@@ -9,14 +9,16 @@
     ]
   },
   "Bioconductor": {
-    "Version": null
+    "Version": "3.13"
   },
   "Packages": {
     "AnnotationDbi": {
       "Package": "AnnotationDbi",
       "Version": "1.54.1",
-      "Source": "Bioconductor",
-      "Hash": "5c5813b294bf80a7664ffbaea0e719ba"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/AnnotationDbi",
+      "Hash": "8b208b3787f99f02dc2463cefebfcf52"
     },
     "BH": {
       "Package": "BH",
@@ -36,6 +38,13 @@
       "Version": "0.38.0",
       "Source": "Bioconductor",
       "Hash": "de5e346fed0fc44a0424a0531cf5d12d"
+    },
+    "BiocManager": {
+      "Package": "BiocManager",
+      "Version": "1.30.16",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2fdca0877debdd4668190832cdee4c31"
     },
     "BiocNeighbors": {
       "Package": "BiocNeighbors",
@@ -58,8 +67,10 @@
     "Biostrings": {
       "Package": "Biostrings",
       "Version": "2.60.1",
-      "Source": "Bioconductor",
-      "Hash": "ee27fadce643ce9df34bb1778748af38"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/Biostrings",
+      "Hash": "062aed4d5824d11e7be6b551a2452fd4"
     },
     "Cairo": {
       "Package": "Cairo",
@@ -103,14 +114,18 @@
     "GO.db": {
       "Package": "GO.db",
       "Version": "3.13.0",
-      "Source": "Bioconductor",
-      "Hash": "12b5ea6d297983e1bca954dd1d047220"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/GO.db",
+      "Hash": "e1cd837f32004b26c40a51d7c8899068"
     },
     "GOSemSim": {
       "Package": "GOSemSim",
       "Version": "2.18.0",
-      "Source": "Bioconductor",
-      "Hash": "b1edbb14cf0a1e148f2a6886bca66356"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/GOSemSim",
+      "Hash": "58e0c6f1d93b52ad1e88a4b13f18fbfd"
     },
     "GenomeInfoDb": {
       "Package": "GenomeInfoDb",
@@ -153,8 +168,10 @@
     "KEGGREST": {
       "Package": "KEGGREST",
       "Version": "1.32.0",
-      "Source": "Bioconductor",
-      "Hash": "343c1821f29a5061d66b2bdb4e87da35"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/KEGGREST",
+      "Hash": "7a8ddd944dcffe94a4303de8fba59cba"
     },
     "KernSmooth": {
       "Package": "KernSmooth",
@@ -337,22 +354,20 @@
     "Seurat": {
       "Package": "Seurat",
       "Version": "4.0.3",
-      "Source": "Repository",
+      "Source": "Local",
       "Repository": "CRAN",
-      "Hash": "7249f329b663f90bf99ffe06097ea3e7"
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/Seurat",
+      "Hash": "f837699731624fa3abe6be1cd1007df8"
     },
     "SeuratDisk": {
       "Package": "SeuratDisk",
       "Version": "0.0.0.9019",
-      "Source": "GitHub",
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/SeuratDisk",
       "Remotes": "satijalab/seurat-data",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "seurat-disk",
-      "RemoteUsername": "mojaveazure",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "163f1aade5bac38ed1e9e9c912283a7e74781610",
-      "Hash": "85629b6fec50b2632b8b3402ff86cc58"
+      "Hash": "08d664c7fd0a06d26196fa2dfe4894b8"
     },
     "SeuratObject": {
       "Package": "SeuratObject",
@@ -464,14 +479,10 @@
     "blaseRtools": {
       "Package": "blaseRtools",
       "Version": "0.0.0.9012",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "blaseRtools",
-      "RemoteUsername": "blaserlab",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "f5e26b9dca58f1d568f6950a4bfd54d73fc31a98",
-      "Hash": "4721f94ebc5a54075d3eebf98944eae8"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/blaseRtools",
+      "Hash": "95e4b0f209bdb04308ece2b437fbf3b3"
     },
     "blob": {
       "Package": "blob",
@@ -784,14 +795,10 @@
     "fastSave": {
       "Package": "fastSave",
       "Version": "0.1.0",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "fastSave",
-      "RemoteUsername": "barkasn",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "41aa16b98bb25a31d8a7f449f61097f26ad3ba92",
-      "Hash": "6b8ed525cc50a78214749caaf5da4c50"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/fastSave",
+      "Hash": "aea124258c58d6e4762420238ded26a0"
     },
     "fastmap": {
       "Package": "fastmap",
@@ -1253,11 +1260,11 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "leidenbase",
       "RemoteUsername": "cole-trapnell-lab",
-      "RemoteRef": "HEAD",
+      "RemoteRepo": "leidenbase",
+      "RemoteRef": "master",
       "RemoteSha": "430f22af6982cc7d2e6e77f6b0df47bc970dcbce",
-      "Hash": "226beba7a53f3489dcad071260f0401b"
+      "Hash": "2686238b84006c8cd569ee4d529a4cb7"
     },
     "lifecycle": {
       "Package": "lifecycle",
@@ -1708,8 +1715,10 @@
     "rrvgo": {
       "Package": "rrvgo",
       "Version": "1.4.0",
-      "Source": "Bioconductor",
-      "Hash": "63b4868c8f8fcf6ad1bc07124f627268"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/rrvgo",
+      "Hash": "54212138d030162e14b1f981b3a3279e"
     },
     "rsample": {
       "Package": "rsample",
@@ -1770,8 +1779,10 @@
     "scater": {
       "Package": "scater",
       "Version": "1.20.1",
-      "Source": "Bioconductor",
-      "Hash": "8dacd35f6e96a32a389314a4a1e40acb"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/scater",
+      "Hash": "4176c453023e773f8bedaf53ab92cef9"
     },
     "scattermore": {
       "Package": "scattermore",
@@ -2005,8 +2016,10 @@
     "topGO": {
       "Package": "topGO",
       "Version": "2.44.0",
-      "Source": "Bioconductor",
-      "Hash": "9e35f314b1db888ff08335b58cb93e48"
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/OSUMC.EDU/blas02/R/x86_64-pc-linux-gnu-library/4.1/topGO",
+      "Hash": "95fdbaaba5593a11d2948a9edc8fc94e"
     },
     "treemap": {
       "Package": "treemap",
