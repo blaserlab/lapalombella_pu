@@ -2,7 +2,7 @@ bb_var_umap(cds = cds_main, var = "specimen", value_to_highlight = "P9")
 bb_var_umap(cds_main, "leukemia_phenotype")
 bb_var_umap(cds_main[, colData(cds_main)$leukemia_phenotype == "AML"], "partition")
 bb_var_umap(cds_main[, colData(cds_main)$leukemia_phenotype == "AML"], "leiden")
-bb_var_umap(cds_main[, colData(cds_main)$leukemia_phenotype %in% c("AML", "No leukemia")], "partition") +
+bb_var_umap(cds_main[, colData(cds_main)$leukemia_phenotype %in% c("AML", "No leukemia")], "partition", legend_title = "Partitions") +
   facet_grid(rows = vars(tissue), cols = vars(leukemia_phenotype)) +
   theme(panel.background = element_rect(color = "grey80"))
 
