@@ -3,6 +3,8 @@ theme_set(theme_cowplot(font_size = 10))
 
 # show_col(pal_npg("nrc")(10))
 experimental_group_palette <- c(
+  "AML" = "#DC0000",
+  "WT" = "#3C5488"
 
 )
 
@@ -28,6 +30,7 @@ filter <- dplyr::filter
 mutate <- dplyr::mutate
 group_by <- dplyr::group_by
 select <- dplyr::select
+rename <- dplyr::rename
 
 # output directories
 
