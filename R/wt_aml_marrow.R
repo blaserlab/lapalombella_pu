@@ -1,7 +1,7 @@
 #' ---
 #' title: "Overview and Question 1"
 #' author: "Brad Blaser"
-#' date: "9/17/2021"
+#' date: "9/17/2021, addendum 9/20/2021"
 #' output: pdf_document
 #' ---
 #'
@@ -211,3 +211,47 @@ write_csv(tm_blast_like_neu, str_glue("{tables_out}/tm_blast_like_neu.csv"))
 #' GSEA/IPA analysis are good ways to go.
 #'
 #' Please let me know if you have any questions about this analysis.  I will work on question 2 and any followups to question 1 over the next several days as time allows.
+
+#' ## Addendum
+#'
+#' Looking at the cell density plot I thought it would be worth looking at some smaller clusters in order to find more specific leukemia signatures.
+#'
+#' For example, considering leiden clusters 5 and 6, which we labeled HSC/Prog and Blast-like, respectively, we can use finer clustering to define subpopulations based on where the leukemia cells localize vs the WT cells.
+#'
+
+#+ echo=FALSE
+wt_aml_louvain_umap <- bb_var_umap(cds_wt_aml_marrow, "louvain", overwrite_labels = T)
+
+#+ echo=TRUE, fig.width = 4.5, fig.height = 4.0, dev = "png", dpi = 300
+wt_aml_louvain_umap
+
+#' Zooming in the Blast-like cluster we can make these binned subpopulations (subpop 4 and 5 enriched with AML cells)
+#'
+
+#+ echo=FALSE
+wt_aml_blastlike_louvain_binned <- bb_var_umap(cds_wt_aml_marrow[,colData(cds_wt_aml_marrow)$louvain %in% c(4, 5, 27, 39)], "leiden_subpop")
+
+
+#+ echo=TRUE, fig.width = 5.5, fig.height = 3.0, dev = "png", dpi = 300
+wt_aml_blastlike_louvain_binned
+
+#' Likewise, zooming in on the HSC/Prog cluster we can make these binned subpopulations (1 and 9 enriched with AML)
+#'
+#+ echo=FALSE
+wt_aml_hscprog_louvain_binned <- bb_var_umap(cds_wt_aml_marrow[,colData(cds_wt_aml_marrow)$louvain %in% c(1, 9, 6, 41, 44)], "leiden_subpop")
+
+
+#+ echo=TRUE, fig.width = 5.5, fig.height = 3.0, dev = "png", dpi = 300
+wt_aml_hscprog_louvain_binned
+
+
+#' The top markers for the comparisons shown in the last two graphs are here:
+#'
+#+ echo=TRUE
+# Leiden 5 corresponds to HSC/Prog
+write_csv(tm_WT_AML_marrow_leiden_5_subpop,
+          str_glue("{tables_out}/tm_WT_AML_marrow_leiden_5_subpop.csv"))
+
+# Leiden 6 corresponds to Blast-like
+write_csv(tm_WT_AML_marrow_leiden_6_subpop,
+          str_glue("{tables_out}/tm_WT_AML_marrow_leiden_6_subpop.csv"))
