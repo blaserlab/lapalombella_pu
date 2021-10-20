@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.1.0",
+    "Version": "4.1.1",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -480,11 +480,11 @@
     },
     "blaseRtools": {
       "Package": "blaseRtools",
-      "Version": "0.0.0.9012",
+      "Version": "0.0.0.9015",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/blaseRtools",
-      "Hash": "49ec969c4aab09966f30a1d92f34bb4a"
+      "Hash": "7e24654fc291b5ab363966ccd8d84d10"
     },
     "blob": {
       "Package": "blob",
