@@ -40,3 +40,7 @@ blast_like_gsea_res %>%
   arrange(padj) %>%
   View()
 fgsea::plotEnrichment(pathway = mouse_gene_sets[["GOBP_LEUKOCYTE_MEDIATED_IMMUNITY"]], stats = gsea_stats)
+
+pander(analysis_configs)
+
+bb_gene_violinplot(cds=cds_main, variable="partition", genes_to_plot = c("Cd34","Cd47", "Vsir"), rows=3, palette = c("1" = "#F0E442", "2" = "#0072B2", "3" = "#D55E00", "#CC79A7", "#999999", "#E69F00", "#56B4E9", "#009E73", "#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", "#E6AB02", "#A6761D", "grey80")) + scale_fill_viridis_d()

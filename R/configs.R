@@ -26,11 +26,14 @@ summarybox_geom <- "crossbar"
 heatmap_3_colors <- c("#313695","white","#A50026")
 
 # unmask important functions
-filter <- dplyr::filter
-mutate <- dplyr::mutate
-group_by <- dplyr::group_by
-select <- dplyr::select
-rename <- dplyr::rename
+conflict_prefer("filter", "dplyr")
+conflict_prefer("mutate", "dplyr")
+conflict_prefer("group_by", "dplyr")
+conflict_prefer("select", "dplyr")
+conflict_prefer("rename", "dplyr")
+conflict_prefer("count", "dplyr")
+
+
 
 # output directories
 
