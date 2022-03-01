@@ -73,6 +73,7 @@ heatmap_gene_anno <- HeatmapAnnotation(
   which = "column"
 )
 
+# make the heatmap finally
 partition_heatmap <- grid.grabExpr(draw(
   Heatmap(
     matrix = agg_mat_partition,
@@ -96,5 +97,7 @@ partition_heatmap <- grid.grabExpr(draw(
     column_title = "Top 20 Genes"
   )
 ), wrap = T)
+
+# plot the heatmap
 plot_grid(partition_heatmap)
 
