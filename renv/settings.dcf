@@ -1,4 +1,4 @@
-external.libraries:
+external.libraries: /home/OSUMC.EDU/blas02/network/X/Labs/Blaser/share/data/blaseRextras
 ignored.packages:
 package.dependency.fields: Imports, Depends, LinkingTo
 r.version:
