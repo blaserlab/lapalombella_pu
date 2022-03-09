@@ -29,4 +29,3 @@ bb_renv_datapkg("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/d
 
 # load the data set into a hidden environment
 requireData("lapalombella.pu.datapkg")
-
