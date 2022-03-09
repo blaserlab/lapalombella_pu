@@ -25,7 +25,8 @@ summarybox_geom <- "crossbar"
 # 3 color heatmap
 heatmap_3_colors <- c("#313695","white","#A50026")
 
-# unmask important functions
+# conflicts ---------------------------------------------------------------
+# resolve conflicting function names here
 conflict_prefer("filter", "dplyr")
 conflict_prefer("mutate", "dplyr")
 conflict_prefer("group_by", "dplyr")
@@ -39,3 +40,10 @@ conflict_prefer("count", "dplyr")
 
 figs_out <- "~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/figs"
 tables_out <- "~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/tables"
+
+# source local configs ----------------------------------------------------
+# these are sourced after main configs and will overwrite duplicate entries if
+# present. The file local_configs.R is ignored by git and so is useful for user-
+# specific configurations such as output directories or formatting.
+
+source("R/local_configs.R")
