@@ -1,4 +1,5 @@
 bioconductor.version:
+external.libraries:
 ignored.packages:
 package.dependency.fields: Imports, Depends, LinkingTo
 r.version:
