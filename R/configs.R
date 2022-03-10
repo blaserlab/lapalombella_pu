@@ -23,7 +23,7 @@ summarybox_alpha <- 0.3
 summarybox_geom <- "crossbar"
 
 # 3 color heatmap
-heatmap_3_colors <- c("#313695","white","#A50026")
+heatmap_3_colors <- c("#041dff","white","#ff0505")
 
 # conflicts ---------------------------------------------------------------
 # resolve conflicting function names here

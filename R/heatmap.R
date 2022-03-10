@@ -38,7 +38,8 @@ heatmap_highlights <- c(
   "Mpeg1",
   "Ikzf2",
   "Cd3g",
-  "Ms4a1"
+  "Cd34",
+  "Gata2"
 )
 
 # make the heatmap color scale
