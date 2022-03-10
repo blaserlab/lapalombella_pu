@@ -14,15 +14,15 @@
   "Packages": {
     "AnnotationDbi": {
       "Package": "AnnotationDbi",
-      "Version": "1.54.1",
+      "Version": "1.56.2",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/AnnotationDbi",
       "git_url": "https://git.bioconductor.org/packages/AnnotationDbi",
-      "git_branch": "RELEASE_3_13",
-      "git_last_commit": "0040118",
-      "git_last_commit_date": "2021-06-07",
-      "Hash": "16f4aebd1c0fd328331e44e8924719f4",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "13fdc4a",
+      "git_last_commit_date": "2021-11-09",
+      "Hash": "9b13fcb62a2f381198894193a46fe059",
       "Requirements": [
         "Biobase",
         "BiocGenerics",
@@ -129,15 +129,15 @@
     },
     "Biostrings": {
       "Package": "Biostrings",
-      "Version": "2.60.1",
+      "Version": "2.62.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/Biostrings",
       "git_url": "https://git.bioconductor.org/packages/Biostrings",
-      "git_branch": "RELEASE_3_13",
-      "git_last_commit": "e0cd6ef",
-      "git_last_commit_date": "2021-06-03",
-      "Hash": "9bb404efb2341bdf45ae47ad956a91b2",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "53ed287",
+      "git_last_commit_date": "2021-10-26",
+      "Hash": "2033fd803f138fe4058609ebdbbe3d5d",
       "Requirements": [
         "BiocGenerics",
         "GenomeInfoDb",
@@ -283,26 +283,26 @@
     },
     "GO.db": {
       "Package": "GO.db",
-      "Version": "3.13.0",
+      "Version": "3.14.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/GO.db",
-      "Hash": "8fc5a4275b16756d7ef830e66ec33ce7",
+      "Hash": "510ee21b2e586bd087b0172378ad8cb7",
       "Requirements": [
         "AnnotationDbi"
       ]
     },
     "GOSemSim": {
       "Package": "GOSemSim",
-      "Version": "2.18.0",
+      "Version": "2.20.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/GOSemSim",
       "git_url": "https://git.bioconductor.org/packages/GOSemSim",
-      "git_branch": "RELEASE_3_13",
-      "git_last_commit": "6e8a8fd",
-      "git_last_commit_date": "2021-05-19",
-      "Hash": "e8775779203b299514025a4049b98c0b",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "fa82442",
+      "git_last_commit_date": "2021-10-26",
+      "Hash": "ab8eb8c9c8fab12c16a9068aea9a4167",
       "Requirements": [
         "AnnotationDbi",
         "GO.db",
@@ -434,15 +434,15 @@
     },
     "KEGGREST": {
       "Package": "KEGGREST",
-      "Version": "1.32.0",
+      "Version": "1.34.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/KEGGREST",
       "git_url": "https://git.bioconductor.org/packages/KEGGREST",
-      "git_branch": "RELEASE_3_13",
-      "git_last_commit": "25656cd",
-      "git_last_commit_date": "2021-05-19",
-      "Hash": "ea3249332c6d1b22d616e31b25717a78",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "2056750",
+      "git_last_commit_date": "2021-10-26",
+      "Hash": "9f510cabb84e8aaf9585d8ec4c4b5236",
       "Requirements": [
         "Biostrings",
         "httr",
@@ -628,12 +628,12 @@
     },
     "Rcpp": {
       "Package": "Rcpp",
-      "Version": "1.0.7",
+      "Version": "1.0.8",
       "Source": "Local",
       "Repository": "CRAN",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/Rcpp",
-      "Hash": "77348f27fd7069edcc0559a027d82636",
+      "Hash": "339f8922e94022b9060a87b81185585e",
       "Requirements": []
     },
     "RcppAnnoy": {
@@ -816,12 +816,12 @@
     },
     "Seurat": {
       "Package": "Seurat",
-      "Version": "4.0.3",
+      "Version": "4.1.0",
       "Source": "Local",
       "Repository": "CRAN",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/Seurat",
-      "Hash": "e6276a4e1b099865e43e1099c634768c",
+      "Hash": "db8095a3e6dfbc49ad60efbd3b322c43",
       "Requirements": [
         "KernSmooth",
         "MASS",
@@ -879,7 +879,7 @@
       "RemoteRef": "master",
       "RemoteSha": "163f1aade5bac38ed1e9e9c912283a7e74781610",
       "Remotes": "satijalab/seurat-data",
-      "Hash": "ce287233389ed99d9b0a5105923d4abc",
+      "Hash": "462f70378ddbc5b88ea4185947853226",
       "Requirements": [
         "Matrix",
         "R6",
@@ -1036,15 +1036,15 @@
     },
     "annotate": {
       "Package": "annotate",
-      "Version": "1.70.0",
+      "Version": "1.72.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/annotate",
       "git_url": "https://git.bioconductor.org/packages/annotate",
-      "git_branch": "RELEASE_3_13",
-      "git_last_commit": "9c8cb9d",
-      "git_last_commit_date": "2021-05-19",
-      "Hash": "7648e1d155bc6c6c624bdbdd16a27916",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "67ac76a",
+      "git_last_commit_date": "2021-10-26",
+      "Hash": "f6866d08debc2b09d0eeb967804c7fe8",
       "Requirements": [
         "AnnotationDbi",
         "Biobase",
@@ -1224,7 +1224,7 @@
       "RemoteRef": "master",
       "RemoteSha": "7b5d4acdee61d25f2723ce5c4f11e73f26d061b9",
       "Remotes": "bioc::DESeq2, github::blaserlab/blaseRdata,\n    github::cole-trapnell-lab/monocle3, bioc::batchelor, bioc::limma,\n    cole-trapnell-lab/leidenbase, mojaveazure/seurat-disk, bioc::rrvgo,\n    bioc::topGO, bioc::scater, bioc::Rsamtools, bioc::GenomicAlignments,\n    github::chris-mcginnis-ucsf/DoubletFinder",
-      "Hash": "b1c0f893b92f0f1628a4ff93def7dcae",
+      "Hash": "0a22bf6647ef558578057e3f40c9d8e8",
       "Requirements": [
         "BiocGenerics",
         "Biostrings",
@@ -1917,21 +1917,25 @@
     },
     "fastmatch": {
       "Package": "fastmatch",
-      "Version": "1.1-0",
+      "Version": "1.1-3",
       "Source": "Local",
       "Repository": "CRAN",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/fastmatch",
-      "Hash": "3e37fa764cacbcadc08aaabea03b7244",
+      "Hash": "c4d11f0012587f66875d10b24741e2d9",
       "Requirements": []
     },
     "fgsea": {
       "Package": "fgsea",
-      "Version": "1.18.0",
+      "Version": "1.20.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/fgsea",
-      "Hash": "4e905f958b40fed8c0fffd8bafd25ae3",
+      "git_url": "https://git.bioconductor.org/packages/fgsea",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "b704f81",
+      "git_last_commit_date": "2021-10-26",
+      "Hash": "6ed28ee62422bef1a4892adadba98a8e",
       "Requirements": [
         "BH",
         "BiocParallel",
@@ -2114,15 +2118,15 @@
     },
     "genefilter": {
       "Package": "genefilter",
-      "Version": "1.74.0",
+      "Version": "1.76.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/genefilter",
       "git_url": "https://git.bioconductor.org/packages/genefilter",
-      "git_branch": "RELEASE_3_13",
-      "git_last_commit": "de81c30",
-      "git_last_commit_date": "2021-05-19",
-      "Hash": "1baa7d8337c04d1fa60345ea06b2111c",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "8d630fd",
+      "git_last_commit_date": "2021-10-26",
+      "Hash": "47765d73582d004d1cfd4b6348ef9927",
       "Requirements": [
         "AnnotationDbi",
         "Biobase",
@@ -2133,15 +2137,15 @@
     },
     "geneplotter": {
       "Package": "geneplotter",
-      "Version": "1.70.0",
+      "Version": "1.72.0",
       "Source": "Local",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/geneplotter",
       "git_url": "https://git.bioconductor.org/packages/geneplotter",
-      "git_branch": "RELEASE_3_13",
-      "git_last_commit": "ca484d3",
-      "git_last_commit_date": "2021-05-19",
-      "Hash": "531aa99974ccc95cdf1d6efa630263c0",
+      "git_branch": "RELEASE_3_14",
+      "git_last_commit": "57a1d83",
+      "git_last_commit_date": "2021-10-26",
+      "Hash": "29beae4334e4bd35272b3d653d310d8d",
       "Requirements": [
         "AnnotationDbi",
         "Biobase",
@@ -2770,6 +2774,22 @@
         "formatR"
       ]
     },
+    "lapalombella.pu.datapkg": {
+      "Package": "lapalombella.pu.datapkg",
+      "Version": "0.0.0.9004",
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/datapkg/lapalombella.pu.datapkg_0.0.0.9004.tar.gz",
+      "Hash": "bc33f642d1ca906dc3e5d76185518c19",
+      "Requirements": [
+        "blaseRtools",
+        "cowplot",
+        "fastSave",
+        "monocle3",
+        "readxl",
+        "tidyverse"
+      ]
+    },
     "later": {
       "Package": "later",
       "Version": "1.3.0",
@@ -3105,7 +3125,7 @@
       "RemoteRef": "master",
       "RemoteSha": "004c096f3a3bdaf1e6709a65fb36f40ba775f1ab",
       "Remotes": "VPetukhov/ggrastr, cole-trapnell-lab/leidenbase",
-      "Hash": "6ae86f12bffc291d54aaf5165dc155fb",
+      "Hash": "745039c5c98dda5f708d6a9f271f3541",
       "Requirements": [
         "Biobase",
         "BiocGenerics",
@@ -4513,12 +4533,12 @@
     },
     "tinytex": {
       "Package": "tinytex",
-      "Version": "0.33",
+      "Version": "0.37",
       "Source": "Local",
       "Repository": "CRAN",
       "RemoteType": "local",
       "RemoteUrl": "/usr/lib/R/site-library/tinytex",
-      "Hash": "1d84e0262003d18732b65f7a6216f8a0",
+      "Hash": "6b1b2b23d91319a5dfd6695a60092426",
       "Requirements": [
         "xfun"
       ]
