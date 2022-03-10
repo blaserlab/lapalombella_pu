@@ -6,7 +6,7 @@
 # blaseRtools and additional dependencies you may have to install since they are not recognized by renv::init
 # renv::install("blaserlab/blaseRtools")
 # renv::install("rstudio/renv")
-renv::install("blaserlab/blaseRtemplates")
+# renv::install("blaserlab/blaseRtemplates")
 
 # load core packages for the analysis
 library("blaseRtools")
