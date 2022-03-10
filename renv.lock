@@ -1196,13 +1196,6 @@
       "Hash": "5ad8b96c240193646ae7c7d57ccd2ea8",
       "Requirements": []
     },
-    "blaseRextras": {
-      "Package": "blaseRextras",
-      "Version": "0.0.0.9001",
-      "Source": "Cellar",
-      "Hash": "280bd82916f2813dcb261c2c5dd3fddf",
-      "Requirements": []
-    },
     "blaseRtemplates": {
       "Package": "blaseRtemplates",
       "Version": "0.0.0.9023",
@@ -2775,22 +2768,6 @@
       "Hash": "b1e925c4b9ffeb901bacf812cbe9a6ad",
       "Requirements": [
         "formatR"
-      ]
-    },
-    "lapalombella.pu.datapkg": {
-      "Package": "lapalombella.pu.datapkg",
-      "Version": "0.0.0.9004",
-      "Source": "Local",
-      "RemoteType": "local",
-      "RemoteUrl": "/home/OSUMC.EDU/blas02/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/datapkg/lapalombella.pu.datapkg_0.0.0.9004.tar.gz",
-      "Hash": "8fb6bc376a31a492da44842ea6bedbe2",
-      "Requirements": [
-        "blaseRtools",
-        "cowplot",
-        "fastSave",
-        "monocle3",
-        "readxl",
-        "tidyverse"
       ]
     },
     "later": {
