@@ -1,14 +1,31 @@
-# libraries-------------------------------------
-# set up the renv and repair with snapshot if needed
-# renv::init()
-# renv::snapshot()
+# renv --------------------------------------------------------------------
 
-# blaseRtools and additional dependencies you may have to install since they are not recognized by renv::init
-# renv::install("blaserlab/blaseRtools")
-# renv::install("rstudio/renv")
-# renv::install("blaserlab/blaseRtemplates")
+# set up the renv from scratch
 
-# load core packages for the analysis
+# renv::init(bioconductor = TRUE)
+
+# restore the renv from the lockfile
+
+# renv::restore()
+
+
+
+# package installation ----------------------------------------------------
+
+# # Try this first...it's faster:
+# blaseRtemplates::easy_install("<package name>", how = "link_from_cache")
+
+# # If you need a new package or an update, try this:
+# blaseRtemplates::easy_install("<package name>", how = "new_or_update")
+# blaseRtemplates::easy_install("blaserlab/blaseRtools", how = "new_or_update")
+
+# # If you are installing from a "tarball", use this:
+# blaseRtemplates::easy_install("/path/to/tarball.tar.gz")
+
+# # use "bioc::<package name>" for bioconductor packages
+# # use "<repo/package name>" for github source packages
+
+# load core packages for the analysis ------------------------------------
 library("blaseRtools")
 library("tidyverse")
 library("monocle3")

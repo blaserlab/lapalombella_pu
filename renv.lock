@@ -879,7 +879,7 @@
       "RemoteRef": "master",
       "RemoteSha": "163f1aade5bac38ed1e9e9c912283a7e74781610",
       "Remotes": "satijalab/seurat-data",
-      "Hash": "462f70378ddbc5b88ea4185947853226",
+      "Hash": "ce287233389ed99d9b0a5105923d4abc",
       "Requirements": [
         "Matrix",
         "R6",
@@ -1196,38 +1196,48 @@
       "Hash": "5ad8b96c240193646ae7c7d57ccd2ea8",
       "Requirements": []
     },
+    "blaseRextras": {
+      "Package": "blaseRextras",
+      "Version": "0.0.0.9001",
+      "Source": "Cellar",
+      "Hash": "280bd82916f2813dcb261c2c5dd3fddf",
+      "Requirements": []
+    },
     "blaseRtemplates": {
       "Package": "blaseRtemplates",
-      "Version": "0.0.0.9023",
+      "Version": "0.0.0.9038",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "blaserlab",
       "RemoteRepo": "blaseRtemplates",
       "RemoteRef": "main",
-      "RemoteSha": "db9c66c72caba9ac1e55df8f23c9609703f1c931",
-      "Hash": "676ea5697e473927a179bc60688eff37",
+      "RemoteSha": "90318461d46cd6994e0a27a9edc920cf6c5c537c",
+      "Hash": "cdfaaa5b069ef0b34c5448aa917fddba",
       "Requirements": [
         "fs",
         "gert",
+        "prompt",
+        "stringr",
         "usethis"
       ]
     },
     "blaseRtools": {
       "Package": "blaseRtools",
-      "Version": "0.0.0.9058",
+      "Version": "0.0.0.9061",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "blaserlab",
       "RemoteRepo": "blaseRtools",
       "RemoteRef": "master",
-      "RemoteSha": "7b5d4acdee61d25f2723ce5c4f11e73f26d061b9",
-      "Remotes": "bioc::DESeq2, github::blaserlab/blaseRdata,\n    github::cole-trapnell-lab/monocle3, bioc::batchelor, bioc::limma,\n    cole-trapnell-lab/leidenbase, mojaveazure/seurat-disk, bioc::rrvgo,\n    bioc::topGO, bioc::scater, bioc::Rsamtools, bioc::GenomicAlignments,\n    github::chris-mcginnis-ucsf/DoubletFinder",
-      "Hash": "0a22bf6647ef558578057e3f40c9d8e8",
+      "RemoteSha": "0bded5aceed83117d2ad499c7ffb904a9cb1f453",
+      "Remotes": "bioc::DESeq2, github::blaserlab/blaseRdata,\n    github::cole-trapnell-lab/monocle3, bioc::batchelor, bioc::limma,\n    cole-trapnell-lab/leidenbase, mojaveazure/seurat-disk, bioc::rrvgo,\n    bioc::topGO, bioc::scater, bioc::Rsamtools, bioc::GenomicAlignments,\n    github::chris-mcginnis-ucsf/DoubletFinder, bioc::ComplexHeatmap",
+      "Hash": "932de42251118e5a0acc5d56a005cc0d",
       "Requirements": [
         "BiocGenerics",
         "Biostrings",
+        "ComplexHeatmap",
         "DESeq2",
         "DoubletFinder",
         "GenomeInfoDb",
@@ -3125,7 +3135,7 @@
       "RemoteRef": "master",
       "RemoteSha": "004c096f3a3bdaf1e6709a65fb36f40ba775f1ab",
       "Remotes": "VPetukhov/ggrastr, cole-trapnell-lab/leidenbase",
-      "Hash": "745039c5c98dda5f708d6a9f271f3541",
+      "Hash": "6ae86f12bffc291d54aaf5165dc155fb",
       "Requirements": [
         "Biobase",
         "BiocGenerics",
@@ -3502,6 +3512,16 @@
         "later",
         "magrittr",
         "rlang"
+      ]
+    },
+    "prompt": {
+      "Package": "prompt",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f848531dd8aef16dcf52702aa1af5b1c",
+      "Requirements": [
+        "cli"
       ]
     },
     "proxy": {
