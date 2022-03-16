@@ -1,0 +1,115 @@
+tm_wt_aml_marrow |>
+  filter(cluster_method == "partition") |>
+  group_by(cell_group) |>
+  slice_min(order_by = marker_test_q_value, n = 20) |>
+  pull(gene_short_name)
+bb_cellmeta(cds_wt_aml_marrow)
+colData(cds_wt_aml_marrow)
+# put in a new row metadata column
+
+rowData(cds_wt_aml_marrow)$top20 <- ifelse(rowData(cds_wt_aml_marrow)$gene_short_name %in% top20,
+                                  "yes",
+                                  "no")
+# filter the cds and pipe into aggregate gene expression
+agg_mat_wt_aml_marrow_1 <- cds_wt_aml_marrow |>
+  filter_cds(genes = bb_rowmeta(cds_wt_aml_marrow) |>
+               filter(top20 == "yes")) |>
+  aggregate_gene_expression(cell_group_df = bb_cellmeta(cds_wt_aml_marrow) |>
+                              select(cell_id, partition))
+
+
+max(agg_mat_wt_aml_marrow_1)
+
+colData(cds_wt_aml_marrow)
+
+min(agg_mat_wt_aml_marrow_1)
+# convert from sparse to regular matrix
+agg_mat_wt_aml_marrow_1 <- as.matrix(agg_mat_wt_aml_marrow_1)
+max(agg_mat_wt_aml_marrow_1)
+# fix the rownames
+rownames(agg_mat_wt_aml_marrow_1) <-
+  left_join(tibble(feature_id = rownames(agg_mat_wt_aml_marrow_1)),
+            bb_rowmeta(cds_wt_aml_marrow)) |>
+  pull(gene_short_name)
+max(agg_mat_wt_aml_marrow_1)
+# transpose and then put all of the genes (columns) on the same scale
+agg_mat_wt_aml_marrow_1 <- scale(t(agg_mat_wt_aml_marrow_1))
+
+
+
+# make a list of genes you want to point out
+# put whatever genes you want from top20 here
+heatmap_highlights <- c(
+  "S100a8",
+  "S100a9",
+  "Mpo",
+  "Ctsg",
+  "Elane",
+  "Ybx1",
+  "Gzmb",
+  "Tox",
+  "Cd8b1",
+  "Vpreb1",
+  "Cd3d"
+)
+# make the heatmap color scale
+# see configs.R for what these colors are
+col_fun_heatmap <-
+  colorRamp2(breaks = c(min(agg_mat_wt_aml_marrow_1),
+                        0,
+                        max(agg_mat_wt_aml_marrow_1)),
+             colors = heatmap_3_colors)
+max(agg_mat_wt_aml_marrow_1)
+
+# make the annotation object
+heatmap_anno_df <-
+  map(
+    .x = heatmap_highlights,
+    .f = function(x) {
+      index <- which(colnames(agg_mat_wt_aml_marrow_1) == x)
+      return(index)
+    }
+  ) %>% set_names(heatmap_highlights) %>%
+  bind_cols() %>%
+  pivot_longer(everything()) %>%
+  as.data.frame()
+
+heatmap_gene_anno <- HeatmapAnnotation(
+  foo = anno_mark(
+    at = heatmap_anno_df$value,
+    labels = heatmap_anno_df$name,
+    labels_gp = gpar(fontsize = 8),
+    padding = 1.5,
+    labels_rot = 45
+  ),
+  which = "column"
+)
+
+
+# make the heatmap finally
+partition_heatmap <- grid.grabExpr(draw(
+  Heatmap(
+    matrix = agg_mat_wt_aml_marrow,
+    col = col_fun_heatmap,
+    name = "Expression",
+    heatmap_legend_param = list(
+      title_gp = gpar(fontface = "plain", fontsize = 9),
+      grid_width = unit(0.14, "in"),
+      labels_gp = gpar(fontsize = 8)
+    ),
+    row_dend_width = unit(5, "mm"),
+    column_dend_height = unit(5, "mm"),
+    column_dend_side = "bottom",
+    show_row_names = T,
+    row_names_gp = gpar(fontsize = 9),
+    show_column_names = F,
+    top_annotation = heatmap_gene_anno,
+    row_dend_gp = gpar(lwd = 0.5),
+    column_dend_gp = gpar(lwd = 0.5),
+    row_title = "Partition",
+    column_title = "Top 20 Genes"
+  )
+), wrap = T)
+
+# plot the heatmap
+plot_grid(partition_heatmap)
