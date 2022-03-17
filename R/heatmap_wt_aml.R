@@ -117,3 +117,11 @@ partition_heatmap <- grid.grabExpr(draw(
 
 # plot the heatmap
 plot_grid(partition_heatmap)
+
+# save the heatmap
+save_plot(
+  plot_grid(partition_heatmap),
+  filename = file.path(figs_out, "wt_aml_heatmap.pdf"),
+  base_width = 5.5,
+  base_height = 3.5
+)
