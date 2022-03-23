@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.1.2",
+    "Version": "4.1.3",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -879,7 +879,7 @@
       "RemoteRef": "master",
       "RemoteSha": "163f1aade5bac38ed1e9e9c912283a7e74781610",
       "Remotes": "satijalab/seurat-data",
-      "Hash": "ce287233389ed99d9b0a5105923d4abc",
+      "Hash": "462f70378ddbc5b88ea4185947853226",
       "Requirements": [
         "Matrix",
         "R6",
@@ -1196,6 +1196,15 @@
       "Hash": "5ad8b96c240193646ae7c7d57ccd2ea8",
       "Requirements": []
     },
+    "blaseRextras": {
+      "Package": "blaseRextras",
+      "Version": "0.0.0.9001",
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/workspace/zhang_workspace/Lapalombella_Pu-1/Git\n    clone/lapalombella_pu/R/pu_work/renv/library/R-4.1/x86_64-pc-linux-gnu/lapalombella.pu.datapkg/renv/library/R-4.1/x86_64-pc-linux-gnu/lapalombella.pu.datapkg/blaseRextras_0.0.0.9001.tar.gz",
+      "Hash": "0f0c2a40024a14e2764a6e74c7fba6b5",
+      "Requirements": []
+    },
     "blaseRtemplates": {
       "Package": "blaseRtemplates",
       "Version": "0.0.0.9038",
@@ -1217,16 +1226,16 @@
     },
     "blaseRtools": {
       "Package": "blaseRtools",
-      "Version": "0.0.0.9061",
+      "Version": "0.0.0.9064",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "blaserlab",
       "RemoteRepo": "blaseRtools",
       "RemoteRef": "master",
-      "RemoteSha": "0bded5aceed83117d2ad499c7ffb904a9cb1f453",
-      "Remotes": "bioc::DESeq2, github::blaserlab/blaseRdata,\n    github::cole-trapnell-lab/monocle3, bioc::batchelor, bioc::limma,\n    cole-trapnell-lab/leidenbase, mojaveazure/seurat-disk, bioc::rrvgo,\n    bioc::topGO, bioc::scater, bioc::Rsamtools, bioc::GenomicAlignments,\n    github::chris-mcginnis-ucsf/DoubletFinder, bioc::ComplexHeatmap",
-      "Hash": "932de42251118e5a0acc5d56a005cc0d",
+      "RemoteSha": "d24d188cb5bd7907a47439578b7b5de69f5a74e6",
+      "Remotes": "bioc::DESeq2, github::blaserlab/blaseRdata,\n    github::cole-trapnell-lab/monocle3, bioc::batchelor, bioc::limma,\n    bioc::leidenbase, github::mojaveazure/seurat-disk, bioc::rrvgo,\n    bioc::topGO, bioc::scater, bioc::Rsamtools, bioc::GenomicAlignments,\n    github::chris-mcginnis-ucsf/DoubletFinder, bioc::ComplexHeatmap,\n    github::blaserlab/blaseRtemplates",
+      "Hash": "cb1d3896a933b19b20b69e6023363e8f",
       "Requirements": [
         "BiocGenerics",
         "Biostrings",
@@ -1249,6 +1258,7 @@
         "ashr",
         "batchelor",
         "blaseRdata",
+        "blaseRtemplates",
         "broom",
         "circlize",
         "cowplot",
@@ -1267,6 +1277,7 @@
         "limma",
         "monocle3",
         "pheatmap",
+        "prompt",
         "readxl",
         "renv",
         "rrvgo",
@@ -2169,14 +2180,8 @@
     "gert": {
       "Package": "gert",
       "Version": "1.5.0",
-      "Source": "CRAN",
+      "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "gert",
-      "RemoteRef": "gert",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "source",
-      "RemoteSha": "1.5.0",
       "Hash": "8fddce7cbd59467106266a6e93e253b4",
       "Requirements": [
         "askpass",
@@ -3140,7 +3145,7 @@
       "RemoteRef": "master",
       "RemoteSha": "004c096f3a3bdaf1e6709a65fb36f40ba775f1ab",
       "Remotes": "VPetukhov/ggrastr, cole-trapnell-lab/leidenbase",
-      "Hash": "6ae86f12bffc291d54aaf5165dc155fb",
+      "Hash": "745039c5c98dda5f708d6a9f271f3541",
       "Requirements": [
         "Biobase",
         "BiocGenerics",
@@ -4669,14 +4674,8 @@
     "usethis": {
       "Package": "usethis",
       "Version": "2.1.5",
-      "Source": "CRAN",
+      "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "usethis",
-      "RemoteRef": "usethis",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "source",
-      "RemoteSha": "2.1.5",
       "Hash": "c499f488e6dd7718accffaee5bc5a79b",
       "Requirements": [
         "cli",

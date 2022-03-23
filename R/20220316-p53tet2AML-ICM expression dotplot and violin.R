@@ -81,7 +81,9 @@ renv::install("/workspace/zhang_workspace/Lapalombella_Pu-1/Git clone/lapalombel
 cds_p53tet2AMLann<-bb_cds_anno(query_cds=cds_p53tet2AML, ref=muench_cds,transfer_col="muench_cluster", unique_id = NULL )
 cds_mainann<-bb_cds_anno(query_cds=cds_main, ref=muench_cds, transfer_col="muench_cluster", unique_id = NULL )
 
-
+colData(muench_cds)
+colData(cds_main)
+colData(cds_wt_aml_spleen)
 bb_var_umap(muench_cds, var = "muench_cluster")
 colData(cds_p53tet2AMLann)
 bb_var_umap(cds_p53tet2AMLann, var="predicted.muench_cluster")

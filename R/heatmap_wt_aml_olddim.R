@@ -4,40 +4,46 @@ top20 <- tm_wt_aml_marrow |>
   group_by(cell_group) |>
   slice_min(order_by = marker_test_q_value, n = 20) |>
   pull(gene_short_name)
-bb_cellmeta(cds_wt_aml_marrow)
-colData(cds_wt_aml_marrow)
+bb_cellmeta(olddims_wt_aml)
+colData(olddims_wt_aml)
+
+top20
 
 # put in a new row metadata column
 # you didnt define your top20 genes here
-rowData(cds_wt_aml_marrow)$top20 <- ifelse(rowData(cds_wt_aml_marrow)$gene_short_name %in% top20,
+rowData(olddims_wt_aml)$top20 <- ifelse(rowData(olddims_wt_aml)$gene_short_name %in% top20,
                                   "yes",
                                   "no")
 
 # filter the cds and pipe into aggregate gene expression
-agg_mat_wt_aml_marrow_1 <-
-  cds_wt_aml_marrow |>
-  filter_cds(genes = bb_rowmeta(cds_wt_aml_marrow) |>
+agg_mat_wt_aml_olddim <-
+  olddims_wt_aml |>
+  filter_cds(genes = bb_rowmeta(olddims_wt_aml) |>
                filter(top20 == "yes")) |>
-  aggregate_gene_expression(cell_group_df = bb_cellmeta(cds_wt_aml_marrow) |>
-                              select(cell_id, partition))
+  aggregate_gene_expression(cell_group_df = bb_cellmeta(olddims_wt_aml) |>
+                              select(cell_id, partition_assignment))
 
 
-max(agg_mat_wt_aml_marrow_1)
+max(agg_mat_wt_aml_olddim)
 
-colData(cds_wt_aml_marrow)
+min(agg_mat_wt_aml_olddim)
 
-min(agg_mat_wt_aml_marrow_1)
+
 # convert from sparse to regular matrix
-agg_mat_wt_aml_marrow_1 <- as.matrix(agg_mat_wt_aml_marrow_1)
-max(agg_mat_wt_aml_marrow_1)
+agg_mat_wt_aml_olddim <- as.matrix(agg_mat_wt_aml_olddim)
+max(agg_mat_wt_aml_olddim)
+
+agg_mat_wt_aml_olddim
+
+
 # fix the rownames
-rownames(agg_mat_wt_aml_marrow_1) <-
-  left_join(tibble(feature_id = rownames(agg_mat_wt_aml_marrow_1)),
-            bb_rowmeta(cds_wt_aml_marrow)) |>
+rownames(agg_mat_wt_aml_olddim) <-
+  left_join(tibble(feature_id = rownames(agg_mat_wt_aml_olddim)),
+            bb_rowmeta(olddims_wt_aml)) |>
   pull(gene_short_name)
-max(agg_mat_wt_aml_marrow_1)
+max(agg_mat_wt_aml_olddim)
 # transpose and then put all of the genes (columns) on the same scale
-agg_mat_wt_aml_marrow_1 <- scale(t(agg_mat_wt_aml_marrow_1))
+agg_mat_wt_aml_olddim <- scale(t(agg_mat_wt_aml_olddim))
 
 
 
@@ -59,18 +65,18 @@ heatmap_highlights <- c(
 # make the heatmap color scale
 # see configs.R for what these colors are
 col_fun_heatmap <-
-  colorRamp2(breaks = c(min(agg_mat_wt_aml_marrow_1),
+  colorRamp2(breaks = c(min(agg_mat_wt_aml_olddim),
                         0,
-                        max(agg_mat_wt_aml_marrow_1)),
+                        max(agg_mat_wt_aml_olddim)),
              colors = heatmap_3_colors)
-max(agg_mat_wt_aml_marrow_1)
+
 
 # make the annotation object
 heatmap_anno_df <-
   map(
     .x = heatmap_highlights,
     .f = function(x) {
-      index <- which(colnames(agg_mat_wt_aml_marrow_1) == x)
+      index <- which(colnames(agg_mat_wt_aml_olddim) == x)
       return(index)
     }
   ) %>% set_names(heatmap_highlights) %>%
@@ -93,7 +99,7 @@ heatmap_gene_anno <- HeatmapAnnotation(
 # make the heatmap finally
 partition_heatmap <- grid.grabExpr(draw(
   Heatmap(
-    matrix = agg_mat_wt_aml_marrow_1, # you had the wrong matrix here
+    matrix = agg_mat_wt_aml_olddim, # you had the wrong matrix here
     col = col_fun_heatmap,
     name = "Expression",
     heatmap_legend_param = list(
