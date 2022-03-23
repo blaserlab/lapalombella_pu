@@ -42,6 +42,7 @@ heatmap_highlights <- c(
   "Gata2"
 )
 
+
 # make the heatmap color scale
 # see configs.R for what these colors are
 col_fun_heatmap <-
