@@ -6,10 +6,11 @@ library("blaseRtools")
 theme_set(theme_cowplot(font_size = 10))
 colData(cds_main)
 bb_var_umap(cds_main, var = "partition")
+bb_var_umap(cds_p53ALL, var = "leiden")
 cds_p53tet2AML<-cds_main[,colData(cds_main)$leukemia_phenotype %in% "AML"]
 
 cds_p53ALL<-cds_main[,colData(cds_main)$leukemia_phenotype %in% "T cell leukemia"]
-
+cds_preBALL<-cds_main[,colData(cds_main)$leukemia_phenotype %in% "PreB ALL"]
 cds_spleen<-cds_main[,colData(cds_main)$tissue %in% "spleen"]
 cds_bonemarrow<-cds_main[,colData(cds_main)$tissue %in% "bone marrow"]
 

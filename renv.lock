@@ -1249,9 +1249,9 @@
       "RemoteUsername": "blaserlab",
       "RemoteRepo": "blaseRtools",
       "RemoteRef": "master",
-      "RemoteSha": "d24d188cb5bd7907a47439578b7b5de69f5a74e6",
+      "RemoteSha": "92d7d8293b3c7b8f65d1581b1e79540cded79ae8",
       "Remotes": "bioc::DESeq2, github::blaserlab/blaseRdata,\n    github::cole-trapnell-lab/monocle3, bioc::batchelor, bioc::limma,\n    bioc::leidenbase, github::mojaveazure/seurat-disk, bioc::rrvgo,\n    bioc::topGO, bioc::scater, bioc::Rsamtools, bioc::GenomicAlignments,\n    github::chris-mcginnis-ucsf/DoubletFinder, bioc::ComplexHeatmap,\n    github::blaserlab/blaseRtemplates",
-      "Hash": "cb1d3896a933b19b20b69e6023363e8f",
+      "Hash": "25b4f4c7aa75461edc3c81aed8c58acf",
       "Requirements": [
         "BiocGenerics",
         "Biostrings",
