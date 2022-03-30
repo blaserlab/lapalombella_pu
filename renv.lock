@@ -1223,21 +1223,31 @@
     },
     "blaseRtemplates": {
       "Package": "blaseRtemplates",
-      "Version": "0.0.0.9038",
+      "Version": "0.0.0.9088",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "blaseRtemplates",
       "RemoteUsername": "blaserlab",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "90318461d46cd6994e0a27a9edc920cf6c5c537c",
-      "Hash": "3b480bd518fed238aa361fb2769b5aa5",
+      "RemoteRepo": "blasertemplates",
+      "RemoteRef": "main",
+      "RemoteSha": "22431320e2c1ab2f030c14075b8721d96068c789",
+      "Hash": "44b2ccc0667130661e326ea606fc6f5b",
       "Requirements": [
+        "cli",
+        "devtools",
+        "dplyr",
+        "drat",
         "fs",
         "gert",
+        "gitcreds",
+        "pak",
         "prompt",
+        "purrr",
+        "renv",
         "stringr",
-        "usethis"
+        "tibble",
+        "usethis",
+        "withr"
       ]
     },
     "blaseRtools": {
@@ -1825,6 +1835,14 @@
         "Rcpp",
         "sitmo"
       ]
+    },
+    "drat": {
+      "Package": "drat",
+      "Version": "0.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "1fdf9057af4b07b62f2f58d953c953ec",
+      "Requirements": []
     },
     "dtplyr": {
       "Package": "dtplyr",
@@ -3275,6 +3293,14 @@
         "stringi",
         "zip"
       ]
+    },
+    "pak": {
+      "Package": "pak",
+      "Version": "0.2.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7791dbf51b1a8665cafadea27318f7ac",
+      "Requirements": []
     },
     "pander": {
       "Package": "pander",

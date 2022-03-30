@@ -12,6 +12,7 @@ cds_p53tet2AML<-cds_main[,colData(cds_main)$leukemia_phenotype %in% "AML"]
 cds_p53ALL<-cds_main[,colData(cds_main)$leukemia_phenotype %in% "T cell leukemia"]
 cds_preBALL<-cds_main[,colData(cds_main)$leukemia_phenotype %in% "PreB ALL"]
 cds_spleen<-cds_main[,colData(cds_main)$tissue %in% "spleen"]
+
 cds_bonemarrow<-cds_main[,colData(cds_main)$tissue %in% "bone marrow"]
 
 bb_gene_umap(cds= cds_p53tet2AML, gene_or_gene = c("Kit", "Cd34", "Cd19", "Cd3e", "Cd4", "Cd8a", "Itgam", "S100a8", "S100a9"), cell_size = 0.1)
