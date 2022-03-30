@@ -1,5 +1,5 @@
 library(tidyverse)
-res <- read_csv("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/K-Means 10 Features-2.csv")
+res <- read_csv("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/K-Means 10 Features-2.csv")
 res
 res2 <- res %>%
   dplyr::select(FeatureName, LFC) %>%
@@ -18,7 +18,7 @@ head(ranks, 20)
 library(ggplot2)
 
 #C2
-pathways.c2 <- gmtPathways("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/c2.all.v7.5.1.symbols.gmt")
+pathways.c2 <- gmtPathways("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/c2.all.v7.5.1.symbols.gmt")
 
 pathways.c2 %>%
   head() %>%
@@ -68,7 +68,7 @@ plotEnrichment(pathways.c2[["MOOTHA_MITOCHONDRIA"]],
                ranks) + labs(title="MOOTHA_MITOCHONDRIA")
 
 #Hallmark
-pathways.hallmark <- gmtPathways("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/h.all.v7.5.1.symbols.gmt")
+pathways.hallmark <- gmtPathways("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/h.all.v7.5.1.symbols.gmt")
 
 pathways.hallmark %>%
   head() %>%
@@ -118,7 +118,7 @@ plotEnrichment(pathways.hallmark[["HALLMARK_OXIDATIVE_PHOSPHORYLATION"]],
                ranks) + labs(title="HALLMARK_OXIDATIVE_PHOSPHORYLATION")
 
 #c5
-pathways.c5 <- gmtPathways("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/c5.all.v7.5.1.symbols.gmt")
+pathways.c5 <- gmtPathways("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/c5.all.v7.5.1.symbols.gmt")
 
 pathways.c5 %>%
   head() %>%
@@ -166,7 +166,7 @@ plotEnrichment(pathways.hallmark[["GOCC_SECRETORY_GRANULE"]],
 
 
 #c7
-pathways.c7 <- gmtPathways("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/c7.immunesigdb.v7.5.1.symbols.gmt")
+pathways.c7 <- gmtPathways("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/c7.immunesigdb.v7.5.1.symbols.gmt")
 
 pathways.c7 %>%
   head() %>%
@@ -214,7 +214,7 @@ plotEnrichment(pathways.hallmark[["GOCC_SECRETORY_GRANULE"]],
 
 #K-mean cluster 6
 
-resc6 <- read_csv("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/K-Means 10 Features-cluster6.csv")
+resc6 <- read_csv("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/K-Means 10 Features-cluster6.csv")
 resc6
 res2c6 <- resc6 %>%
   dplyr::select(FeatureName1, LFC) %>%
@@ -228,7 +228,7 @@ ranks <- deframe(res2c6)
 head(ranks, 20)
 
 #Hallmark
-pathways.hallmark <- gmtPathways("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/h.all.v7.5.1.symbols.gmt")
+pathways.hallmark <- gmtPathways("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/h.all.v7.5.1.symbols.gmt")
 
 pathways.hallmark %>%
   head() %>%
@@ -278,7 +278,7 @@ plotEnrichment(pathways.hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]],
                ranks) + labs(title="HALLMARK_TNFA_SIGNALING_VIA_NFKB")
 
 #C2
-pathways.c2 <- gmtPathways("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/Msgsea/c2.all.v7.5.1.symbols.gmt")
+pathways.c2 <- gmtPathways("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/c2.all.v7.5.1.symbols.gmt")
 
 pathways.c2 %>%
   head() %>%

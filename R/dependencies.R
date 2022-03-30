@@ -43,7 +43,7 @@ library("pander")
 library("conflicted")
 
 # run this to update the data package in renv
-bb_renv_datapkg("~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/datapkg")
+bb_renv_datapkg("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/datapkg")
 
 
 # load the data set into a hidden environment

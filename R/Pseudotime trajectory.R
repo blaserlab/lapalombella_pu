@@ -1,12 +1,7 @@
-requireData("lapalombella.pu.datapkg")
-library(lapalombella.pu.datapkg)
-renv::install("blaserlab/blaseRtools")
-library(Seurat)
-library("blaseRtools")
 
 #wt-aml-marrow
 colData(cds_wt_aml_marrow)
-        cds <- reduce_dimension(cds_wt_aml_marrow)
+cds <- reduce_dimension(cds_wt_aml_marrow)# not so sure why you want to recalculate dimensions
 plot_cells(cds, label_groups_by_cluster=FALSE,  color_cells_by = "leiden_assignment")
 
 ciliated_genes <- c("Cd34",
@@ -20,7 +15,7 @@ plot_cells(cds,
            genes=ciliated_genes,
            label_cell_groups=FALSE,
            show_trajectory_graph=FALSE)
-cds <- cluster_cells(cds)
+cds <- cluster_cells(cds)# also not sure why you are reclustering
 plot_cells(cds, color_cells_by = "partition")
 
 
