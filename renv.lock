@@ -895,7 +895,7 @@
       "RemoteRef": "master",
       "RemoteSha": "163f1aade5bac38ed1e9e9c912283a7e74781610",
       "Remotes": "satijalab/seurat-data",
-      "Hash": "462f70378ddbc5b88ea4185947853226",
+      "Hash": "ce287233389ed99d9b0a5105923d4abc",
       "Requirements": [
         "Matrix",
         "R6",
@@ -2214,8 +2214,14 @@
     "gert": {
       "Package": "gert",
       "Version": "1.5.0",
-      "Source": "Repository",
+      "Source": "CRAN",
       "Repository": "CRAN",
+      "RemoteType": "standard",
+      "RemotePkgRef": "gert",
+      "RemoteRef": "gert",
+      "RemoteRepos": "https://cloud.r-project.org",
+      "RemotePkgPlatform": "source",
+      "RemoteSha": "1.5.0",
       "Hash": "8fddce7cbd59467106266a6e93e253b4",
       "Requirements": [
         "askpass",
@@ -3179,7 +3185,7 @@
       "RemoteRef": "master",
       "RemoteSha": "004c096f3a3bdaf1e6709a65fb36f40ba775f1ab",
       "Remotes": "VPetukhov/ggrastr, cole-trapnell-lab/leidenbase",
-      "Hash": "745039c5c98dda5f708d6a9f271f3541",
+      "Hash": "6ae86f12bffc291d54aaf5165dc155fb",
       "Requirements": [
         "Biobase",
         "BiocGenerics",
@@ -4716,8 +4722,14 @@
     "usethis": {
       "Package": "usethis",
       "Version": "2.1.5",
-      "Source": "Repository",
+      "Source": "CRAN",
       "Repository": "CRAN",
+      "RemoteType": "standard",
+      "RemotePkgRef": "usethis",
+      "RemoteRef": "usethis",
+      "RemoteRepos": "https://cloud.r-project.org",
+      "RemotePkgPlatform": "source",
+      "RemoteSha": "2.1.5",
       "Hash": "c499f488e6dd7718accffaee5bc5a79b",
       "Requirements": [
         "cli",

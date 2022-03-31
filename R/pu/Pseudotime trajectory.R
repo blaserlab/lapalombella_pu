@@ -1,4 +1,3 @@
-
 #wt-aml-marrow
 colData(cds_wt_aml_marrow)
 cds <- reduce_dimension(cds_wt_aml_marrow)# not so sure why you want to recalculate dimensions

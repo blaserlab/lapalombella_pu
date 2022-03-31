@@ -1,4 +1,3 @@
-library(tidyverse)
 res <- read_csv("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/Msgsea/K-Means 10 Features-2.csv")
 res
 res2 <- res %>%
@@ -10,7 +9,6 @@ res2 <- res %>%
 res2
 
 
-library(fgsea)
 
 ranks <- deframe(res2)
 head(ranks, 20)
