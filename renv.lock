@@ -2830,19 +2830,12 @@
     },
     "lapalombella.pu.datapkg": {
       "Package": "lapalombella.pu.datapkg",
-      "Version": "0.0.0.9004",
+      "Version": "0.0.0.9005",
       "Source": "Local",
+      "RemotePkgRef": "local::~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/datapkg/lapalombella.pu.datapkg_0.0.0.9005.tar.gz",
       "RemoteType": "local",
-      "RemoteUrl": "~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/datapkg/lapalombella.pu.datapkg_0.0.0.9004.tar.gz",
-      "Hash": "bc33f642d1ca906dc3e5d76185518c19",
-      "Requirements": [
-        "blaseRtools",
-        "cowplot",
-        "fastSave",
-        "monocle3",
-        "readxl",
-        "tidyverse"
-      ]
+      "Hash": "6fae36ad2c249f25f5fdb3ba9693c77b",
+      "Requirements": []
     },
     "later": {
       "Package": "later",
