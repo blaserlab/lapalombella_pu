@@ -117,6 +117,8 @@ plot_cells(cds_subset_1,
            label_branch_points=TRUE,
            graph_label_size=1.5,cell_size = 1)
 
+colData(cds_subset_1)
+
 genes_p568_Ball <- c("Il7r", "Myb")
 lineage_cds_p568_Ball <- cds_subset[rowData(cds_subset)$gene_short_name %in% genes_p568_Ball,
                    colData(cds_subset)$specimen %in% c("P6", "P8")]
@@ -128,7 +130,7 @@ plot_genes_in_pseudotime(lineage_cds_p568_Ball,
 genes_p568_aml <- c("Flt3", "Klf4", "Gata2", "Spi1")
 lineage_cds_p568_aml <- cds_subset_1[rowData(cds_subset_1)$gene_short_name %in% genes_p568_aml,
                           colData(cds_subset_1)$specimen %in% c("P5", "P8")]
-
+colData(lineage_cds_p568_aml)
 plot_genes_in_pseudotime(lineage_cds_p568_aml,
                          color_cells_by="louvain",
                          min_expr=0.5)
@@ -139,3 +141,7 @@ colData(cds_p568ann)
 bb_var_umap(cds_p568ann, "predicted.leiden_assignment")
 bb_var_umap(cds_p568ann, "leukemia_phenotype")
 
+bb_gene_umap(cds_p568,"Flt3")
+bb_gene_dotplot(cds_p568, markers = c("Flt3", "Klf4", "Spi1"),group_cells_by = "louvain")
+
+cds_p568[, colData(cds_p568)$louvain%in%c("49"...)]
