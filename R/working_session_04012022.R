@@ -144,4 +144,4 @@ bb_var_umap(cds_p568ann, "leukemia_phenotype")
 bb_gene_umap(cds_p568,"Flt3")
 bb_gene_dotplot(cds_p568, markers = c("Flt3", "Klf4", "Spi1"),group_cells_by = "louvain")
 
-cds_p568[, colData(cds_p568)$louvain%in%c("49"...)]
+# cds_p568[, colData(cds_p568)$louvain%in%c("49"...)]
