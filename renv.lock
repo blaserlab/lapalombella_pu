@@ -1355,17 +1355,16 @@
     },
     "blaseRtemplates": {
       "Package": "blaseRtemplates",
-      "Version": "0.0.0.9096",
-      "Source": "CRAN",
-      "Repository": "https://blaserlab.r-universe.dev",
-      "RemoteUrl": "https://github.com/blaserlab/blaseRtemplates",
-      "RemoteRef": "blaseRtemplates",
-      "RemoteSha": "0.0.0.9096",
-      "RemoteType": "standard",
-      "RemotePkgRef": "blaseRtemplates",
-      "RemoteRepos": "https://blaserlab.r-universe.dev",
-      "RemotePkgPlatform": "source",
-      "Hash": "2def7f9544592e4e290d12e895671a93",
+      "Version": "0.0.0.9097",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "blaseRtemplates",
+      "RemoteUsername": "blaserlab",
+      "RemotePkgRef": "blaserlab/blaseRtemplates",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "3260ed14c617b0123163130fd6748861d47be3ee",
+      "Hash": "4cd94a2c54ffc90857bb7e7428864497",
       "Requirements": [
         "cli",
         "devtools",
@@ -1378,6 +1377,7 @@
         "pkgcache",
         "prompt",
         "purrr",
+        "readr",
         "renv",
         "rlang",
         "rstudioapi",
@@ -2888,6 +2888,15 @@
       "Requirements": [
         "formatR"
       ]
+    },
+    "lapalombella.pu.datapkg": {
+      "Package": "lapalombella.pu.datapkg",
+      "Version": "0.0.0.9005",
+      "Source": "Local",
+      "RemotePkgRef": "local::/workspace/rst/renv/pkgcache/R/pkgcache/pkg/src/contrib/lapalombella.pu.datapkg_0.0.0.9005.tar.gz",
+      "RemoteType": "local",
+      "Hash": "67dda24b77ce890455b709913fee5c7d",
+      "Requirements": []
     },
     "later": {
       "Package": "later",
