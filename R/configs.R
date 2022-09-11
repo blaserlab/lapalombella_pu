@@ -38,8 +38,9 @@ conflict_prefer("count", "dplyr")
 
 # output directories
 
-figs_out <- "~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/figs"
-tables_out <- "~/network/X/Labs/Blaser/collaborators/lapalombella_pu_network/tables"
+figs_out <- "~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/figs"
+tables_out <- "~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/tables"
+geo_out <- "~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/geo"
 
 # source local configs ----------------------------------------------------
 # these are sourced after main configs and will overwrite duplicate entries if
