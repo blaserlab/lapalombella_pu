@@ -56,6 +56,19 @@ aggr_cluster_tbl <- read_csv("~/network/X/Labs/Blaser/share/collaborators/lapalo
  cds_main <- bb_tbl_to_coldata(obj = cds_main, min_tbl = aggr_umap_tbl)
  cds_main <- bb_tbl_to_coldata(obj = cds_main, min_tbl = aggr_cluster_tbl)
 
+ #By Genotype
+loupe_dimension_umap_geno <- bb_var_umap(
+     cds_main,
+     var = "kmeans10_cluster",
+     alt_dim_x = "aggr_UMAP_1",
+     alt_dim_y = "aggr_UMAP_2",
+     overwrite_labels = T
+   ) + facet_grid(col = vars(genotype)) + labs(x = "UMAP 1", y = "UMAP 2") +
+     theme_minimal() + theme(panel.grid.major = element_blank(),
+                             panel.grid.minor = element_blank()) +
+     theme(panel.background = element_rect(color = "black")) + theme(legend.position = "none")
+
+
  #Create genotype/phenotype column in cds
  colData(cds_main)$geno_pheno <-
    paste0(colData(cds_main)$genotype, " ", colData(cds_main)$leukemia_phenotype)
@@ -65,6 +78,52 @@ aggr_cluster_tbl <- read_csv("~/network/X/Labs/Blaser/share/collaborators/lapalo
                                               levels = 1:10)
  colData(cds_main)$geno_pheno <- factor(colData(cds_main)$geno_pheno,
                                       levels = c("TP53-/-/TET2-/- AML", "TP53-/-/TET2-/- PreB ALL", "TP53-/- T cell leukemia", "WT No leukemia"))
+
+ # make the gene expression umaps
+
+ aml_plotlist <- map(.x = c("Cd34","Mpo", "Kit", "Elane", "Calr","Cd33"),
+                     .f = \(x, dat = cds_main) {
+                       p <- bb_gene_umap(
+                         dat,
+                         gene_or_genes = x,
+                         alt_dim_x = "aggr_UMAP_1",
+                         alt_dim_y = "aggr_UMAP_2", cell_size = 0.2
+                       ) +
+                         scale_color_distiller(palette = "Oranges",
+                                               direction = 1,
+                                               na.value = "grey80",
+                                               limits = c(0,2.5)) +
+                         facet_wrap(~geno_pheno) +
+                         scale_y_continuous(breaks = c(-15,0, 10)) +
+                         scale_x_continuous(breaks = c(-10,0, -10))+
+                         theme(panel.spacing = unit(0.5, "lines"))+
+                         theme(panel.grid.major = element_blank(),
+                               panel.grid.minor = element_blank())+
+                         theme(panel.background = element_rect(color = "black",
+                                                               fill = "white"))+
+                         theme(axis.line = element_blank()) +
+                         #theme(axis.ticks = element_blank()) +
+                         #theme(axis.text = element_blank()) +
+                         labs(x =NULL, y = NULL, subtitle = x) +
+                         theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+                       # if (x != "Calr") p <- p + theme(legend.position = "none")
+                       p
+                     })
+
+ aml_gexp_umap <- ggarrange(aml_plotlist[[1]],
+           aml_plotlist[[2]],
+           aml_plotlist[[3]],
+           aml_plotlist[[4]],
+           aml_plotlist[[5]],
+           aml_plotlist[[6]],
+           ncol = 3,
+           nrow=2,
+           common.legend = TRUE,
+           legend="right")
+
+aml_gexp_umap
+
+
 
  colData(cds_main)$genotype <- factor(colData(cds_main)$genotype,
                                               levels = c("TP53-/-/TET2-/-", "TP53-/-", "WT"))
@@ -174,17 +233,7 @@ aggr_cluster_tbl <- read_csv("~/network/X/Labs/Blaser/share/collaborators/lapalo
    #                         panel.grid.minor = element_blank()) +
    # theme(panel.background = element_rect(color = "black")) + theme(legend.position = "none")
 
- #By Genotype
-A1 <- bb_var_umap(
-     cds_main,
-     var = "kmeans10_cluster",
-     alt_dim_x = "aggr_UMAP_1",
-     alt_dim_y = "aggr_UMAP_2",
-     overwrite_labels = T
-   ) + facet_grid(col = vars(genotype)) + labs(x = "UMAP 1", y = "UMAP 2") +
-     theme_minimal() + theme(panel.grid.major = element_blank(),
-                             panel.grid.minor = element_blank()) +
-     theme(panel.background = element_rect(color = "black")) + theme(legend.position = "none")
+
 A2 <- bb_var_umap(
   cds_main,
   var = "partition",
@@ -238,35 +287,6 @@ A3<-A5/A4
 #B-ALL: c(Cd19, Pax5, Cd24a, Cd79a, Vpreb1, Vpreb2, Vpreb3, Tdt)
 
 #bb_gene_umap(cds_main, gene_or_genes = c("Cd34"), alt_dim_x = "aggr_UMAP_1", alt_dim_y = "aggr_UMAP_2")
-aml_plotlist <- map(.x = c("Cd34","Mpo", "Kit", "Elane", "Calr","Cd33"),
-                      .f = \(x, dat = cds_main) {
-                        p <- bb_gene_umap(
-                          dat,
-                          gene_or_genes = x,
-                          alt_dim_x = "aggr_UMAP_1",
-                          alt_dim_y = "aggr_UMAP_2", cell_size = 0.2
-                        ) +
-                          scale_color_distiller(palette = "Oranges",
-                                                direction = 1,
-                                                na.value = "grey80", limits = c(0,2.5)) +
-                          facet_wrap(~geno_pheno) + scale_y_continuous(breaks = c(-15,0, 10)) +
-                          scale_x_continuous(breaks = c(-10,0, -10))+
-                          theme(panel.spacing = unit(0.5, "lines"))+
-                          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-                          theme(panel.background = element_rect(color = "black", fill = "white"))+
-                          theme(axis.line = element_blank()) +
-                          #theme(axis.ticks = element_blank()) +
-                          #theme(axis.text = element_blank()) +
-                          labs(x =NULL, y = x) +
-                          theme(axis.title.y = element_text(size = 14, face = "italic"))
-                        if (x != "Calr") p <- p + theme(legend.position = "none")
-                        p
-                      })
-aml_markers_umap1<- aml_plotlist[[1]]|aml_plotlist[[2]]|aml_plotlist[[3]]
-#ggsave("aml_markers1.pdf", width = 7, height =3.5, path = T_figs)
-
-aml_markers_umap2 <- aml_plotlist[[4]]/aml_plotlist[[5]]/aml_plotlist[[6]]
-ggsave("aml_markers2.pdf",width = 3.5, path = T_figs)
 
 #bb_gene_umap(cds_main, gene_or_genes = c("Cd19"), alt_dim_x = "aggr_UMAP_1", alt_dim_y = "aggr_UMAP_2")
 b_all_plotlist <- map(.x = c("Cd19", "Pax5", "Cd24a", "Cd79a", "Vpreb1", "Vpreb2", "Vpreb3", "Dntt"),
