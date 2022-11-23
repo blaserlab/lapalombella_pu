@@ -1,5 +1,6 @@
 # graphical parameters####
-theme_set(theme_cowplot(font_size = 10))
+the_font_size <-10
+theme_set(theme_cowplot(font_size = the_font_size))
 
 # show_col(pal_npg("nrc")(10))
 experimental_group_palette <- c(
@@ -39,6 +40,8 @@ conflict_prefer("count", "dplyr")
 # output directories
 
 figs_out <- "~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/figs"
+T_figs <- "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Figures"
+pu_figs <- "~/network/T/Labs/EHL/Mouse Group/1.MOUSE COLONIES/p53 colonies RL/Mechanistic studies/scRNA-seq/scRNA-seq analysis/2022.11 Ethan's analysis for manuscript"
 tables_out <- "~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/tables"
 geo_out <- "~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/geo"
 
@@ -47,4 +50,4 @@ geo_out <- "~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/
 # present. The file local_configs.R is ignored by git and so is useful for user-
 # specific configurations such as output directories or formatting.
 
-source("R/local_configs.R")
+#source("R/local_configs.R")
