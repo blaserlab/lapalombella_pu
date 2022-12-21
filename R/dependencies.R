@@ -16,6 +16,9 @@ suppressPackageStartupMessages(library("knitr"))
 suppressPackageStartupMessages(library("pander"))
 suppressPackageStartupMessages(library("conflicted"))
 suppressPackageStartupMessages(library("readr"))
+suppressPackageStartupMessages(library("gridExtra"))
+suppressPackageStartupMessages(library("patchwork"))
+
 
 # load the data set into a hidden environment
 requireData("lapalombella.pu.datapkg")
