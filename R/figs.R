@@ -61,30 +61,75 @@ unique(colData(cds_main)$leukemia_phenotype)
 colData(cds_main)$leukemia_phenotype <-
   recode(
     colData(cds_main)$leukemia_phenotype,
-    "PreB ALL" = "B-ALL",
-    "T cell leukemia" = "T-ALL"
+    "PreB ALL" = "pre-B ALL",
+    "T cell leukemia" = "T ALL"
   )
  colData(cds_main)$geno_pheno <-
    paste0(colData(cds_main)$genotype, " ", colData(cds_main)$leukemia_phenotype)
 
 colData(cds_main)$geno_pheno <-
    recode(colData(cds_main)$geno_pheno,
-          "WT No Leukemia" = "Wildtype"
+          "WT No leukemia" = "Wildtype",
+          "TP53-/-/TET2-/- AML" = "dKO: AML",
+          "TP53-/-/TET2-/- pre-B ALL" = "dKO: pre-B ALL",
+          "TP53-/- T ALL" = "P53 KO: T ALL"
+
           )
+unique(colData(cds_main)$geno_pheno)
  #Order factor levels
  colData(cds_main)$kmeans10_cluster <- factor(colData(cds_main)$kmeans10_cluster,
                                               levels = 1:10)
- colData(cds_main)$geno_pheno <- factor(colData(cds_main)$geno_pheno,
-                                      levels = c("TP53-/-/TET2-/- AML", "TP53-/-/TET2-/- B-ALL", "TP53-/- T-ALL", "WT"))
- colData(cds_main)$genotype <- factor(colData(cds_main)$genotype,
-                                      levels = c("TP53-/-/TET2-/-", "TP53-/-", "WT"))
-#Figure 5A
- #By Genotype
- A1 <- bb_var_umap(
+ colData(cds_main)$geno_pheno <-
+   factor(
+     colData(cds_main)$geno_pheno,
+     levels = c(
+       "dKO: AML",
+       "dKO: pre-B ALL",
+       "P53 KO: T ALL",
+       "Wildtype"
+     )
+   )
+ colData(cds_main)$genotype <-
+   factor(colData(cds_main)$genotype,
+          levels = c("TP53-/-/TET2-/-", "TP53-/-", "WT"))
+ #Make genotype/phenotype/tissue specific column:
+ colData(cds_main)$pheno_tissue <-
+   paste0(colData(cds_main)$geno_pheno, " ", colData(cds_main)$tissue)
+
+ #where did these assignments come from
+ #-partition 3 displays AML Blast Markers
+ colData(cds_main)$partition_assignment <-
+   recode(colData(cds_main)$partition,
+          "1" = "pre-Neu2/3",
+          "2" = "Neu",
+          "3" = "immNeu",
+          "4" = "pre-Neu1",
+          "5" = "HSC/Prog",
+          "6" = "Blast-like",
+          "7" = "Mono",
+          "8" = "cMoP/DC",
+          "9" = "B",
+          "10" = "T/NK 1",
+          "11" = "PC",
+          "12" = "T/NK 2",
+          "13" = "Th1",
+          "14" = "Th2",
+          "15" = "Th3",
+          "16" = "plasma cells"
+   )
+ ##############################################################################################
+
+ #Figure 5A
+bb_cellmeta(cds_main) |>
+   group_by(pheno_tissue, specimen, primary_or_engraftment) |>
+   summarise(n = n())
+
+#By genotype
+ A1 <-  bb_var_umap(
    cds_main,
    var = "kmeans10_cluster",
    alt_dim_x = "aggr_UMAP_1",
-   alt_dim_y = "aggr_UMAP_2", cell_size = 0.25,
+   alt_dim_y = "aggr_UMAP_2", cell_size = 0.1,
    overwrite_labels = T
  ) + facet_grid(col = vars(genotype)) +
    theme_minimal() + theme(panel.grid.major = element_blank(),
@@ -94,19 +139,70 @@ colData(cds_main)$geno_pheno <-
    theme(axis.title.x = element_blank()) +
    theme(axis.title.y = element_blank())+
    theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
+
+ #By genotype on primary mice
+ bb_var_umap(
+   filter_cds(cds_main, cells = bb_cellmeta(cds_main)|> filter(primary_or_engraftment == "primary")),
+   var = "kmeans10_cluster",
+   alt_dim_x = "aggr_UMAP_1",
+   alt_dim_y = "aggr_UMAP_2", cell_size = 0.1,
+   overwrite_labels = T
+ ) + facet_grid(col = vars(genotype)) +
+   theme_minimal() + theme(panel.grid.major = element_blank(),
+                           panel.grid.minor = element_blank()) +
+   theme(panel.background = element_rect(color = "black")) +
+   theme(legend.position = "none") +
+   theme(axis.title.x = element_blank()) +
+   theme(axis.title.y = element_blank())+
+   theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
+
+#Primary mice faceted by phenotype/tissue
+ bb_var_umap(
+   filter_cds(cds_main, cells = bb_cellmeta(cds_main)|> filter(primary_or_engraftment == "primary")),
+   var = "kmeans10_cluster",
+   alt_dim_x = "aggr_UMAP_1",
+   alt_dim_y = "aggr_UMAP_2", cell_size = 0.1,
+   overwrite_labels = T
+ ) + facet_grid(col = vars(pheno_tissue)) +
+   theme_minimal() + theme(panel.grid.major = element_blank(),
+                           panel.grid.minor = element_blank()) +
+   theme(panel.background = element_rect(color = "black")) +
+   theme(legend.position = "none") +
+   theme(axis.title.x = element_blank()) +
+   theme(axis.title.y = element_blank())+
+   theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
+
+ #Engrafted mice faceted by phenotype/tissue
+   bb_var_umap(
+     filter_cds(cds_main, cells = bb_cellmeta(cds_main)|> filter(primary_or_engraftment == "engraftment")),
+     var = "kmeans10_cluster",
+     alt_dim_x = "aggr_UMAP_1",
+     alt_dim_y = "aggr_UMAP_2", cell_size = 0.1,
+     overwrite_labels = T
+   ) + facet_grid(col = vars(pheno_tissue)) +
+     theme_minimal() + theme(panel.grid.major = element_blank(),
+                             panel.grid.minor = element_blank()) +
+     theme(panel.background = element_rect(color = "black")) +
+     theme(legend.position = "none") +
+     theme(axis.title.x = element_blank()) +
+     theme(axis.title.y = element_blank())+
+     theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
+
  A2<-bb_var_umap(
    cds_main,
    var = "density",
    facet_by = "genotype",
    alt_dim_x = "aggr_UMAP_1",
-   alt_dim_y = "aggr_UMAP_2", cell_size = 0.25
+   alt_dim_y = "aggr_UMAP_2", cell_size = 0.1
  ) + facet_grid(col = vars(genotype)) +
    theme_minimal() +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
    theme(panel.background = element_rect(color = "black"))+
    theme(axis.title.x = element_blank()) +
    theme(axis.title.y = element_blank())+
-   theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
+   theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))+
+   theme(legend.title=element_text(size=8)) +
+   theme(legend.key.size = unit(0.3,"cm"))
 
 F5A <-
    as_ggplot(grid.arrange(
@@ -115,18 +211,6 @@ F5A <-
      bottom = textGrob(A1$labels$x, hjust = 0.8, vjust = -0.5))
    )
 
-#By geno_pheno
-umap_geno_pheno <- bb_var_umap(
-   cds_main,
-   var = "kmeans10_cluster",
-   alt_dim_x = "aggr_UMAP_1",
-   alt_dim_y = "aggr_UMAP_2",
-   overwrite_labels = T
- ) + facet_grid(col = vars(geno_pheno)) + labs(x = "UMAP 1", y = "UMAP 2") +
-   theme_minimal() + theme(panel.grid.major = element_blank(),
-                           panel.grid.minor = element_blank()) +
-   theme(panel.background = element_rect(color = "black")) + theme(legend.position = "none")
-
 # make the gene expression umaps
 aml_plotlist <- map(.x = c("Cd34","Mpo", "Kit", "Elane", "Calr","Ctsg"),
                      .f = \(x, dat = cds_main) {
@@ -134,7 +218,7 @@ aml_plotlist <- map(.x = c("Cd34","Mpo", "Kit", "Elane", "Calr","Ctsg"),
                          dat,
                          gene_or_genes = x,
                          alt_dim_x = "aggr_UMAP_1",
-                         alt_dim_y = "aggr_UMAP_2", cell_size = 0.2
+                         alt_dim_y = "aggr_UMAP_2", cell_size = 0.1
                        ) +
                          scale_color_distiller(palette = "Oranges",
                                                direction = 1,
@@ -314,6 +398,202 @@ hmap_bp <-
 #library(cowplot)
 F5hm<- plot_grid(F5heatmap,hmap_bp, ncol=1, rel_heights = c(3,1))
 
+#Pseudobulk:
+##AML cluster 1 (17401 cells) vs WT cluster 1 (400 cells)
+
+# bb_cellmeta(cds_main) |>
+#   group_by(kmeans10_cluster, leukemia_phenotype) |>
+#   summarise(n = n()) |> filter(kmeans10_cluster %in% c("1"))
+
+wt_aml <- blaseRtools::filter_cds(
+  cds = cds_main,
+  cells = bb_cellmeta(cds_main) |> filter(kmeans10_cluster %in% c("1")) |>
+    filter(leukemia_phenotype %in% c("AML", "No leukemia")))
+
+bb_var_umap(wt_aml,
+            "kmeans10_cluster",
+            overwrite_labels = T,
+            cell_size = 0.2, alt_dim_x = "aggr_UMAP_1", alt_dim_y = "aggr_UMAP_2") + facet_grid(
+              col = vars(tissue),
+              row = vars(leukemia_phenotype, primary_or_engraftment)
+            ) + theme(legend.position = "right")
+
+bb_cellmeta(wt_aml) |>
+  group_by(sample, tissue, leukemia_phenotype) |>
+  summarise(n = n())
+
+exp_design <-
+  bb_cellmeta(wt_aml) |>
+  group_by(sample, leukemia_phenotype) |>
+  summarise()
+exp_design
+
+pseudobulk_res <-
+  bb_pseudobulk_mf(cds = wt_aml,
+                   pseudosample_table = exp_design,
+                   design_formula = "~ leukemia_phenotype",
+                   result_recipe = c("leukemia_phenotype", "AML", "No leukemia"))
+
+#less conservative approach (pseudobulk is a very conservative approach)
+#bb_monocle_regression(cds = wt_aml, gene_or_genes = "Mpo", form = "~genotype")
+
+pseudobulk_res$Header
+
+pseudobulk_res$Result |> filter(gene_short_name == "Mpo")
+pseudobulk_res$Result |> filter(gene_short_name == "Cd34")
+Fig6_wt_aml_clust1_all_pseudobulk<- pseudobulk_res$Result
+write.csv(Fig6_wt_aml_clust1_all_pseudobulk, "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/Fig6_wt_aml_clust1_all_pseudobulk.csv")
+
+#Volcano Plot:
+# Differential expression results.  Positive L2FC indicates up in B vs T upregulated
+genes_to_highlight <- unique(c("Cd34", "Mpo", "Klf4", "Il7r"))
+genes_to_highlight <- genes_to_highlight[genes_to_highlight %in% (filter(pseudobulk_res$Result, padj < 0.1 & abs(log2FoldChange) >= 0.58)|>pull(gene_short_name))]
+
+
+volcano_data <- pseudobulk_res$Result %>%
+  mutate(threshold = padj < 0.1 & abs(log2FoldChange) >= 0.58) %>%
+  mutate(text_label = ifelse(gene_short_name %in% genes_to_highlight, gene_short_name, ""))
+#write.csv(volcano_data, "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/volcano_data.csv")
+
+library(ggtext)
+volcano_pseudobulk <-
+  ggplot(
+    volcano_data,
+    aes(
+      x = log2FoldChange,
+      y = -log10(padj),
+      colour = threshold,
+      fill = threshold,
+      label = text_label
+    )
+  ) +
+  geom_point(shape = 21,
+             size = 0.5,
+             alpha = 0.4) +
+  geom_text_repel(color = "black",
+                  fontface = "italic",
+                  box.padding = 0.5, #0.5
+                  point.padding = 0.25, #0.25
+                  min.segment.length = 0,
+                  max.overlaps = 20000,
+                  size = 3,
+                  segment.size = 0.25,
+                  force = 2,
+                  seed = 1234,
+                  segment.curvature = -0.1,
+                  segment.square = TRUE,
+                  segment.inflect = TRUE) +
+  xlab("log<sub>2</sub> fold change") +
+  ylab("-log<sub>10</sub> adjusted p-value") +
+  theme(axis.title.x =  element_markdown()) +
+  theme(axis.title.y = element_markdown()) +
+  theme(legend.position = "none") +
+  scale_color_manual(values = c("grey80", "#DC0000")) +
+  scale_fill_manual(values = c("transparent", "#DC0000")) +
+  labs(caption = "\U21D0 Up in WT\nUp in AML \U21D2",title = "Pseudobulk Cluster 1: dKO AML vs WT")+
+  theme(plot.caption.position = "panel") +
+  theme(plot.caption = element_text(hjust = 0.5)) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  coord_cartesian(xlim = c(-1.0*max(abs(range(volcano_data |> dplyr::filter(!is.na(padj)) |> pull(log2FoldChange)))), 1.0*max(abs(range(volcano_data |> filter(!is.na(padj)) |> pull(log2FoldChange))))))
+volcano_pseudobulk
+ggsave("volcano_pseudob_clust1_wt_vs_aml.pdf", path = "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Figures")
+
+#fgsea:
+install.packages("msigdbr")
+install.packages("fgsea")
+library(msigdbr); library(fgsea)
+
+#pseudbulk_data<- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/Fig6_wt_aml_clust1_all_pseudobulk.csv")
+#pseudobulk_data[duplicated(GSEA_input)]
+distinct(Fig6_wt_aml_clust1_all_pseudobulk$gene_short_name)
+pseudobulk_data<- Fig6_wt_aml_clust1_all_pseudobulk[!duplicated(Fig6_wt_aml_clust1_all_pseudobulk$gene_short_name), ]
+##Rank
+GSEA_input <- mutate(pseudobulk_data, Rank = -log10(pseudobulk_data$padj)*pseudobulk_data$log2FoldChange)
+GSEA_input <- GSEA_input[complete.cases(GSEA_input), ]
+#GSEA_input[duplicated(GSEA_input)]
+rankData <- GSEA_input$Rank
+names(rankData) <- GSEA_input$gene_short_name
+# rankData[duplicated(rankData)]
+
+msigdbr_df <- rbind(msigdbr(species = "Mus musculus", category = "H"))#, #Hallmark
+                 # msigdbr(species = "Mus musculus", category = "C6"), #Cancer relevant
+                 # msigdbr(species = "Mus musculus", category = "C5", subcategory= "GO:BP"), #Gene ontology-biological process
+                 # msigdbr(species = "Mus musculus", category = "C7", subcategory = "IMMUNESIGDB")) #immune relevant
+
+pathwaysH = split(x = msigdbr_df$gene_symbol, f = msigdbr_df$gs_name)
+
+fgseaRes <- fgsea(pathwaysH,
+                  rankData,
+                  minSize=15,
+                  maxSize = 300, scoreType = "std", eps = 0) #, nperm=1000)
+#fgsea has a default lower bound eps=1e-10 for estimating P-values.
+#If you need to estimate P-value more accurately, you can set the eps argument to zero
+#in the fgsea function.
+
+#Collapse redundant pathways
+fgseaRes2 <- fgseaRes[match(collapsePathways(fgseaRes, pathwaysH, rankData, pval.threshold = 0.05, nperm = 200, gseaParam = 1)$mainPathways, fgseaRes$pathway), ]
+
+# Number of Results w/significant hits after FDR correction
+sum(fgseaRes[, padj < 0.01])
+sum(fgseaRes[, padj < 0.05])
+sum(fgseaRes2[, padj < 0.01])
+sum(fgseaRes2[, padj < 0.05])
+
+fgseaRes2 |>
+  arrange(desc(abs(NES))) |>
+  top_n(10, -padj) #can adjust top_n # for sig hits after FDR correction
+
+fgseaResTidy <- fgseaRes2 |>
+  as_tibble() |>
+  arrange(desc(NES))
+# Show in a nice table:
+TT<-as.tibble(fgseaResTidy)
+
+topPathways <- fgseaRes |>
+  top_n(10, wt=-padj) |>
+  arrange(-NES) |>
+  pull(pathway)
+
+plotGseaTable(pathwaysH[topPathways],
+              rankData,
+              fgseaRes,
+              gseaParam = 0.5)
+
+GSEA_HM<- ggplot(fgseaResTidy, aes(reorder(pathway, NES), NES)) +
+  geom_col(aes(fill=padj<0.05)) +
+  coord_flip() +
+  labs(x="Pathway", y="Normalized Enrichment Score",
+       title="GSEA Hallmark Pathways")
+
+# Number of Results w/significant hits after FDR correction
+sum(fgseaRes[, padj < 0.01])
+sum(fgseaRes2[, padj < 0.05])
+fgseaRes <- fgseaRes |> top_n(8, wt=-padj) #filter for # of sig hits after FDR correction
+fgseaRes3 <- fgseaRes |> top_n(7, wt=-padj) #filter for # of sig hits after FDR correction
+HM_PseudoBulkGSEA<- ggplot(fgseaRes3, aes(y = reorder(pathway, NES), x = NES, size = size)) +
+  geom_point(aes(color = padj), alpha = 1) +
+  scale_color_gradient(low = '#FDE725',high = "#414487") +
+  #scale_color_viridis_b() +
+  ggtitle("Pseudobulk Cluster 1: AML vs WT") +
+  theme_cowplot() +
+  theme(axis.text = element_text(size = 9)) +labs(y = "Pathways (Hallmark)")
+HM_PseudoBulkGSEA
+
+plotEnrichment(pathwaysH[["HALLMARK_GLYCOLYSIS"]], rankData)  +
+  labs(title =
+         "AML vs WT: Hallmark Glycolysis",
+       subtitle = paste0(
+         "NES = ",
+         round(fgseaRes$NES[19], digits = 2),
+         ",  Adjusted pval = ",
+         formatC(fgseaRes$padj[19], format = "e", digits = 2)
+       ))
+
+#T cell exhaustion score Zheng et al 2021 (https://www.science.org/doi/pdf/10.1126/science.abe6474):
+
+
+
+
 ######################################################################
 #Pu partition assignment
  bb_genebubbles(
@@ -334,44 +614,26 @@ F5hm<- plot_grid(F5heatmap,hmap_bp, ncol=1, rel_heights = c(3,1))
              "Il3ra" #Cd123 - Leukemic Stem Cells
    ), cell_grouping = "partition") + labs(x = "Partition Clusters", y = NULL)
 
- colData(cds_main)$partition_assignment <-
-   recode(colData(cds_main)$partition,
-          "1" = "pre-Neu2/3",
-          "2" = "Neu",
-          "3" = "immNeu",
-          "4" = "pre-Neu1",
-          "5" = "HSC/Prog",
-          "6" = "Blast-like",
-          "7" = "Mono",
-          "8" = "cMoP/DC",
-          "9" = "B",
-          "10" = "T/NK 1",
-          "11" = "PC",
-          "12" = "T/NK 2",
-          "13" = "Th1",
-          "14" = "Th2",
-          "15" = "Th3",
-          "16" = "plasma cells"
-   )
- colData(cds_main)$partition_assignment <-
-   recode(colData(cds_main)$partition,
-          "1" = "B",
-          "2" = "Cd4+ T",
-          "3" = "Blast-like",
-          "4" = "Cd8+ T",
-          "5" = "B",
-          "6" = "Neu/Blast-like",
-          "7" = "Neu/Cd33+ Blast-like",
-          "8" = "T",
-          "9" = "Neu",
-          "10" = "B",
-          "11" = "Unassigned",
-          "12" = "Unassigned",
-          "13" = "Unassigned",
-          "14" = "Unassigned",
-          "15" = "Mixed?",
-          "16" = "B"
-   )
+
+ # colData(cds_main)$partition_assignment <-
+ #   recode(colData(cds_main)$partition,
+ #          "1" = "B",
+ #          "2" = "Cd4+ T",
+ #          "3" = "Blast-like",
+ #          "4" = "Cd8+ T",
+ #          "5" = "B",
+ #          "6" = "Neu/Blast-like",
+ #          "7" = "Neu/Cd33+ Blast-like",
+ #          "8" = "T",
+ #          "9" = "Neu",
+ #          "10" = "B",
+ #          "11" = "Unassigned",
+ #          "12" = "Unassigned",
+ #          "13" = "Unassigned",
+ #          "14" = "Unassigned",
+ #          "15" = "Mixed?",
+ #          "16" = "B"
+ #   )
 
  #kmeans10 assignment
  bb_genebubbles(
@@ -470,7 +732,7 @@ A3<-A5/A4
 
 #Phenotypic Markers
 #AML: c(Mpo,Cd34,Kit,Cd11b,Elane,Calr, Ctsg)
-#T-ALL: c(Sca1, Ly6a, Cd7, Cd3, Tdt, Cd34)
+#T-ALL: c(Sca1 = Atxn1, Ly6a, Cd7, Cd3, Tdt, Cd34)
 #B-ALL: c(Cd19, Pax5, Cd24a, Cd79a, Vpreb1, Vpreb2, Vpreb3, Tdt)
 
 #bb_gene_umap(cds_main, gene_or_genes = c("Cd34"), alt_dim_x = "aggr_UMAP_1", alt_dim_y = "aggr_UMAP_2")
@@ -604,7 +866,13 @@ olddims_wt_aml <- blaseRtools::filter_cds(cds = cds_main,
                                             filter(leukemia_phenotype %in% c("AML", "No leukemia")))
 
 # plot the wt aml cells with old dimensions
-bb_var_umap(olddims_wt_aml, "partition")
+bb_var_umap(
+  olddims_wt_aml,
+  "partition",
+  alt_dim_x = "aggr_UMAP_1",
+  alt_dim_y = "aggr_UMAP_2",
+  facet_by = "genotype"
+)
 
 colData(olddims_wt_aml)$partition_assignment <-
   recode(colData(olddims_wt_aml)$partition,
@@ -625,9 +893,28 @@ colData(olddims_wt_aml)$partition_assignment <-
          "15" = "Th3",
          "16" = "plasma cells"
   )
-bb_var_umap(olddims_wt_aml, "partition_assignment",overwrite_labels = T, facet_by = "leukemia_phenotype")
+bb_var_umap(
+  olddims_wt_aml,
+  "partition_assignment",
+  overwrite_labels = T,
+  facet_by = "geno_pheno"
+)
 #with loupe dims
-bb_var_umap(olddims_wt_aml, "partition_assignment", alt_dim_x = "aggr_UMAP_1", alt_dim_y = "aggr_UMAP_2",overwrite_labels = T)
+bb_var_umap(
+  olddims_wt_aml,
+  "partition_assignment",
+  alt_dim_x = "aggr_UMAP_1",
+  alt_dim_y = "aggr_UMAP_2",
+  overwrite_labels = T,
+  facet_by = "geno_pheno"
+)/
+bb_var_umap(
+  olddims_wt_aml,
+  var = "density",
+  facet_by = "geno_pheno",
+  alt_dim_x = "aggr_UMAP_1",
+  alt_dim_y = "aggr_UMAP_2"
+)
 
 #Pu Heatmap Code---------------------------------------------------------
 cds_p53tet2AML<-cds_main[,colData(cds_main)$leukemia_phenotype %in% "AML"]
