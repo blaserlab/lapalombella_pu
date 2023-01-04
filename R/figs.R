@@ -75,9 +75,10 @@ colData(cds_main)$geno_pheno <-
           "TP53-/- T ALL" = "P53 KO: T ALL"
 
           )
-unique(colData(cds_main)$geno_pheno)
- #Order factor levels
- colData(cds_main)$kmeans10_cluster <- factor(colData(cds_main)$kmeans10_cluster,
+#unique(colData(cds_main)$geno_pheno)
+
+#Order factor levels
+colData(cds_main)$kmeans10_cluster <- factor(colData(cds_main)$kmeans10_cluster,
                                               levels = 1:10)
  colData(cds_main)$geno_pheno <-
    factor(
@@ -275,6 +276,8 @@ F5_topmarkers_k10 <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data
 
 markers <- F5_topmarkers_k10 |> filter(
    cell_group %in% c('6','8','1','5','3'))|>pull(gene_short_name)
+markers <- F5_topmarkers_k10 |> filter(
+  cell_group %in% c('6','8','1','5','3','2','4','7','9','10'))|>pull(gene_short_name)
 
 #Expression Matrix
   # mat <-
@@ -301,7 +304,7 @@ mat <-
       cds_main,
       cells = bb_cellmeta(cds_main) |>
         filter(
-          kmeans10_cluster %in% c('3','6','8','1','5')
+          kmeans10_cluster %in% c('3','6','8','1','5','2','4','7','9','10')
         ),
       genes = bb_rowmeta(cds_main) |>
         filter(gene_short_name %in% markers)
@@ -326,7 +329,7 @@ heatmap_3_colors <-
                                            0,
                                            max(mat)),
                                 colors = heatmap_3_colors)
-  heatmap_highlights <- c(
+  heatmap_highlights <- c( #change to labeling top ~5-6 marker genes per cluster?
     "Mpo",
     "Ctsg",
     "Elane",
@@ -350,7 +353,7 @@ heatmap_3_colors <-
     col = colfun,
     name = "Expression",
     show_row_names = F,
-    show_column_names = F,
+    show_column_names = F, #check column clustering order for bp
     right_annotation = anno,
     #top_annotation = hmap_bp,
     row_dend_width = unit(4, "mm"),
@@ -367,7 +370,10 @@ heatmap_3_colors <-
 ####fraction of cells contributed to each cluster by leukemia_phenotype
 cellcount<- bb_cellmeta(cds_main) |>
   group_by(kmeans10_cluster, leukemia_phenotype) |>
-  summarise(n = n()) |> filter(kmeans10_cluster %in% c("5", "6", "1", "8","3"))
+  summarise(n = n()) |> filter(kmeans10_cluster %in% c("5", "6", "1", "8","3")) #select clusters
+cellcount<- bb_cellmeta(cds_main) |> #all clusters
+  group_by(kmeans10_cluster, leukemia_phenotype) |>
+  summarise(n = n()) |> filter(kmeans10_cluster %in% c("1", "2","3","4","5","6","7","8","9","10"))
 # mutate(cellcount, frac = n/group_by(kmeans10_cluster) |> summarise(n = sum(n)))
 #create fraction column
 library(data.table)
@@ -375,9 +381,11 @@ setDT(cellcount)[, frac := n / sum(n), by=kmeans10_cluster]
 
 #factor levels
 cellcount$kmeans10_cluster <- factor(cellcount$kmeans10_cluster,
-                                     levels = c("5", "6","1","8","3"))
+                                     levels = c("5", "6","1","8","3")) #for select clusters
+cellcount$kmeans10_cluster <- factor(cellcount$kmeans10_cluster,
+                                     levels = c("10","5","6","7","2","8","3","9","1","4")) #for all
 cellcount$leukemia_phenotype <- factor(cellcount$leukemia_phenotype,
-                                     levels = c("AML", "B-ALL","T-ALL", "No leukemia"))
+                                     levels = c("AML", "pre-B ALL","T ALL", "No leukemia"))
 #plot
 hmap_bp <-
   ggplot(cellcount,
@@ -387,17 +395,17 @@ hmap_bp <-
   theme(axis.title.y = element_blank()) +
   theme(axis.text.y = element_text(size = 6)) +
   theme(axis.text.x = element_text(size = 12)) +
-  coord_fixed(ratio = 0.45)+
-  theme(plot.margin = unit(c(0,0.4,0,0), "cm")) +
+  coord_fixed(ratio = 1.2)+ #0.45
+  theme(plot.margin = unit(c(0,0.37,0,0), "cm")) + #0.4 for select clusters
   labs(x = "Clusters (k-means10)")+
-  scale_x_discrete(expand = c(0.13,0))
-
+  scale_x_discrete(expand = c(0.07,0)) #(0.13,0) for select clusters
+hmap_bp
 #library(gtable)
 #F5D<- F5heatmap / hmap_bp + plot_layout(heights = c(3,1))
 
 #library(cowplot)
 F5hm<- plot_grid(F5heatmap,hmap_bp, ncol=1, rel_heights = c(3,1))
-
+F5hm
 #Pseudobulk:
 ##AML cluster 1 (17401 cells) vs WT cluster 1 (400 cells)
 
