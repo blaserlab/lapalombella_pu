@@ -106,3 +106,24 @@ bb_var_umap(cds_main,
             #alt_dim_y = "aggr_UMAP_2",
             cell_size = 0.1,
             overwrite_labels = T)
+
+#Refine celltype annotation:
+
+mat2 <-
+  bb_aggregate(
+    obj = filter_cds(
+      cds_main,
+      cells = bb_cellmeta(cds_main) |>
+        filter(
+          partition %in% c(1, 7, 9, 5, 11)
+          #leukemia_phenotype %in% c("AML", "pre-B ALL", "T ALL", "No leukemia")
+        ),
+      genes = bb_rowmeta(cds_main) #|>
+      #   filter(gene_short_name %in% markers)
+    ),
+    cell_group_df = bb_cellmeta(cds_main) |>
+      select(cell_id, leiden)
+  ) |>
+  t() |>
+  scale() |>
+  t()
