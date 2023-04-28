@@ -1,4 +1,4 @@
-T_Figs <- "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Figures/01.04.23"
+T_Figs <- "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Figures"
 Pu_Figs <- "~/network/T/Labs/EHL/Rosa/Pu Zhang/MANUSCRIPT/TP53 and TET2 AML mouse model/Figures/AI figures/10X_Figs"
 source("R/dependencies.R")
 source("R/configs.R")
@@ -10,25 +10,39 @@ source("R/cds_mods.R")
 #    summarise(n = n())
 
 #By genotype
- A1 <- bb_var_umap(
+bb_var_umap(cds_main, "leiden", overwrite_labels = T)
+bb_var_umap(cds_main, "louvain", overwrite_labels = T)
+
+a<-bb_var_umap(filter_cds(cds_main, "leiden_assignment2", overwrite_labels = T)) + facet_wrap(~geno_pheno)
+
+# a+geom_label_repel(aes(label = "leiden_assignment2", size = NULL), arrow = arrow(length = unit(0.03, "npc"),
+#                                  type = "closed", ends = "last",
+#                    nudge_y = 3,
+#                    segment.size  = 0.3)
+  #segment.size  = 2, segment.color = 'grey50', direction = 'x')
+#box.padding   = 0.35, point.padding = 10.5,
+
+ A1 <-
+   bb_var_umap(
    cds_main,
    var = "leiden_assignment2",
    #alt_dim_x = "aggr_UMAP_1",
    #alt_dim_y = "aggr_UMAP_2",
    cell_size = 0.1,
-   overwrite_labels = T
+   overwrite_labels = F
  ) + facet_grid(col = vars(geno_pheno)) +
    theme_minimal() + theme(panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank()) +
    theme(panel.background = element_rect(color = "black")) +
-   theme(legend.position = "none") +
+   #theme(legend.position = "none") +
    theme(axis.title.x = element_blank()) +
    theme(axis.text.x = element_blank())+
    theme(axis.title.y = element_blank())+
    theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))+
    coord_fixed(ratio = 1)
 
-A2<-bb_var_umap(
+A2<-
+  bb_var_umap(
    cds_main,
    var = "density",
    facet_by = "genotype",
@@ -228,14 +242,17 @@ heatmap_3_colors <-
 
  #AML leiden clusters heatmap
  aml <- blaseRtools::filter_cds(cds = cds_main,
-                                           cells = bb_cellmeta(cds_main) |>
-                                             filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12')))
- AML_topmarkers <-
-   monocle3::top_markers(
-     aml,
-     group_cells_by = "leiden",
-     genes_to_test_per_group = 20,
-     cores = 12)
+                                           cells = bb_cellmeta(cds_main) |> filter(leiden %in% c('4', '5', '8', '24', '12')))
+
+bb_var_umap(aml, "leiden_assignment2", overwrite_labels = T, group_label_size = 5))
+ggsave("aml_leiden_clusters.pdf", path = T_Figs)
+
+# AML_topmarkers <-
+ #   monocle3::top_markers(
+ #     aml,
+ #     group_cells_by = "leiden",
+ #     genes_to_test_per_group = 20,
+ #     cores = 12)
 
   #write_csv(AML_leiden_clusts_topmarkers, file = file.path("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data", "AML_leiden_clusts_topmarkers.csv"))
  AML_topmarkers <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/AML_leiden_clusts_topmarkers.csv")
@@ -801,7 +818,34 @@ plotEnrichment(pathwaysH[["HALLMARK_GLYCOLYSIS"]], rankData)  +
 #T cell exhaustion score Zheng et al 2021 (https://www.science.org/doi/pdf/10.1126/science.abe6474):
 
 #GO blasertools
-
+pseudo3n11_goenrichment <-
+  bb_goenrichment(
+    query = dplyr::filter(pseudobulk_res$Result, padj < 0.1 &
+                            log2FoldChange >= 0.58) |> pull(gene_short_name),
+    reference = bb_rowmeta(cds_main),
+    go_db = "org.Hs.eg.db"
+  )
+# pseudo3n11_gosummary_0.9 <- bb_gosummary(x = pseudo3n11_goenrichment,
+#                                          reduce_threshold = 0.9,
+#                                          go_db = "org.Hs.eg.db")
+# pseudobulk_Clust3n11.Up_GO_PCA <-
+#   bb_goscatter(simMatrix = pseudo3n11_gosummary_0.9$simMatrix,
+#                reducedTerms = pseudo3n11_gosummary_0.9$reducedTerms)
+# #ggsave("pseudobulk_Clust3n11.Up_GO_PCA.pdf", path = "~/network/T/Labs/EHL/Rosa/Ethan/EHL/PRMT5/Hing et al manuscript - NatComm/10X Project Update/Figs/Composed Figs/Figure1_Supp1/S1_GO_&_Pathway_Analysis/pseudobulk")
+#
+# #pseudoGO barplot
+# ####RT Upregulated
+# pseudo3n11_goenrichment$res_table$classicFisher[pseudo3n11_goenrichment$res_table$classicFisher=="< 1e-30"]<-"1.0e-30"
+# pseudo3n11_goenrichment$res_table$Rank <- as.numeric(as.character(pseudo3n11_goenrichment$res_table$Rank))
+# pseudob_top25 <- filter(pseudo3n11_goenrichment$res_table, as.numeric(pseudo3n11_goenrichment$res_table$Rank) <= 25) |> mutate(neg_log10_pval = -log10(as.numeric(classicFisher))) |> rename(GO_Term = Term, Genes_Mapped = Significant)
+# pseudob_top25
+#
+# pseudob_3n11.Up_GObp<- ggplot(data=pseudob_top25, aes(reorder(x= GO_Term, y= neg_log10_pval, neg_log10_pval), y= neg_log10_pval, fill = Genes_Mapped)) +
+#   geom_bar(stat="identity") +
+#   coord_flip() + scale_fill_viridis_c() + labs(x = "GO Terms", y = "-log(pval)")#theme(axis.title.x = element_text("GO Terms"), axis.title.y = element_text("-log(pval)"))
+# pseudob_3n11vs1n9_GObp
+# #ggsave("pseudob_3n11v.Up_GObp.pdf", path = "~/network/T/Labs/EHL/Rosa/Ethan/EHL/PRMT5/Hing et al manuscript - NatComm/10X Project Update/Figs/Composed Figs/Figure1_Supp1/S1_GO_&_Pathway_Analysis/pseudobulk")
+#
 
 
 ######################################################################
@@ -1033,6 +1077,58 @@ bb_var_umap(
   theme_minimal() + theme(panel.grid.major = element_blank(),
                           panel.grid.minor = element_blank()) +
   theme(panel.background = element_rect(color = "black")) + theme(legend.position = "none")
+
+unique(colData(cds_main)$leukemia_phenotype)
+
+#Supp Fig8a
+t_all_plotlist2 <- map(.x = c("Cd3e", "Cd4", "Gzma", "Icos", "Izumo1r", "Trbc1"),
+                      .f = \(x, dat = filter_cds(
+                        cds_main,
+                        cells = bb_cellmeta(cds_main) |>
+                          filter(
+                            leukemia_phenotype %in% c("T cell leukemia")))) {
+                        p <- bb_gene_umap(
+                          dat,
+                          gene_or_genes = x,
+                          #alt_dim_x = "aggr_UMAP_1",
+                          #alt_dim_y = "aggr_UMAP_2",
+                          cell_size = 0.1
+                        ) +
+                          scale_color_distiller(palette = "Oranges",
+                                                direction = 1,
+                                                na.value = "grey80",
+                                                limits = c(0,2.5)) +
+                          #facet_wrap(~geno_pheno, labeller = labeller(group = label_wrap_gen(width = 5, multi_line = TRUE))) +
+                          scale_y_continuous(breaks = c(-10, 0, 10)) +
+                          scale_x_continuous(breaks = c(-10,0, 10))+
+                          theme(panel.spacing = unit(0.25, "lines"))+
+                          theme(panel.grid.major = element_blank(),
+                                panel.grid.minor = element_blank())+
+                          theme(panel.background = element_rect(color = "black",
+                                                                fill = "white"))+
+                          theme(axis.line = element_blank()) +
+                          #theme(axis.ticks = element_blank()) +
+                          #theme(axis.text = element_blank()) +
+                          #labs(x =NULL, y = NULL, subtitle = x) +
+                          #theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))+
+                          theme(legend.position = "none")+
+                          coord_fixed(ratio = 1)+ labs(x =NULL, y = x) +
+                          theme(axis.title.y = element_text(size = 14, face = "italic"))
+                        # if (x != "Calr") p <- p + theme(legend.position = "none")
+                        p
+                      })
+
+t_all_gexp_umap2 <- ggarrange(t_all_plotlist2[[1]],
+                              t_all_plotlist2[[2]],
+                              t_all_plotlist2[[3]],
+                              t_all_plotlist2[[4]],
+                              t_all_plotlist2[[5]],
+                              t_all_plotlist2[[6]],
+                              ncol = 3,
+                              nrow=2,
+                              common.legend = TRUE,
+                              legend="right")
+t_all_gexp_umap2
 
 #AML Markers:
 ####
@@ -1380,7 +1476,7 @@ bb_gene_violinplot(cds_main,
   #   cells = bb_cellmeta(cds_main) |>
   #     filter( == "B")
   # ),
-  variable = "kmeans10_cluster",
+  variable = "partition",
   genes_to_plot = "S100a8",
   pseudocount = 0, jitter_fill = "transparent", violin_alpha = 0.55, jitter_alpha = 0.1, include_jitter = TRUE
 )

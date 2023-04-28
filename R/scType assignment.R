@@ -132,15 +132,69 @@ rownames(mat) <-
   left_join(bb_rowmeta(cds_main) |>
               select(feature_id, gene_short_name)) |> pull(gene_short_name)
 
+#louvain
+mat <-
+  bb_aggregate(
+    obj = filter_cds(
+      cds_main,
+      cells = bb_cellmeta(cds_main) |>
+        filter(
+          partition %in% c(1:16)
+          #leukemia_phenotype %in% c("AML", "pre-B ALL", "T ALL", "No leukemia")
+        ),
+      genes = bb_rowmeta(cds_main) #|>
+      #   filter(gene_short_name %in% markers)
+    ),
+    cell_group_df = bb_cellmeta(cds_main) |>
+      select(cell_id, louvain)#barcode)
+  ) |>
+  t() |>
+  scale() |>
+  t()
+
+rownames(mat) <-
+  tibble(feature_id = rownames(mat)) |>
+  left_join(bb_rowmeta(cds_main) |>
+              select(feature_id, gene_short_name)) |> pull(gene_short_name)
+
 # #count matrix
 # mat <- monocle3::exprs(cds_main)
 
 # assign cell types
 es.max = sctype_score(scRNAseqData = mat, scaled = TRUE, gs = gs_list$gs_positive, gs2 = gs_list$gs_negative)
-rownames(es.max)
+#rownames(es.max)
+
+#louvain - creates a data
+es.max3<-as.data.frame(es.max|> t())
+es.max3 <- as.data.frame(colnames(es.max3)[max.col(es.max3)])
+es.max3$louvain <- rownames(es.max3)
+colnames(es.max3)[1] <- "louvain_assignment"
+# colData(cds_main)$louvain_assignment <-
+#   recode(colData(cds_main)$louvain,
+#          if(unique(colData(cds_main)$louvain) == es.max3$louvain))
+# colData(cds_main)$louvain_assignment <- cbind(colData(cds_main))
+
+# cds_main <- bb_tbl_to_coldata(obj = cds_main, min_tbl = aggr_cluster_tbl)
+# cds_main <- bb_tbl_to_coldata(obj = cds_main, join_col = 'louvain', min_tbl = es.max3)
+colData(cds_main)
+
+cn <- colnames(cds_main)
+a <-
+  merge(colData(cds_main), es.max3, by.x = "louvain", by.y = "louvain", all.x = FALSE)
+colnames(a@listData) <- cn
+
+colData(a@listData)
+unique(colData(cds_main)$louvain_assignment)
+
+
+
+colData(rse1) <- cbind(colData(rse1), secondcol=7:12)
+
+
+colData(cds_main)
 
 es.max2 <- as.data.frame(es.max)
-es.max2 <- es.max2[,39:43]
+#es.max2 <- es.max2[,39:43]
 es.max2$Largest_Column <-colnames(es.max2)[apply(es.max2,1,which.max)]
 view(es.max2)
 
@@ -149,15 +203,15 @@ colData(cds_main)$leiden_assignment2 <-
          "1" = "Pro-B cells", #4.0
          "2" = "Pre-B cells", #3.4
          "3" = "Naive CD4+ T cells", #2.9
-         "4" = "Neutrophils", #1.8
-         "5" = "Neutrophils", #1.8
+         "4" = "OXPHOS-high AML",  #"Neutrophils", #1.8
+         "5" = "Hyperproliferative AML",  #"Neutrophils", #1.8
          "6" = "Effector CD8+ T cells", #2.3
          "7" = "Immature B cells", #4.2
-         "8" = "Neutrophils", #2.65
+         "8" = "Neutrophil-like AML",  #"Neutrophils", #2.65
          "9" = "Myeloid Dendritic cells", #2.4
          "10" = "Effector CD4+ T cells", #2.3
          "11" = "Myeloid Dendritic cells", #2.2
-         "12" = "Granulocytes", #2.0
+         "12" = "erythroid-like AML", #"Granulocytes", #2.0
          "13" = "Neutrophils",#4.4
          "14" = "Neutrophils",#5.1
          "15" = "Naive CD4+ T cells",#6.0
@@ -169,7 +223,7 @@ colData(cds_main)$leiden_assignment2 <-
          "21" = "Naive B cells",#3.7
          "22" = "Macrophages",#5.6
          "23" = "Naive CD4+ T cells",#2.4
-         "24" = "ISG expressing immune cells",#2.9
+         "24" = "IFN_high macrophage-like AML", #"ISG expressing immune cells",#2.9
          "25" = "Neutrophils", #0.4 ???????
          "26" = "Erythroid-like and erythroid precursor cells", #5.5
          "27" = "Macrophages", #4.7
@@ -180,7 +234,7 @@ colData(cds_main)$leiden_assignment2 <-
          "32" = "Natural killer  cells",#12
          "33" = "Platelets", #9.0
          "34" = "Immature B cells",#2.9
-         "35" = "Naive B cells",#7.5
+         "35" = "Naive B-like ALL", #Naive B cells #7.5
          "36" = "Platelets", #4.1
          "37" = "Neutrophils",#2.5
          "38" = "Megakaryocyte",#4.7
@@ -367,3 +421,23 @@ aml_gexp_umap2 <- ggarrange(aml_plotlist2[[1]],
           legend="right")
 aml_gexp_umap2
 #Make Heatmap of AML leiden clusters
+
+library(devtools)
+install_github("ggjlab/scMCA")
+library(scMCA)
+
+mca_result <- scMCA(scdata = aml, numbers_plot = 5)
+scMCA_vis(mca_result)
+
+
+
+#Make Heatmap of AML leiden clusters
+
+library(devtools)
+install_github("ggjlab/scMCA")
+library(scMCA)
+
+mca_result <- scMCA(scdata = aml, numbers_plot = 5)
+scMCA_vis(mca_result)
+
+bb_rowmeta(cds_main)

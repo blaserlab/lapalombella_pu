@@ -134,4 +134,53 @@ colData(cds_main)$partition_assignment2 <-
          "15" = "Effector CD8+ T cells",
          "16" = "Pro-B cells" #pre? less specific than 16
   )
+
+
+colData(cds_main)$leiden_assignment2 <-
+  recode(colData(cds_main)$leiden,
+         "1" = "Pro-B-like ALL_1",#Pro-B cells, #4.0
+         "2" = "Pre-B-like ALL", #Pre-B cells", #3.4
+         "3" = "Naive CD4+ T-like ALL_1", #Naive CD4+ T, #2.9
+         "4" = "OXPHOS-high AML",  #"Neutrophils", #1.8
+         "5" = "Hyperproliferative AML",  #"Neutrophils", #1.8
+         "6" = "Effector CD8+ T cells", #2.3
+         "7" = "Immature B cells", #4.2
+         "8" = "Neutrophil-like AML",  #"Neutrophils", #2.65
+         "9" = "Myeloid Dendritic cells", #2.4
+         "10" = "Effector CD4+ T-like ALL", #Effector CD4+ T cells #2.3
+         "11" = "Myeloid Dendritic cells", #2.2
+         "12" = "erythroid-like AML", #"Granulocytes", #2.0
+         "13" = "Neutrophils",#4.4
+         "14" = "Neutrophils",#5.1
+         "15" = "Naive CD4+ T cells",#6.0
+         "16" = "Neutrophils",#3.5
+         "17" = "Macrophages",#2.2
+         "18" = "Neutrophils",#4.8
+         "19" = "Naive CD4+ T cells",#5
+         "20" = "Neutrophils",#4.2
+         "21" = "Naive B-ALL", #Naive B cells #3.7
+         "22" = "Macrophages",#5.6
+         "23" = "Naive CD4+ T-like ALL_2", # #Naive CD4+ T #2.4
+         "24" = "IFN-high macrophage-like AML", #"ISG expressing immune cells",#2.9
+         "25" = "Neutrophils", #0.4 ???????
+         "26" = "Erythroid-like and erythroid precursor cells", #5.5
+         "27" = "Macrophages", #4.7
+         "28" = "Pro-B-like ALL_2", #4.4
+         "29" = "Effector CD8+ T cells", #3.0
+         "30" = "γδ-T-like ALL", #γδ-T cells #1.7
+         "31" = "ISG expressing immune cells",#5.1
+         "32" = "Natural killer  cells",#12
+         "33" = "Platelets", #9.0
+         "34" = "Immature B cells",#2.9
+         "35" = "Naive B cells",#7.5
+         "36" = "Platelets", #4.1
+         "37" = "Neutrophils",#2.5
+         "38" = "Megakaryocyte",#4.7
+         "39" = "Immature B cells",#4.7
+         "40" = "Effector CD8+ T cells",#0.46
+         "41" = "Myeloid Dendritic cells",#5.0
+         "42" = "CD8+ NKT-like cells",#1.9
+         "43" = "Pro-B cells" #Pro B cells#4.7
+  )
+
 ##############################################################################################
