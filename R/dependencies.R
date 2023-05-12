@@ -20,12 +20,7 @@ suppressPackageStartupMessages(library("gridExtra"))
 suppressPackageStartupMessages(library("patchwork"))
 
 
-# load the data set into a hidden environment
-requireData("lapalombella.pu.datapkg")
-
-#library(lapalombella.pu.datapkg)
-
-# run this to update the data package in renv
-#blaseRtemplates::project_data("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/datapkg")
+# run this to update the data package
+blaseRtemplates::project_data("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/datapkg")
 
 

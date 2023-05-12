@@ -1,10 +1,3 @@
-T_Figs <- "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Figures"
-
-source("R/dependencies.R")
-source("R/configs.R")
-source("R/cds_mods.R")
-
-unique(colData(cds_main)$leukemia_phenotype)
 
 bb_var_umap(filter_cds(
   cds_main,
@@ -54,6 +47,6 @@ aml_allb <- blaseRtools::filter_cds(cds = aml_allb,
 a<- bb_var_umap(aml, "leiden_assignment2", overwrite_labels = T) + labs(title = "AML") + ylim(-13.5, 11) +xlim(-12, 15)
 b<- bb_var_umap(allb, "leiden_assignment2", overwrite_labels = T) + labs(title = "B ALL") + ylim(-13.5, 11) +xlim(-12, 15)
 F7B<- a+b
-ggsave("F7B.pdf")
-p <- p1 + p2
-ggsave('figures/test.png', p)
+# ggsave("F7B.pdf")
+# p <- p1 + p2
+# ggsave('figures/test.png', p)

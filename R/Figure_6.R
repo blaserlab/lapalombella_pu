@@ -1,9 +1,4 @@
-T_Figs <- "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Figures"
-
-source("R/dependencies.R")
-source("R/configs.R")
-source("R/cds_mods.R")
-##################################################################################################################
+#################################################################################################################
 #Violin Plots
 # bb_gene_violinplot(cds_main, variable = "partition",
 #                    genes_to_plot = c("S100a8", "S100a9"),
@@ -74,41 +69,11 @@ aml_gexp_umap <- ggarrange(aml_plotlist[[1]],
                            common.legend = TRUE,
                            legend="right")
 
-F6B1 <-
-  (aml_plotlist[[1]] |
-     plot_spacer() |
-     aml_plotlist[[2]] |
-     plot_spacer() |
-     aml_plotlist[[3]])+ theme(
-       legend.position = "right",
-       legend.key.size = unit(4, "mm")
-     ) + plot_layout(widths = c(1, 0, 1, 0, 1))
-#ggsave("F6C1.pdf", path = T_Figs, width = 8.25, height = 4.5)
 
-F6B2 <-
-  (aml_plotlist[[4]] |
-     plot_spacer() |
-     aml_plotlist[[5]] |
-     plot_spacer() |
-     aml_plotlist[[6]])+ theme(
-       legend.position = "right",
-       legend.key.size = unit(4, "mm")
-     ) + plot_layout(widths = c(1, 0, 1, 0, 1))
 #ggsave("F6C2.pdf", path = T_Figs, width = 8.25, height = 4.5)
 ########################################################################################################################
 #Figure 6C
 #Heatmap
-##top markers
-F6_topmarkers_part <-
-  monocle3::top_markers(
-    cds_main,
-    group_cells_by = "partition",
-    genes_to_test_per_group = 20,
-    cores = 12
-  )
-#write_csv(F6_topmarkers_part, file = file.path("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data", "F6_topmarkers_part.csv"))
-F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_topmarkers_part.csv")
-
 
 # markers <- F5_topmarkers_k10 |> filter(
 #    cell_group %in% c('6','8','1','5','3'))|>pull(gene_short_name)
@@ -122,9 +87,7 @@ mat <-
     obj = filter_cds(
       cds_main,
       cells = bb_cellmeta(cds_main) |>
-        filter(
-          partition %in% c(1:16)
-        ),
+        filter(partition %in% c(1:16)),
       genes = bb_rowmeta(cds_main) |>
         filter(gene_short_name %in% markers)
     ),
@@ -138,8 +101,7 @@ rownames(mat) <-
   tibble(feature_id = rownames(mat)) |>
   left_join(bb_rowmeta(cds_main) |>
               select(feature_id, gene_short_name)) |>
-  pull(gene_short_name
-  )
+  pull(gene_short_name)
 
 heatmap_3_colors <-
   c("#313695", "white", "#A50026")
@@ -151,7 +113,7 @@ colfun = circlize::colorRamp2(breaks = c(min(mat),
 
 #Annotation: Top 5 marker genes per cluster
 heatmap_highlights <-
-  F6_topmarkers_k10 |> group_by(cell_group) |>
+  F6_topmarkers_part |> group_by(cell_group) |>
   slice_max(order_by = marker_score, n=5)|>
   pull(gene_short_name)
 
@@ -238,17 +200,8 @@ aml <- blaseRtools::filter_cds(cds = cds_main,
                                  filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12')))
 #Figure 6D
 bb_var_umap(aml, "leiden_assignment2", overwrite_labels = T, group_label_size = 5)
-ggsave("Figure6D-aml_leiden_clusters.pdf", path = T_Figs)
+# ggsave("Figure6D-aml_leiden_clusters.pdf", path = T_Figs)
 
-# AML_topmarkers <-
-#   monocle3::top_markers(
-#     aml,
-#     group_cells_by = "leiden",
-#     genes_to_test_per_group = 20,
-#     cores = 12)
-
-#write_csv(AML_leiden_clusts_topmarkers, file = file.path("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data", "AML_leiden_clusts_topmarkers.csv"))
-AML_topmarkers <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/AML_leiden_clusts_topmarkers.csv")
 
 markers <- AML_topmarkers |> pull(gene_short_name)
 
@@ -327,170 +280,3 @@ ComplexHeatmap::Heatmap(
 )))
 F6E<-as_ggplot(F6E)
 F6E
-#ggsave("F6E.pdf", path = T_Figs)
-##############################################################################################################################################
-#Fig 6F Volcano
-# exp_design <-
-#   bb_cellmeta(filter_cds(
-#     cds = cds_main,
-#     cells = bb_cellmeta(cds_main) |>
-#       filter(leukemia_phenotype %in% c("AML", "No leukemia")))) |> #wt_aml
-#   group_by(sample, leukemia_phenotype) |>
-#   summarise()
-#
-# pseudobulk_res <-
-#   bb_pseudobulk_mf(cds = filter_cds(
-#     cds = cds_main,
-#     cells = bb_cellmeta(cds_main) |>
-#       filter(leukemia_phenotype %in% c("AML", "No leukemia"))),
-#     pseudosample_table = exp_design,
-#     design_formula = "~ leukemia_phenotype",
-#     result_recipe = c("leukemia_phenotype", "AML", "No leukemia"))
-#
-# #write.csv(F6_aml_wt_pseudobulk, "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_aml_wt_pseudobulk.csv")
-# F6_aml_wt_pseudobulk<- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_aml_wt_pseudobulk.csv")
-#
-# genes_to_highlight <- unique(c("Prox1", "Ifi44l", "Tdrd5", "Etv4", "Etv5"))
-#
-# volcano_data <- F6_aml_wt_pseudobulk %>%
-#   mutate(threshold = padj < 0.05 & abs(log2FoldChange) >= 0.58) %>%
-#   mutate(text_label = ifelse(gene_short_name %in% genes_to_highlight, gene_short_name, ""))
-# #write.csv(volcano_data, "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/volcano_data.csv")
-#
-# volcano_data<-volcano_data[!(volcano_data$gene_short_name=="Slc4a8"),]
-#
-# library(ggtext)
-# volcano_pseudobulk <-
-#   ggplot(
-#     volcano_data,
-#     aes(
-#       x = log2FoldChange,
-#       y = -log10(padj),
-#       colour = threshold,
-#       fill = threshold,
-#       label = text_label
-#     )
-#   ) +
-#   geom_point(shape = 21,
-#              size = 0.5,
-#              alpha = 0.4) +
-#   geom_text_repel(color = "black",
-#                   fontface = "italic",
-#                   box.padding = 0.5, #0.5
-#                   point.padding = 0.25, #0.25
-#                   min.segment.length = 0,
-#                   max.overlaps = 20000,
-#                   size = 3,
-#                   segment.size = 0.25,
-#                   force = 2,
-#                   seed = 1234,
-#                   segment.curvature = -0.1,
-#                   segment.square = TRUE,
-#                   segment.inflect = TRUE) +
-#   xlab("log<sub>2</sub> fold change") +
-#   ylab("-log<sub>10</sub> adjusted p-value") +
-#   theme(axis.title.x =  element_markdown()) +
-#   theme(axis.title.y = element_markdown()) +
-#   theme(legend.position = "none") +
-#   scale_color_manual(values = c("grey80", "#DC0000")) +
-#   scale_fill_manual(values = c("transparent", "#DC0000")) +
-#   labs(title = "Pseudobulk dKO AML vs WT")+ #caption = "\U21D0 Up in WT\nUp in AML \U21D2",
-#   theme(plot.caption.position = "panel") +
-#   #theme(plot.caption = element_text(hjust = 0.5)) +
-#   theme(plot.title = element_text(hjust = 0.5)) +
-#   coord_cartesian(xlim = c(-1.0 * max(abs(range(volcano_data |> dplyr::filter(!is.na(padj)) |> pull(log2FoldChange)))), 1.0 * max(abs(range(volcano_data |> filter(!is.na(padj)) |> pull(log2FoldChange)))))) #+
-# volcano_pseudobulk
-##############################################################################################################################################
-#Fig 6G
-AML_topmarkers <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/AML_leiden_clusts_topmarkers.csv")
-
-library(topGO)
-goenrichment <-
-  bb_goenrichment(
-    query = dplyr::filter(pseudobulk_res$Result, padj < 0.1 &
-                            log2FoldChange >= 0.58) |> pull(gene_short_name),
-    reference = bb_rowmeta(cds_main),
-    go_db = "org.Mm.eg.db"
-  )
-
-
-gosummary_0.89 <- bb_gosummary(x = goenrichment,
-                              reduce_threshold = 0.89,
-                              go_db = "org.Mm.eg.db")
-pseudobulk_AML_vs_WT_GO_PCA <-
-  bb_goscatter(simMatrix = gosummary_0.89$simMatrix,
-               reducedTerms = gosummary_0.89$reducedTerms)
-pseudobulk_AML_vs_WT_GO_PCA
-
-gosummary_0.9 <- bb_gosummary(x = goenrichment,
-                                         reduce_threshold = 0.9,
-                                         go_db = "org.Mm.eg.db")
-pseudobulk_AML_vs_WT_GO_PCA_0.9 <-
-  bb_goscatter(simMatrix = gosummary_0.9$simMatrix,
-               reducedTerms = gosummary_0.9$reducedTerms)
-pseudobulk_AML_vs_WT_GO_PCA_0.9
-
-#pseudoGO barplot
-# pseudo3n11_goenrichment$res_table$classicFisher[pseudo3n11_goenrichment$res_table$classicFisher=="< 1e-30"]<-"1.0e-30"
-# pseudo3n11_goenrichment$res_table$Rank <- as.numeric(as.character(pseudo3n11_goenrichment$res_table$Rank))
-# pseudob_top25 <- filter(pseudo3n11_goenrichment$res_table, as.numeric(pseudo3n11_goenrichment$res_table$Rank) <= 25) |> mutate(neg_log10_pval = -log10(as.numeric(classicFisher))) |> rename(GO_Term = Term, Genes_Mapped = Significant)
-# pseudob_top25
-#
-# pseudob_3n11.Up_GObp<- ggplot(data=pseudob_top25, aes(reorder(x= GO_Term, y= neg_log10_pval, neg_log10_pval), y= neg_log10_pval, fill = Genes_Mapped)) +
-#   geom_bar(stat="identity") +
-#   coord_flip() + scale_fill_viridis_c() + labs(x = "GO Terms", y = "-log(pval)")#theme(axis.title.x = element_text("GO Terms"), axis.title.y = element_text("-log(pval)"))
-# pseudob_3n11vs1n9_GObp
-# #ggsave("pseudob_3n11v.Up_GObp.pdf", path = "~/network/T/Labs/EHL/Rosa/Ethan/EHL/PRMT5/Hing et al manuscript - NatComm/10X Project Update/Figs/Composed Figs/Figure1_Supp1/S1_GO_&_Pathway_Analysis/pseudobulk")
-
-
-##############################################################################################################################################
-
-#cell type assignment: scType package
-lapply(c("dplyr","Seurat","HGNChelper"), library, character.only = T)
-source(
-  "https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/gene_sets_prepare.R"
-)
-source(
-  "https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_score_.R"
-)
-
-# get cell-type-specific gene sets from ScType database
-gs_list = gene_sets_prepare(
-  "https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/ScTypeDB_short.xlsx",
-  "Immune system"
-)
-
-#louvain
-mat <-
-  bb_aggregate(
-    obj = filter_cds(
-      cds_main,
-      cells = bb_cellmeta(cds_main) |>
-        filter(
-          partition %in% c(1:16)
-          #leukemia_phenotype %in% c("AML", "pre-B ALL", "T ALL", "No leukemia")
-        ),
-      genes = bb_rowmeta(cds_main) #|>
-      #   filter(gene_short_name %in% markers)
-    ),
-    cell_group_df = bb_cellmeta(cds_main) |>
-      select(cell_id, louvain)#barcode)
-  ) |>
-  t() |>
-  scale() |>
-  t()
-
-rownames(mat) <-
-  tibble(feature_id = rownames(mat)) |>
-  left_join(bb_rowmeta(cds_main) |>
-              select(feature_id, gene_short_name)) |> pull(gene_short_name)
-
-# assign cell types
-es.max = sctype_score(scRNAseqData = mat, scaled = TRUE, gs = gs_list$gs_positive, gs2 = gs_list$gs_negative)
-#rownames(es.max)
-
-#louvain
-es.max3<-as.data.frame(es.max|> t())
-es.max3 <- as.data.frame(colnames(es.max3)[max.col(es.max3)])
-es.max3$louvain <- rownames(es.max3)
-colnames(es.max3)[1] <- "louvain_assignment"
