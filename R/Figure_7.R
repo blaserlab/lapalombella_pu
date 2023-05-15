@@ -1,22 +1,37 @@
 #Figure 7B
-cellcount_aml<- bb_cellmeta(blaseRtools::filter_cds(cds = cds_main,
-                                                    cells = bb_cellmeta(cds_main) |>
-                                                      filter(leukemia_phenotype %in% c("AML")))) |> #all clusters
+cellcount_aml <- bb_cellmeta(blaseRtools::filter_cds(
+  cds = cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("AML"))
+)) |> #all clusters
   group_by(leiden, leiden_assignment2) |>
   summarise(n = n())
 cellcount_aml <- filter(cellcount_aml, n > 10)
-aml <- blaseRtools::filter_cds(cds = blaseRtools::filter_cds(cds = cds_main,
-                                                             cells = bb_cellmeta(cds_main) |>
-                                                               filter(leukemia_phenotype %in% c("AML"))),
-                               cells = bb_cellmeta(blaseRtools::filter_cds(cds = cds_main,
-                                                                           cells = bb_cellmeta(cds_main) |>
-                                                                             filter(leukemia_phenotype %in% c("AML")))) |>
-                                 filter(leiden %in% dput(as.character(cellcount_aml$leiden))
-                                          ))
 
-cellcount_ball<- bb_cellmeta(blaseRtools::filter_cds(cds = cds_main,
-                                                     cells = bb_cellmeta(cds_main) |>
-                                                       filter(leukemia_phenotype %in% c("pre-B ALL")))) |>
+aml <-
+  blaseRtools::filter_cds(
+    cds = blaseRtools::filter_cds(
+      cds = cds_main,
+      cells = bb_cellmeta(cds_main) |>
+        filter(leukemia_phenotype %in% c("AML"))
+    ),
+    cells = bb_cellmeta(
+      blaseRtools::filter_cds(
+        cds = cds_main,
+        cells = bb_cellmeta(cds_main) |>
+          filter(leukemia_phenotype %in% c("AML"))
+      )
+    ) |>
+      filter(leiden %in% dput(as.character(
+        cellcount_aml$leiden
+      )))
+  )
+
+cellcount_ball <- bb_cellmeta(blaseRtools::filter_cds(
+  cds = cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("pre-B ALL"))
+)) |>
   group_by(leiden, leiden_assignment2) |>
   summarise(n = n())
 cellcount_ball <- filter(cellcount_ball, n > 10)
@@ -49,9 +64,48 @@ b <-
   labs(title = "pre-B ALL") +
   ylim(-13.5, 11) +
   xlim(-12, 15)
-F7B<- a+b
+F7B <- a + b
 
 F7B
+
+bb_var_umap(cds_main, "density", facet_by = "leukemia_phenotype")
+
+
+# cell composition stacked bar chart----------------------
+pheno_sums <- bb_cellmeta(cds_main) |>
+  count(leukemia_phenotype, name = "sum")
+
+bb_cellmeta(cds_main) |>
+  count(leiden_assignment2, leukemia_phenotype) |>
+  left_join(pheno_sums) |>
+  mutate(total = sum(pheno_sums$sum)) |>
+  mutate(ratio = sum/total) |>
+  mutate(normal = n/ratio/4) |>
+  filter(str_detect(leiden_assignment2, "T|B")) |>
+  filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)) |>
+  ggplot(aes(x = leiden_assignment2, y = normal, fill = leukemia_phenotype)) +
+  geom_bar(position="fill", stat="identity") +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+
+bb_cellmeta(cds_main) |>
+  group_by(leiden_assignment2) |> summarise() |> View()
+
+# figure out the gene list for this-----------------------------
+#
+gb_plot <- bb_genebubbles(filter_cds(cds_main, cells = bb_cellmeta(cds_main) |>
+                                       filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+                                       filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))),
+                          genes = c("Itgam", "Ly6g", "Cd3e", "Gzma"),
+                          cell_grouping = "leiden_assignment2",
+                          return_value = "plot")
+
+
+  # theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  # labs(x = "SC-Type Assignment")
+
+
+
 #ggsave("F7B.pdf", path = figs_out)
 
 ####Pu 7C-7F:

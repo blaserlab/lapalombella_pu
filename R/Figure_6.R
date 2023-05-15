@@ -180,9 +180,9 @@ hmap_bp
 
 ########################################################################################################################
 #Figure 6D
-# aml <- blaseRtools::filter_cds(cds = cds_main,
-#                                cells = bb_cellmeta(cds_main) |>
-#                                  filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12')))
+aml <- blaseRtools::filter_cds(cds = cds_main,
+                               cells = bb_cellmeta(cds_main) |>
+                                 filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12')))
 
 F6D <- bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
                                     cells = bb_cellmeta(cds_main) |>
@@ -234,13 +234,13 @@ colfun = circlize::colorRamp2(breaks = c(min(mat),
 highlights1 <- c("Ccl6","Mpo", "Ctsg", "Elane", "Cd34", "Birc5", "S100A8", "S100A9", "Lyz2", "Cd52", "Stmn1", "Cd34", "Mpo", "Klf4", "Il7r", "Fcnb", "Nedd4", "Cebpe", "Ms4a3", "Ets1", "Mapk13", "Ifit1", "Ifit3", "Ifi47", "Il6ra", "Irf5")
 
 highlights2 <- c("Ifi27l2a", "S100a8", "S100a9", "Wfdc17", "Trem2", "Lyz2", "Ccl6", "Fcer1g", "Ftl1", "Cd52","Lgals3", "Fn1", "Ifi213","Hbb-bt","Hbb-bs","Hba-a1","Hba-a2","Lcn2", "Hmgn2","Ngp", "Camp", "Ngp","Ltf","Lcn","Ifitm6","Wfdc21","Elane","Mpo","Top2a","Tubb5", "Tubb4b", "Birc5", "Ran", "Stmn1" ,"Cox5b","Atp5c1","Chchd2","Mdh2","Atp5j2","Mif","Npm1","Atp5g1","Uqcrb")
-heatmap_highlights <- unique(c(highlights1, highlights2))
+heatmap_highlights2 <- unique(c(highlights1, highlights2))
 #heatmap_highlights <- unique(c(heatmap_highlights, highlights))
 anno <-
   ComplexHeatmap::rowAnnotation(link =  anno_mark(
-    at = which(rownames(mat) %in% heatmap_highlights),
-    labels = rownames(mat)[rownames(mat) %in% heatmap_highlights],
-    labels_gp = gpar(fontsize = 6.5),
+    at = which(rownames(mat) %in% heatmap_highlights2),
+    labels = rownames(mat)[rownames(mat) %in% heatmap_highlights2],
+    labels_gp = gpar(fontsize = 4),
     padding = 0.15
   ))
 
@@ -251,7 +251,7 @@ ComplexHeatmap::Heatmap(
   col = colfun,
   name = "Expression",
   show_row_names = F,
-  show_column_names = T,
+  show_column_names = F,
   column_names_rot = 45,
   right_annotation = anno,
   #top_annotation = hmap_bp,
@@ -269,3 +269,19 @@ ComplexHeatmap::Heatmap(
 )))
 F6E<-as_ggplot(F6E)
 F6E
+
+
+#  scratch work below this ---------------------------
+# bb_cellmeta(cds_p568) |> glimpse()
+# bb_var_umap(cds_p568, "sample")
+# bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "AML") +
+#   bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "PreB ALL") +
+#   bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "No leukemia")
+#
+# bb_var_umap(cds_p568, "density", facet_by = "leukemia_phenotype")
+# bb_var_umap(cds_p568, "leiden_assignment2", facet_by = "leukemia_phenotype")
+#
+# bb_cellmeta(muench_cds) |> glimpse()
+#
+# data(muench_cds, package = "lapalombella.pu.datapkg")
+
