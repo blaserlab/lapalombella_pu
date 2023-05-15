@@ -1,11 +1,3 @@
-#################################################################################################################
-#Violin Plots
-# bb_gene_violinplot(cds_main, variable = "partition",
-#                    genes_to_plot = c("S100a8", "S100a9"),
-#                    pseudocount = 0, jitter_fill = "transparent", violin_alpha = 0.55, jitter_alpha = 0.1, include_jitter = TRUE
-# ) + theme(axis.title = element_text(size = 12)) +
-#   theme(axis.text = element_text(size = 12))
-##################################################################################################################
 #Figure 6A
 F6A1 <- bb_var_umap(
   cds_main,
@@ -70,15 +62,10 @@ aml_gexp_umap <- ggarrange(aml_plotlist[[1]],
                            legend="right")
 
 
-#ggsave("F6C2.pdf", path = T_Figs, width = 8.25, height = 4.5)
-########################################################################################################################
-#Figure 6C
-#Heatmap
+#ggsave("F6C2.pdf", path = figs_out, width = 8.25, height = 4.5)
 
-# markers <- F5_topmarkers_k10 |> filter(
-#    cell_group %in% c('6','8','1','5','3'))|>pull(gene_short_name)
-# markers <- F5_topmarkers_k10 |> filter(
-#   cell_group %in% c('6','8','1','5','3','2','4','7','9','10'))|>pull(gene_short_name)
+#Figure 6C: Heatmap
+
 markers <- F6_topmarkers_part |> pull(gene_short_name)
 
 #Expression Matrix
@@ -125,7 +112,7 @@ anno <-
     padding = 0.15
   ))
 
-#F6heatmap<-grid.grabExpr(draw(
+F6heatmap<-grid.grabExpr(draw(
 ComplexHeatmap::Heatmap(
   mat,
   col = colfun,
@@ -145,7 +132,7 @@ ComplexHeatmap::Heatmap(
     title_position = "lefttop-rot",
     title_gp = gpar(fontsize = 8.5)
   )
-)#))
+)))
 
 #stacked bar chart
 ####fraction of cells contributed to each cluster by leukemia_phenotype
@@ -188,21 +175,21 @@ hmap_bp <-
 hmap_bp
 #ggsave("hmap_bp.pdf", path = T_Figs, width = 3.56, height = 3.85)
 
-# F6hm<- plot_grid(F6heatmap,hmap_bp, ncol=1, rel_heights = c(3,0.75))
-# F6hm
+#F6hm<- plot_grid(F6heatmap,hmap_bp, ncol=1, rel_heights = c(3,0.75))
+#F6hm
 
 ########################################################################################################################
-#Figure 6D & 6E
-
-#AML leiden clusters heatmap
-aml <- blaseRtools::filter_cds(cds = cds_main,
-                               cells = bb_cellmeta(cds_main) |>
-                                 filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12')))
 #Figure 6D
-bb_var_umap(aml, "leiden_assignment2", overwrite_labels = T, group_label_size = 5)
-# ggsave("Figure6D-aml_leiden_clusters.pdf", path = T_Figs)
+# aml <- blaseRtools::filter_cds(cds = cds_main,
+#                                cells = bb_cellmeta(cds_main) |>
+#                                  filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12')))
 
+F6D <- bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
+                                    cells = bb_cellmeta(cds_main) |>
+                                      filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12'))), "leiden_assignment2", overwrite_labels = T, group_label_size = 5)
+#ggsave("Figure6D-aml_leiden_clusters.pdf", path = figs_out)
 
+#Figure 6E
 markers <- AML_topmarkers |> pull(gene_short_name)
 
 #Expression Matrix
@@ -212,13 +199,13 @@ mat <-
       aml,
       cells = bb_cellmeta(aml) |>
         filter(
-          leiden %in% c('4', '5', '8', '24', '12')
+          leiden_assignment2 %in% c('4', '5', '8', '24', '12')
         ),
       genes = bb_rowmeta(aml) |>
         filter(gene_short_name %in% markers)
     ),
     cell_group_df = bb_cellmeta(aml) |>
-      select(cell_id, leiden)
+      select(cell_id, leiden_assignment2)
   ) |>
   t() |>
   scale() |>
@@ -243,6 +230,7 @@ colfun = circlize::colorRamp2(breaks = c(min(mat),
 #   AML_topmarkers |> group_by(cell_group) |>
 #   slice_max(order_by = marker_score, n=5)|>
 #   pull(gene_short_name)
+
 highlights1 <- c("Ccl6","Mpo", "Ctsg", "Elane", "Cd34", "Birc5", "S100A8", "S100A9", "Lyz2", "Cd52", "Stmn1", "Cd34", "Mpo", "Klf4", "Il7r", "Fcnb", "Nedd4", "Cebpe", "Ms4a3", "Ets1", "Mapk13", "Ifit1", "Ifit3", "Ifi47", "Il6ra", "Irf5")
 
 highlights2 <- c("Ifi27l2a", "S100a8", "S100a9", "Wfdc17", "Trem2", "Lyz2", "Ccl6", "Fcer1g", "Ftl1", "Cd52","Lgals3", "Fn1", "Ifi213","Hbb-bt","Hbb-bs","Hba-a1","Hba-a2","Lcn2", "Hmgn2","Ngp", "Camp", "Ngp","Ltf","Lcn","Ifitm6","Wfdc21","Elane","Mpo","Top2a","Tubb5", "Tubb4b", "Birc5", "Ran", "Stmn1" ,"Cox5b","Atp5c1","Chchd2","Mdh2","Atp5j2","Mif","Npm1","Atp5g1","Uqcrb")
@@ -263,7 +251,8 @@ ComplexHeatmap::Heatmap(
   col = colfun,
   name = "Expression",
   show_row_names = F,
-  show_column_names = T, #check column clustering order for bp
+  show_column_names = T,
+  column_names_rot = 45,
   right_annotation = anno,
   #top_annotation = hmap_bp,
   #width = ncol(mat)*unit(0.1, "mm"),
