@@ -63,7 +63,7 @@ aml_gexp_umap <- ggarrange(aml_plotlist[[1]],
 
 
 #ggsave("F6C2.pdf", path = figs_out, width = 8.25, height = 4.5)
-
+#####################################################################################################################
 #Figure 6C: Heatmap
 
 markers <- F6_topmarkers_part |> pull(gene_short_name)
@@ -134,18 +134,19 @@ ComplexHeatmap::Heatmap(
   )
 )))
 
-#stacked bar chart
-####fraction of cells contributed to each cluster by leukemia_phenotype
-# cellcount<- bb_cellmeta(cds_main) |>
-#   group_by(kmeans10_cluster, leukemia_phenotype) |>
-#   summarise(n = n()) |> filter(kmeans10_cluster %in% c("5", "6", "1", "8","3")) #select clusters
-cellcount<- bb_cellmeta(cds_main) |> #all clusters
+# Stacked bar chart: heatmap cell composition
+#normalized to cell quantity contributed from each leukemia phenotype
+cellpheno_sums <- bb_cellmeta(cds_main) |>
+  count(leukemia_phenotype, name = "pheno_sum")
+
+cellcount <- bb_cellmeta(cds_main) |>
   group_by(partition, leukemia_phenotype) |>
-  summarise(n = n()) |> filter(partition %in% c(1:16))|> mutate(leukemia_phenotype = recode(leukemia_phenotype,
-                                                                                            "No leukemia" = "WT"))
-#create fraction column
-library(data.table)
-setDT(cellcount)[, frac := n / sum(n), by=partition]
+  summarise(n = n()) |> filter(partition %in% c(1:16)) |>
+  left_join(cellpheno_sums) |>
+  mutate(leukemia_phenotype = recode(leukemia_phenotype, "No leukemia" = "WT")) |>
+  mutate(total = sum(cellpheno_sums$pheno_sum)) |>
+  mutate(ratio = pheno_sum/total) |>
+  mutate(normalized_cell_frac = n/ratio/4)
 
 #factor levels
 cellcount$partition <- factor(cellcount$partition,
@@ -155,8 +156,8 @@ cellcount$leukemia_phenotype <- factor(cellcount$leukemia_phenotype,
 #plot
 hmap_bp <-
   ggplot(cellcount,
-         aes(x = partition, y = frac, fill = leukemia_phenotype)) +
-  geom_bar(stat = "identity", width = 0.9) +
+         aes(x = partition, y = normalized_cell_frac, fill = leukemia_phenotype)) +
+  geom_bar(position = "fill", stat = "identity", width = 0.9) +
   theme_minimal()+
   theme(legend.title = element_blank()) +
   theme(legend.position = "bottom")+
@@ -171,9 +172,10 @@ hmap_bp <-
   #theme(plot.margin = unit(c(1,3.31,0,0.13), "cm")) + #0.4 for select clusters
   labs(x = "Partition Clusters")+
   scale_x_discrete(expand = c(0.07,0))+ #(0.13,0) for select clusters
-  theme(legend.margin=margin(t = -0.22, unit='cm'))
+  theme(legend.margin=margin(t = -0.22, unit='cm'))+
+  theme(plot.margin = unit(c(1,0.1,1,0.25), "cm"))
 hmap_bp
-#ggsave("hmap_bp.pdf", path = T_Figs, width = 3.56, height = 3.85)
+#ggsave("hmap_bp.pdf", path = figs_out, width = 6.8, height = 2.15)
 
 #F6hm<- plot_grid(F6heatmap,hmap_bp, ncol=1, rel_heights = c(3,0.75))
 #F6hm
@@ -272,6 +274,8 @@ F6E
 
 
 #  scratch work below this ---------------------------
+#pseudotime analysis
+
 # bb_cellmeta(cds_p568) |> glimpse()
 # bb_var_umap(cds_p568, "sample")
 # bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "AML") +
