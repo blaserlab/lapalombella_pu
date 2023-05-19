@@ -1,81 +1,9 @@
-#Figure 7B
-cellcount_aml <- bb_cellmeta(blaseRtools::filter_cds(
-  cds = cds_main,
-  cells = bb_cellmeta(cds_main) |>
-    filter(leukemia_phenotype %in% c("AML"))
-)) |> #all clusters
-  group_by(leiden, leiden_assignment2) |>
-  summarise(n = n())
-cellcount_aml <- filter(cellcount_aml, n > 10)
-
-aml <-
-  blaseRtools::filter_cds(
-    cds = blaseRtools::filter_cds(
-      cds = cds_main,
-      cells = bb_cellmeta(cds_main) |>
-        filter(leukemia_phenotype %in% c("AML"))
-    ),
-    cells = bb_cellmeta(
-      blaseRtools::filter_cds(
-        cds = cds_main,
-        cells = bb_cellmeta(cds_main) |>
-          filter(leukemia_phenotype %in% c("AML"))
-      )
-    ) |>
-      filter(leiden %in% dput(as.character(
-        cellcount_aml$leiden
-      )))
-  )
-
-cellcount_ball <- bb_cellmeta(blaseRtools::filter_cds(
-  cds = cds_main,
-  cells = bb_cellmeta(cds_main) |>
-    filter(leukemia_phenotype %in% c("pre-B ALL"))
-)) |>
-  group_by(leiden, leiden_assignment2) |>
-  summarise(n = n())
-cellcount_ball <- filter(cellcount_ball, n > 10)
-allb <-
-  blaseRtools::filter_cds(
-    cds = blaseRtools::filter_cds(
-      cds = cds_main,
-      cells = bb_cellmeta(cds_main) |>
-        filter(leukemia_phenotype %in% c("pre-B ALL"))
-    ),
-    cells = bb_cellmeta(
-      blaseRtools::filter_cds(
-        cds = cds_main,
-        cells = bb_cellmeta(cds_main) |>
-          filter(leukemia_phenotype %in% c("pre-B ALL"))
-      )
-    ) |>
-      filter(leiden %in% dput(as.character(
-        cellcount_ball$leiden
-      )))
-  )
-
-a <-
-  bb_var_umap(aml, "leiden_assignment2", overwrite_labels = T) +
-  labs(title = "AML") +
-  ylim(-13.5, 11) +
-  xlim(-12, 15)
-b <-
-  bb_var_umap(allb, "leiden_assignment2", overwrite_labels = T) +
-  labs(title = "pre-B ALL") +
-  ylim(-13.5, 11) +
-  xlim(-12, 15)
-F7B <- a + b
-
-F7B
-
-bb_var_umap(cds_main, "density", facet_by = "leukemia_phenotype")
-
-
+#Figure 7
 # cell composition stacked bar chart----------------------
 pheno_sums <- bb_cellmeta(cds_main) |>
   count(leukemia_phenotype, name = "sum")
 
-bb_cellmeta(cds_main) |>
+microenv_bp<- bb_cellmeta(cds_main) |>
   count(leiden_assignment2, leukemia_phenotype) |>
   left_join(pheno_sums) |>
   mutate(total = sum(pheno_sums$sum)) |>
@@ -85,28 +13,246 @@ bb_cellmeta(cds_main) |>
   filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)) |>
   ggplot(aes(x = leiden_assignment2, y = normal, fill = leukemia_phenotype)) +
   geom_bar(position="fill", stat="identity") +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + labs(x = "ScType Assignment")
 
+# bb_cellmeta(cds_main) |>
+#   group_by(leiden_assignment2) |> summarise() |> View()
 
-bb_cellmeta(cds_main) |>
-  group_by(leiden_assignment2) |> summarise() |> View()
+microenv <- filter_cds(cds_main, cells = bb_cellmeta(cds_main) |>
+                         filter(leukemia_phenotype %in% c("AML", "pre-B ALL")) |>
+                         filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+                         filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)))
+microenv_map<- bb_var_umap(microenv, "leiden_assignment2", facet_by = "leukemia_phenotype")
 
-# figure out the gene list for this-----------------------------
+gb_plot <-
+  bb_genebubbles(
+    filter_cds(
+      cds_main,
+      cells = bb_cellmeta(cds_main) |>
+        filter(leukemia_phenotype %in% c("AML", "pre-B ALL")) |>
+        filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+        filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
+    ),
+    genes = c(
+      "Cd37",
+      "Cd79a",
+      "Cd3e",
+      "Cd4",
+      "Gzma",
+      "Icos",
+      "Izumo1r",
+      "Trbc1"
+    ),
+    #"Itgam", "Ly6g", "Gzma"),
+    cell_grouping = c("leiden_assignment2", "leukemia_phenotype"),
+    return_value = "data"
+  ) |>
+  ggplot(mapping = aes(
+    x = leiden_assignment2,
+    y = gene_short_name,
+    color = expression,
+    size = proportion
+  )) +
+  geom_point() +
+  scale_size_area() +
+  scale_color_viridis_c() +
+  facet_wrap( ~leukemia_phenotype, scales = "free_x",) +
+  theme_minimal_grid(font_size = 8) +
+  theme(
+    strip.background = ggh4x::element_part_rect(
+      side = "b",
+      colour = "black",
+      fill = "transparent"
+    )
+  ) +
+  theme(axis.text.y = element_text(face = "italic")) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  labs(x = NULL,
+       y = NULL,
+       size = "Proportion",
+       color = "Expression")
+
+aml_ballT_map <-(bb_gene_umap(filter_cds(
+  cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("AML")) |>
+    filter(str_detect(leiden_assignment2, "T")) |>
+    filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
+),
+gene_or_genes = c(
+  "Cd3e",
+  "Tigit",
+  "Pdcd1", #Pd1
+  "Havcr2" #Tim3
+  ))+labs(title = "dKO AML: T cells"))|
+(bb_gene_umap(filter_cds(
+  cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("pre-B ALL")) |>
+    filter(str_detect(leiden_assignment2, "T")) |>
+    filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
+),
+gene_or_genes = c(
+  "Cd3e",
+  "Tigit",
+  "Pdcd1", #Pd1
+  "Havcr2" #Tim3
+))+labs(title = "dKO pre-B ALL: T cells"))
+
+gb_plot2 <-
+  bb_genebubbles(
+    filter_cds(
+      cds_main,
+      cells = bb_cellmeta(cds_main) |>
+        filter(leukemia_phenotype %in% c("AML", "pre-B ALL")) |>
+        filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+        filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
+    ),
+    genes = c(
+      "Tox",
+      "Eomes",
+      "Klrg1", #Pd1
+      "Havcr2",
+      "Sell",
+      "Slamf6"), #Tim3
+    #"Itgam", "Ly6g", "Gzma"),
+    cell_grouping = c("leiden_assignment2", "leukemia_phenotype"),
+    return_value = "data"
+  ) |>
+  ggplot(mapping = aes(
+    x = leiden_assignment2,
+    y = gene_short_name,
+    color = expression,
+    size = proportion
+  )) +
+  geom_point() +
+  scale_size_area() +
+  scale_color_viridis_c() +
+  facet_wrap( ~leukemia_phenotype, scales = "free_x",) +
+  theme_minimal_grid(font_size = 8) +
+  theme(
+    strip.background = ggh4x::element_part_rect(
+      side = "b",
+      colour = "black",
+      fill = "transparent"
+    )
+  ) +
+  theme(axis.text.y = element_text(face = "italic")) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  labs(x = NULL,
+       y = NULL,
+       size = "Proportion",
+       color = "Expression")
+
+F7_1<- microenv_map/microenv_bp|gb_plot
+F7_2<-aml_ballT_map/gb_plot3
+F7_1
+F7_2
+
+#Figure 7B:
+#Figure 7B
+# cellcount_aml <- bb_cellmeta(blaseRtools::filter_cds(
+#   cds = cds_main,
+#   cells = bb_cellmeta(cds_main) |>
+#     filter(leukemia_phenotype %in% c("AML"))
+# )) |> #all clusters
+#   group_by(leiden, leiden_assignment2) |>
+#   summarise(n = n())
+# cellcount_aml <- filter(cellcount_aml, n > 10)
 #
-gb_plot <- bb_genebubbles(filter_cds(cds_main, cells = bb_cellmeta(cds_main) |>
-                                       filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
-                                       filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))),
-                          genes = c("Itgam", "Ly6g", "Cd3e", "Gzma"),
-                          cell_grouping = "leiden_assignment2",
-                          return_value = "plot")
+# aml <-
+#   blaseRtools::filter_cds(
+#     cds = blaseRtools::filter_cds(
+#       cds = cds_main,
+#       cells = bb_cellmeta(cds_main) |>
+#         filter(leukemia_phenotype %in% c("AML"))
+#     ),
+#     cells = bb_cellmeta(
+#       blaseRtools::filter_cds(
+#         cds = cds_main,
+#         cells = bb_cellmeta(cds_main) |>
+#           filter(leukemia_phenotype %in% c("AML"))
+#       )
+#     ) |>
+#       filter(leiden %in% dput(as.character(
+#         cellcount_aml$leiden
+#       )))
+#   )
+#
+# cellcount_ball <- bb_cellmeta(blaseRtools::filter_cds(
+#   cds = cds_main,
+#   cells = bb_cellmeta(cds_main) |>
+#     filter(leukemia_phenotype %in% c("pre-B ALL"))
+# )) |>
+#   group_by(leiden, leiden_assignment2) |>
+#   summarise(n = n())
+# cellcount_ball <- filter(cellcount_ball, n > 10)
+# allb <-
+#   blaseRtools::filter_cds(
+#     cds = blaseRtools::filter_cds(
+#       cds = cds_main,
+#       cells = bb_cellmeta(cds_main) |>
+#         filter(leukemia_phenotype %in% c("pre-B ALL"))
+#     ),
+#     cells = bb_cellmeta(
+#       blaseRtools::filter_cds(
+#         cds = cds_main,
+#         cells = bb_cellmeta(cds_main) |>
+#           filter(leukemia_phenotype %in% c("pre-B ALL"))
+#       )
+#     ) |>
+#       filter(leiden %in% dput(as.character(
+#         cellcount_ball$leiden
+#       )))
+#   )
+#
+# a <-
+#   bb_var_umap(aml, "leiden_assignment2", overwrite_labels = T) +
+#   labs(title = "AML") +
+#   ylim(-13.5, 11) +
+#   xlim(-12, 15)
+# b <-
+#   bb_var_umap(allb, "leiden_assignment2", overwrite_labels = T) +
+#   labs(title = "pre-B ALL") +
+#   ylim(-13.5, 11) +
+#   xlim(-12, 15)
+# F7B1 <- a + b
+#
+# F7B1
+# cellcount_aml_ball <- bb_cellmeta(blaseRtools::filter_cds(
+#   cds = cds_main,
+#   cells = bb_cellmeta(cds_main) |>
+#     filter(leukemia_phenotype %in% c("AML", "pre-B ALL"))
+# )) |> #all clusters
+#   group_by(leiden, leiden_assignment2) |>
+#   summarise(n = n())
+# cellcount_aml_ball <- filter(cellcount_aml_ball, n > 10)
+#
+# aml_allb <-
+#   blaseRtools::filter_cds(
+#     cds = blaseRtools::filter_cds(
+#       cds = cds_main,
+#       cells = bb_cellmeta(cds_main) |>
+#         filter(leukemia_phenotype %in% c("AML", "pre-B ALL"))
+#     ),
+#     cells = bb_cellmeta(
+#       blaseRtools::filter_cds(
+#         cds = cds_main,
+#         cells = bb_cellmeta(cds_main) |>
+#           filter(leukemia_phenotype %in% c("AML","pre-B ALL"))
+#       )
+#     ) |>
+#       filter(leiden %in% dput(as.character(
+#         cellcount_aml_ball$leiden
+#       )))
+#   )
+#
+# F7B1 <- bb_var_umap(aml_allb, "leiden_assignment2", overwrite_labels = T) +
+#   labs(title = "AML and pre-B ALL")
+# F7B1
 
-
-  # theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  # labs(x = "SC-Type Assignment")
-
-
-
-#ggsave("F7B.pdf", path = figs_out)
+# F7B2 <- bb_var_umap(aml_allb,"density", facet_by = "leukemia_phenotype")
+# F7B2
 
 ####Pu 7C-7F:
 #
