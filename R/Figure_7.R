@@ -3,7 +3,7 @@
 pheno_sums <- bb_cellmeta(cds_main) |>
   count(leukemia_phenotype, name = "sum")
 
-microenv_bp<- bb_cellmeta(cds_main) |>
+F7_microenv_bp<- bb_cellmeta(cds_main) |>
   count(leiden_assignment2, leukemia_phenotype) |>
   left_join(pheno_sums) |>
   mutate(total = sum(pheno_sums$sum)) |>
@@ -13,7 +13,8 @@ microenv_bp<- bb_cellmeta(cds_main) |>
   filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)) |>
   ggplot(aes(x = leiden_assignment2, y = normal, fill = leukemia_phenotype)) +
   geom_bar(position="fill", stat="identity") +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1)) + labs(x = "ScType Assignment")
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  labs(x = "ScType Assignment")
 
 microenv_populations <- bb_cellmeta(cds_main) |>
   group_by(leiden_assignment2) |>
@@ -22,17 +23,18 @@ microenv_populations <- bb_cellmeta(cds_main) |>
   filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)) |>
   pull(leiden_assignment2)
 
-microenv_map <- bb_var_umap(
+cds_main$leukemia_phenotype <- factor(cds_main$leukemia_phenotype,
+                                  levels = c("No leukemia","AML","pre-B ALL"))
+F7_microenv_map <- bb_var_umap(
   filter_cds(
     cds_main,
     cells = bb_cellmeta(cds_main) |>
-      filter(leukemia_phenotype %in% c("AML", "pre-B ALL"))
+      filter(leukemia_phenotype %in% c("No leukemia", "AML", "pre-B ALL"))
   ),
-  var = "leiden_assignment2",
+  var = "leiden_assignment2", cell_size = 0.1,
   value_to_highlight = microenv_populations,
   facet_by = "leukemia_phenotype"
-)
-
+) #+theme(legend.text = element_text(size = 8))
 
 gb_plot <-
   bb_genebubbles(
@@ -81,7 +83,59 @@ gb_plot <-
        y = NULL,
        size = "Proportion",
        color = "Expression")
+gb_plot
 
+gb_plot2 <-
+  bb_genebubbles(
+    filter_cds(
+      cds_main,
+      cells = bb_cellmeta(cds_main) |>
+        filter(leukemia_phenotype %in% c("AML", "pre-B ALL", "No leukemia")) |>
+        filter(str_detect(leiden_assignment2, "T")) |>
+        # filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+        filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
+    ),
+    genes = c(
+      "Tox",
+      "Eomes",
+      "Havcr2",
+      "Pdcd1",
+      "Cd3e",
+      "Tigit",
+      "Sell",
+      "Slamf6"),
+    cell_grouping = c("leiden_assignment2", "leukemia_phenotype"),
+    return_value = "data"
+  ) |>
+  mutate(across(leukemia_phenotype, factor, levels=c("No leukemia","AML","pre-B ALL")))|>
+  ggplot(mapping = aes(
+    x = leiden_assignment2,
+    y = gene_short_name,
+    color = expression,
+    size = proportion
+  )) +
+  geom_point() +
+  scale_size_area() +
+  scale_color_viridis_c() +
+  facet_wrap( ~leukemia_phenotype, scales = "free_x",) +
+  theme_minimal_grid(font_size = 8) +
+  theme(
+    strip.background = ggh4x::element_part_rect(
+      side = "b",
+      colour = "black",
+      fill = "transparent"
+    )
+  ) +
+  theme(axis.text.y = element_text(face = "italic")) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  labs(x = NULL,
+       y = NULL,
+       size = "Proportion",
+       color = "Expression")
+
+gb_plot2
+
+#Figure 7 scratch:
 # aml_T_map <- bb_gene_umap(
 #   filter_cds(
 #     cds_main,
@@ -116,62 +170,6 @@ gb_plot <-
 #
 # aml_ballT_map <- aml_T_map | ball_T_map
 # aml_ballT_map
-
-gb_plot2 <-
-  bb_genebubbles(
-    filter_cds(
-      cds_main,
-      cells = bb_cellmeta(cds_main) |>
-        filter(leukemia_phenotype %in% c("AML", "pre-B ALL", "No leukemia")) |>
-        filter(str_detect(leiden_assignment2, "T")) |>
-        # filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
-        filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
-    ),
-    genes = c(
-      "Tox",
-      "Eomes",
-      "Havcr2",
-      "Pdcd1",
-      "Cd3e",
-      "Tigit",
-      "Sell",
-      "Slamf6"),
-    cell_grouping = c("leiden_assignment2", "leukemia_phenotype"),
-    return_value = "data"
-  ) |>
-  ggplot(mapping = aes(
-    x = leiden_assignment2,
-    y = gene_short_name,
-    color = expression,
-    size = proportion
-  )) +
-  geom_point() +
-  scale_size_area() +
-  scale_color_viridis_c() +
-  facet_wrap( ~leukemia_phenotype, scales = "free_x",) +
-  theme_minimal_grid(font_size = 8) +
-  theme(
-    strip.background = ggh4x::element_part_rect(
-      side = "b",
-      colour = "black",
-      fill = "transparent"
-    )
-  ) +
-  theme(axis.text.y = element_text(face = "italic")) +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-  labs(x = NULL,
-       y = NULL,
-       size = "Proportion",
-       color = "Expression")
-
-gb_plot2
-
-F7_1<- microenv_map/microenv_bp|gb_plot
-F7_2<-aml_ballT_map/gb_plot3
-F7_1
-F7_2
-
-#Figure 7B:
 #Figure 7B
 # cellcount_aml <- bb_cellmeta(blaseRtools::filter_cds(
 #   cds = cds_main,
