@@ -23,4 +23,4 @@ suppressPackageStartupMessages(library("patchwork"))
 # run this to update the data package
 blaseRtemplates::project_data("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/datapkg")
 
-
+todor::todor(c("TODO", "NOTE"))
