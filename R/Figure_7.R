@@ -15,14 +15,24 @@ microenv_bp<- bb_cellmeta(cds_main) |>
   geom_bar(position="fill", stat="identity") +
   theme(axis.text.x = element_text(angle = 30, hjust = 1)) + labs(x = "ScType Assignment")
 
-# bb_cellmeta(cds_main) |>
-#   group_by(leiden_assignment2) |> summarise() |> View()
+microenv_populations <- bb_cellmeta(cds_main) |>
+  group_by(leiden_assignment2) |>
+  summarise() |>
+  filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+  filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)) |>
+  pull(leiden_assignment2)
 
-microenv <- filter_cds(cds_main, cells = bb_cellmeta(cds_main) |>
-                         filter(leukemia_phenotype %in% c("AML", "pre-B ALL")) |>
-                         filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
-                         filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)))
-microenv_map<- bb_var_umap(microenv, "leiden_assignment2", facet_by = "leukemia_phenotype")
+microenv_map <- bb_var_umap(
+  filter_cds(
+    cds_main,
+    cells = bb_cellmeta(cds_main) |>
+      filter(leukemia_phenotype %in% c("AML", "pre-B ALL"))
+  ),
+  var = "leiden_assignment2",
+  value_to_highlight = microenv_populations,
+  facet_by = "leukemia_phenotype"
+)
+
 
 gb_plot <-
   bb_genebubbles(
@@ -72,50 +82,60 @@ gb_plot <-
        size = "Proportion",
        color = "Expression")
 
-aml_ballT_map <-(bb_gene_umap(filter_cds(
-  cds_main,
-  cells = bb_cellmeta(cds_main) |>
-    filter(leukemia_phenotype %in% c("AML")) |>
-    filter(str_detect(leiden_assignment2, "T")) |>
-    filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
-),
-gene_or_genes = c(
-  "Cd3e",
-  "Tigit",
-  "Pdcd1", #Pd1
-  "Havcr2" #Tim3
-  ))+labs(title = "dKO AML: T cells"))|
-(bb_gene_umap(filter_cds(
-  cds_main,
-  cells = bb_cellmeta(cds_main) |>
-    filter(leukemia_phenotype %in% c("pre-B ALL")) |>
-    filter(str_detect(leiden_assignment2, "T")) |>
-    filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
-),
-gene_or_genes = c(
-  "Cd3e",
-  "Tigit",
-  "Pdcd1", #Pd1
-  "Havcr2" #Tim3
-))+labs(title = "dKO pre-B ALL: T cells"))
+# aml_T_map <- bb_gene_umap(
+#   filter_cds(
+#     cds_main,
+#     cells = bb_cellmeta(cds_main) |>
+#       filter(leukemia_phenotype %in% c("AML")) |>
+#       filter(str_detect(leiden_assignment2, "T")) |>
+#       filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
+#   ),
+#   gene_or_genes = c("Cd3e",
+#                     "Tigit",
+#                     "Pdcd1", #Pd1
+#                     "Havcr2" #Tim3)
+#                     )) +
+#     labs(title = "dKO AML: T cells") +
+#     panel_border()
+#
+# ball_T_map <- bb_gene_umap(
+#       filter_cds(
+#         cds_main,
+#         cells = bb_cellmeta(cds_main) |>
+#           filter(leukemia_phenotype %in% c("pre-B ALL")) |>
+#           filter(str_detect(leiden_assignment2, "T")) |>
+#           filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
+#       ),
+#       gene_or_genes = c("Cd3e",
+#                         "Tigit",
+#                         "Pdcd1", #Pd1
+#                         "Havcr2" #Tim3)
+#       )) +
+#         labs(title = "dKO pre-B ALL: T cells")+
+#        panel_border()
+#
+# aml_ballT_map <- aml_T_map | ball_T_map
+# aml_ballT_map
 
 gb_plot2 <-
   bb_genebubbles(
     filter_cds(
       cds_main,
       cells = bb_cellmeta(cds_main) |>
-        filter(leukemia_phenotype %in% c("AML", "pre-B ALL")) |>
-        filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+        filter(leukemia_phenotype %in% c("AML", "pre-B ALL", "No leukemia")) |>
+        filter(str_detect(leiden_assignment2, "T")) |>
+        # filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
         filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
     ),
     genes = c(
       "Tox",
       "Eomes",
-      "Klrg1", #Pd1
       "Havcr2",
+      "Pdcd1",
+      "Cd3e",
+      "Tigit",
       "Sell",
-      "Slamf6"), #Tim3
-    #"Itgam", "Ly6g", "Gzma"),
+      "Slamf6"),
     cell_grouping = c("leiden_assignment2", "leukemia_phenotype"),
     return_value = "data"
   ) |>
@@ -143,6 +163,8 @@ gb_plot2 <-
        y = NULL,
        size = "Proportion",
        color = "Expression")
+
+gb_plot2
 
 F7_1<- microenv_map/microenv_bp|gb_plot
 F7_2<-aml_ballT_map/gb_plot3

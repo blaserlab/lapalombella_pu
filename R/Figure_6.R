@@ -275,17 +275,26 @@ F6E
 
 #  scratch work below this ---------------------------
 #pseudotime analysis
+# TODO Make gene bubbles and umap for partitons in cds_p568.
 
-# bb_cellmeta(cds_p568) |> glimpse()
-# bb_var_umap(cds_p568, "sample")
-# bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "AML") +
-#   bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "PreB ALL") +
-#   bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "No leukemia")
-#
-# bb_var_umap(cds_p568, "density", facet_by = "leukemia_phenotype")
-# bb_var_umap(cds_p568, "leiden_assignment2", facet_by = "leukemia_phenotype")
-#
-# bb_cellmeta(muench_cds) |> glimpse()
-#
-# data(muench_cds, package = "lapalombella.pu.datapkg")
+bb_cellmeta(cds_p568) |> glimpse()
+bb_var_umap(cds_p568, "leukemia_phenotype", facet_by = "value")
+bb_var_umap(cds_p568, "leiden")
+bb_var_umap(cds_p568, "partition")
+cds_p568_tm |> filter(cell_group == "partition 2") |> View()
+
+
+
+
+plot_cells(cds_p568, color_cells_by = "pseudotime")
+bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "AML") +
+  bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "PreB ALL") +
+  bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "No leukemia")
+
+bb_var_umap(cds_p568, "density", facet_by = "leukemia_phenotype")
+bb_var_umap(cds_p568, "leiden_assignment2", facet_by = "leukemia_phenotype")
+
+bb_cellmeta(muench_cds) |> glimpse()
+
+data(muench_cds, package = "lapalombella.pu.datapkg")
 
