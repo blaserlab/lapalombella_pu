@@ -287,7 +287,7 @@ R_version	name	version	date_time	hash	binary_location	status
 4.3.0	densityClust	0.3.2	2023-05-03T02:50:44Z	98763f81c309df633cd3938792e70e8a	/workspace/rst/cache_R_4_3/library/densityClust/0.3.2/98763f81c309df633cd3938792e70e8a/densityClust	available
 4.3.0	densvis	1.10.0	2023-05-02T21:44:42Z	f05b920616b49a5c1c525ff31419fafe	/workspace/rst/cache_R_4_3/library/densvis/1.10.0/f05b920616b49a5c1c525ff31419fafe/densvis	available
 4.3.0	desc	1.4.2	2023-05-02T21:13:46Z	824a10c805eed71b52468371e3fa8776	/workspace/rst/cache_R_4_3/library/desc/1.4.2/824a10c805eed71b52468371e3fa8776/desc	available
-4.3.0	devtools	2.4.5	2023-05-02T21:13:46Z	271ebe2746358297eb143ded617841b4	/workspace/rst/cache_R_4_3/library/devtools/2.4.5/271ebe2746358297eb143ded617841b4/devtools	active
+4.3.0	devtools	2.4.5	2023-05-02T21:13:46Z	271ebe2746358297eb143ded617841b4	/workspace/rst/cache_R_4_3/library/devtools/2.4.5/271ebe2746358297eb143ded617841b4/devtools	available
 4.3.0	diagram	1.6.5	2023-05-03T02:50:44Z	5ebde5fcbb88940bc27a3c55422edfcf	/workspace/rst/cache_R_4_3/library/diagram/1.6.5/5ebde5fcbb88940bc27a3c55422edfcf/diagram	available
 4.3.0	dials	1.2.0	2023-05-03T02:50:44Z	dc5e5cb748b85db35d85693344c8e3c8	/workspace/rst/cache_R_4_3/library/dials/1.2.0/dc5e5cb748b85db35d85693344c8e3c8/dials	available
 4.3.0	dichromat	2.0.0.1	2023-05-03T02:50:44Z	cd9a5f2c5d5b14fa708c51c81a88511a	/workspace/rst/cache_R_4_3/library/dichromat/2.0-0.1/cd9a5f2c5d5b14fa708c51c81a88511a/dichromat	available
