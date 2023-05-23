@@ -120,6 +120,65 @@ colData(cds_main)$leiden_assignment2 <-
          "43" = "Pro-B cells"#4.7
   )
 
+mat2 <-
+  bb_aggregate(
+    obj = filter_cds(
+      cds_main,
+      cells = bb_cellmeta(cds_p568) |>
+        filter(
+          leiden %in% c(1:13)
+          #leukemia_phenotype %in% c("AML", "pre-B ALL", "T ALL", "No leukemia")
+        ),
+      genes = bb_rowmeta(cds_p568) #|>
+      #   filter(gene_short_name %in% markers)
+    ),
+    cell_group_df = bb_cellmeta(cds_p568) |>
+      select(cell_id, leiden)#barcode)
+  ) |>
+  t() |>
+  scale() |>
+  t()
+
+rownames(mat2) <-
+  tibble(feature_id = rownames(mat2)) |>
+  left_join(bb_rowmeta(cds_p568) |>
+              select(feature_id, gene_short_name)) |> pull(gene_short_name)
+
+# assign cell types
+es.max_p568 = sctype_score(scRNAseqData = mat2, scaled = TRUE, gs = gs_list$gs_positive, gs2 = gs_list$gs_negative)
+rownames(es.max_p568)
+
+es.max3 <- as.data.frame(es.max_p568)
+es.max3$Largest_Column <-colnames(es.max3)[apply(es.max3,1,which.max)]
+
+harmony_colfun <- circlize::colorRamp2(breaks = c(0, 1), colors = c("grey80", "red"))
+heatmap_3_colors <-
+  c("#313695", "white", "#A50026")
+
+colfun = circlize::colorRamp2(breaks = c(min(es.max_p568),
+                                         0,
+                                         max(es.max_p568)),
+                              colors = heatmap_3_colors)
+
+p568_leiden_ScType_hm<- ComplexHeatmap::Heatmap(es.max_p568,
+                                           col = colfun)
+
+colData(cds_p568)$leiden_assignment <-
+  recode(colData(cds_p568)$leiden,
+         "1" = "Neutrophils_1",
+         "2" = "ISG expressing immune cells",
+         "3" = "Non-classical monocytes",
+         "4" = "Naive CD8+ T cells",
+         "5" = "Neutrophils_2",
+         "6" = "Macrophages",
+         "7" = "Intermediate monocytes",
+         "8" = "CD8+ NKT-like cells",
+         "9" = "Platelets",
+         "10" = "Neutrophils_3",
+         "11" = "Neutrophils_4",
+         "12" = "Naive B cells",
+         "13" = "Pro-B cells")
+
 #scratch work
 #Pu's requested gene expression
 # unique(colData(cds_main)$leukemia_phenotype)

@@ -279,12 +279,10 @@ F6E
 
 bb_cellmeta(cds_p568) |> glimpse()
 bb_var_umap(cds_p568, "leukemia_phenotype", facet_by = "value")
-bb_var_umap(cds_p568, "leiden")
+bb_var_umap(cds_p568, "leiden", overwrite_labels = T)
+bb_var_umap(cds_p568, "louvain", overwrite_labels = T)
 bb_var_umap(cds_p568, "partition")
 cds_p568_tm |> filter(cell_group == "partition 2") |> View()
-
-
-
 
 plot_cells(cds_p568, color_cells_by = "pseudotime")
 bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "AML") +
@@ -292,9 +290,69 @@ bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "AML") +
   bb_var_umap(cds_p568, "leukemia_phenotype", value_to_highlight = "No leukemia")
 
 bb_var_umap(cds_p568, "density", facet_by = "leukemia_phenotype")
-bb_var_umap(cds_p568, "leiden_assignment2", facet_by = "leukemia_phenotype")
+bb_var_umap(cds_p568, "leiden_assignment", facet_by = "leukemia_phenotype")
 
 bb_cellmeta(muench_cds) |> glimpse()
 
 data(muench_cds, package = "lapalombella.pu.datapkg")
 
+#Ethan scratch
+colData(cds_p568)$leiden_assignment <-
+  recode(colData(cds_p568)$leiden,
+         "1" = "Neutrophils_1",
+         "2" = "ISG expressing immune cells",
+         "3" = "Non-classical monocytes",
+         "4" = "Naive CD8+ T cells",
+         "5" = "Neutrophils_2",
+         "6" = "Macrophages",
+         "7" = "Intermediate monocytes",
+         "8" = "CD8+ NKT-like cells",
+         "9" = "Platelets",
+         "10" = "Neutrophils_3",
+         "11" = "Neutrophils_4",
+         "12" = "Naive B cells",
+         "13" = "Pro-B cells")
+
+bb_var_umap(cds_p568, "leiden", overwrite_labels = T)
+bb_var_umap(cds_p568, "leiden_assignment", overwrite_labels = T, facet_by = "leukemia_phenotype")
+
+bb_genebubbles(cds_p568, genes = c(
+    "Cd19",
+    "Cd79a",
+    "Cd9",
+    "Cd3e",
+    "Cd4",
+    "Cd8a",
+    "Cd11b",
+    "Ly6g",
+    "Cd14",
+    "Itgam"
+  ),
+  #"Itgam", "Ly6g", "Gzma"),
+  cell_grouping = c("leiden_assignment", "leukemia_phenotype"),
+  return_value = "data"
+) |>
+  ggplot(mapping = aes(
+    x = leiden_assignment,
+    y = gene_short_name,
+    color = expression,
+    size = proportion
+  )) +
+  geom_point() +
+  scale_size_area() +
+  scale_color_viridis_c() +
+  facet_wrap( ~leukemia_phenotype, scales = "free_x",) +
+  theme_minimal_grid(font_size = 6) +
+  theme(
+    strip.background = ggh4x::element_part_rect(
+      side = "b",
+      colour = "black",
+      fill = "transparent"
+    )
+  ) +
+  theme(axis.text.y = element_text(face = "italic")) +
+  theme(axis.text.x = element_text(angle = 40, hjust = 1)) +
+  labs(x = NULL,
+       y = NULL,
+       size = "Proportion",
+       color = "Expression")
