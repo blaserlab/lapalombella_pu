@@ -356,3 +356,60 @@ bb_genebubbles(cds_p568, genes = c(
        y = NULL,
        size = "Proportion",
        color = "Expression")
+
+
+# pseudotime --------------------------------
+bb_cellmeta(cds_p568) |> glimpse()
+bb_var_umap(
+  cds_p568,
+  "pseudotime_louvain_18",
+  show_trajectory_graph = TRUE,
+  label_root_node = TRUE
+)
+
+bb_var_umap(
+  filter_cds(cds_p568, cells = bb_cellmeta(cds_p568) |> filter(partition == "2")),
+  "pseudotime_louvain_18",
+  show_trajectory_graph = TRUE,
+  label_root_node = TRUE
+)
+
+bb_var_umap(
+  cds_p568,
+  "pseudotime_louvain_9",
+  show_trajectory_graph = TRUE,
+  label_root_node = TRUE
+)
+
+bb_var_umap(
+  filter_cds(cds_p568, cells = bb_cellmeta(cds_p568) |> filter(partition == "3")),
+  "pseudotime_louvain_9",
+  show_trajectory_graph = TRUE,
+  label_root_node = TRUE
+)
+
+bb_var_umap(
+  cds_p568,
+  var = "leiden",
+  pseudotime_dim = "pseudotime_louvain_9",
+  show_trajectory_graph = TRUE,
+  label_root_node = TRUE
+)
+
+bb_var_umap(cds_main, "leukemia_phenotype")
+bb_var_umap(cds_main, "tissue")
+bb_var_umap(cds_main, "primary_or_engraftment")
+cds_main_aligned <- bb_align(cds_main, align_by = "primary_or_engraftment", n_cores = 30)
+bb_var_umap(cds_main_aligned, "leukemia_phenotype", facet_by = "value")
+bb_var_umap(cds_main_aligned, "louvain", value_to_highlight = "9")
+bb_var_umap(cds_main_aligned, "louvain", value_to_highlight = "18")
+bb_var_umap(cds_main_aligned, "leiden_assignment2", overwrite_labels = TRUE)
+
+cds_main_aligned <- left_join(bb_cellmeta(cds_main_aligned) |> select(cell_id),
+          bb_cellmeta(cds_p568) |> select(cell_id, louvain) |> filter(louvain == "9")) |>
+  mutate(is_louvain_9 = ifelse(is.na(louvain), FALSE, TRUE)) |>
+  select(cell_id, is_louvain_9) |>
+  bb_tbl_to_coldata(cds_main_aligned, min_tbl = _)
+
+bb_var_umap(cds_main_aligned, "is_louvain_9", value_to_highlight = TRUE)
+

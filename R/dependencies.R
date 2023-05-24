@@ -1,3 +1,4 @@
+# blaseRtemplates::install_one_package("blaseRtools", "link")
 # load core packages for the analysis ------------------------------------
 suppressPackageStartupMessages(library("blaseRtools"))
 suppressPackageStartupMessages(library("blaseRtemplates"))
