@@ -33,7 +33,7 @@ F7_microenv_map <- bb_var_umap(
   ),
   var = "leiden_assignment2", cell_size = 0.1,
   #value_to_highlight = microenv_populations,
-  facet_by = "leiden", overwrite_labels = F
+  facet_by = "leukemia_phenotype", overwrite_labels = T
 ) #+theme(legend.text = element_text(size = 8))
 
 marrow_gb_plot <-
@@ -135,6 +135,9 @@ gb_plot2 <-
        color = "Expression")
 
 gb_plot2
+
+#Supp Fig 9A
+leiden_clust <- bb_var_umap(cds_main, var = "leiden", overwrite_labels = T)
 
 #Figure 7 scratch:
 # aml_T_map <- bb_gene_umap(

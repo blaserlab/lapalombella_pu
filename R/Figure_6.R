@@ -2,19 +2,26 @@
 F6A1 <- bb_var_umap(
   cds_main,
   var = "partition",
-  overwrite_labels = T
-) + facet_grid(col = vars(geno_pheno)) + labs(x = "UMAP 1", y = "UMAP 2") +
-  theme_minimal() + theme(panel.grid.major = element_blank(),
-                          panel.grid.minor = element_blank()) +
-  theme(panel.background = element_rect(color = "black")) + theme(legend.position = "none")
-F6A1
+  overwrite_labels = T) + theme(plot.margin = unit(c(0, 0, -1, 0), "cm"))
+#   facet_grid(col = vars(geno_pheno)) + labs(x = "UMAP 1", y = "UMAP 2") +
+#   theme_minimal() + theme(panel.grid.major = element_blank(),
+#                           panel.grid.minor = element_blank(),
+#                           panel.background = element_rect(color = "black"),
+#                           legend.position = "none")
 F6A2<-bb_var_umap(
   cds_main,
   var = "density",
-  facet_by = "geno_pheno"
-) + facet_grid(col = vars(geno_pheno)) + labs(x = "UMAP 1", y = "UMAP 2")+ theme_minimal() + theme(panel.grid.major = element_blank(),
-                                                                                                   panel.grid.minor = element_blank()) +theme(panel.background = element_rect(color = "black"))
-F6A2
+  facet_by = "geno_pheno") +
+  facet_grid(col = vars(geno_pheno)) +
+  labs(x = "UMAP 1", y = "UMAP 2")+
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(color = "black"))
+
+F6A1a<-F6A1 + plot_spacer()+ plot_layout(widths = c(2.5, 1))
+F6A<-F6A1a/plot_spacer()/F6A2 + plot_layout(heights = c(2.25,-0.2, 1))
+F6A
 #####################################################################################################################
 #Figure 6B
 aml_plotlist <- map(.x = c("Cd34","Mpo", "Kit", "Elane", "Calr","Ctsg"),
@@ -65,6 +72,14 @@ aml_gexp_umap <- ggarrange(aml_plotlist[[1]],
 #ggsave("F6C2.pdf", path = figs_out, width = 8.25, height = 4.5)
 #####################################################################################################################
 #Figure 6C: Heatmap
+# F6_topmarkers_part <-
+#   monocle3::top_markers(
+#     cds_main,
+#     group_cells_by = "partition",
+#     genes_to_test_per_group = 20,
+#     cores = 12
+#   )
+#F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_topmarkers_part.csv")
 
 markers <- F6_topmarkers_part |> pull(gene_short_name)
 
@@ -140,7 +155,7 @@ cellpheno_sums <- bb_cellmeta(cds_main) |>
   count(leukemia_phenotype, name = "pheno_sum")
 
 cellcount <- bb_cellmeta(cds_main) |>
-  group_by(partition, leukemia_phenotype) |>
+  group_by(partition, leukemia_phenotype, leiden_assignment2) |>
   summarise(n = n()) |> filter(partition %in% c(1:16)) |>
   left_join(cellpheno_sums) |>
   mutate(leukemia_phenotype = recode(leukemia_phenotype, "No leukemia" = "WT")) |>
@@ -148,9 +163,12 @@ cellcount <- bb_cellmeta(cds_main) |>
   mutate(ratio = pheno_sum/total) |>
   mutate(normalized_cell_frac = n/ratio/4)
 
+#write.csv(cellcount, file = "~/network/T/Labs/EHL/Rosa/Ethan/10x/Tet2_P53/cellcount.csv")
+
 #factor levels
 cellcount$partition <- factor(cellcount$partition,
                                      levels = c("12","2","4","15","6","3","9","14", "11","1","16","10","5","8","13","7")) #for all
+
 cellcount$leukemia_phenotype <- factor(cellcount$leukemia_phenotype,
                                        levels = c("AML", "pre-B ALL","T ALL", "WT"))
 #plot
@@ -233,7 +251,7 @@ colfun = circlize::colorRamp2(breaks = c(min(mat),
 #   slice_max(order_by = marker_score, n=5)|>
 #   pull(gene_short_name)
 
-highlights1 <- c("Ccl6","Mpo", "Ctsg", "Elane", "Cd34", "Birc5", "S100A8", "S100A9", "Lyz2", "Cd52", "Stmn1", "Cd34", "Mpo", "Klf4", "Il7r", "Fcnb", "Nedd4", "Cebpe", "Ms4a3", "Ets1", "Mapk13", "Ifit1", "Ifit3", "Ifi47", "Il6ra", "Irf5")
+highlights1 <- c("Ifitm3", "Ccl6","Mpo", "Ctsg", "Elane", "Cd34", "Birc5", "S100A8", "S100A9", "Lyz2", "Cd52", "Stmn1", "Cd34", "Mpo", "Klf4", "Il7r", "Fcnb", "Nedd4", "Cebpe", "Ms4a3", "Ets1", "Mapk13", "Ifit1", "Ifit3", "Ifi47", "Il6ra", "Irf5")
 
 highlights2 <- c("Ifi27l2a", "S100a8", "S100a9", "Wfdc17", "Trem2", "Lyz2", "Ccl6", "Fcer1g", "Ftl1", "Cd52","Lgals3", "Fn1", "Ifi213","Hbb-bt","Hbb-bs","Hba-a1","Hba-a2","Lcn2", "Hmgn2","Ngp", "Camp", "Ngp","Ltf","Lcn","Ifitm6","Wfdc21","Elane","Mpo","Top2a","Tubb5", "Tubb4b", "Birc5", "Ran", "Stmn1" ,"Cox5b","Atp5c1","Chchd2","Mdh2","Atp5j2","Mif","Npm1","Atp5g1","Uqcrb")
 heatmap_highlights2 <- unique(c(highlights1, highlights2))
@@ -242,8 +260,8 @@ anno <-
   ComplexHeatmap::rowAnnotation(link =  anno_mark(
     at = which(rownames(mat) %in% heatmap_highlights2),
     labels = rownames(mat)[rownames(mat) %in% heatmap_highlights2],
-    labels_gp = gpar(fontsize = 4),
-    padding = 0.15
+    labels_gp = gpar(fontsize = 6),
+    padding = 0.35
   ))
 
 #Figure 6E
@@ -257,7 +275,7 @@ ComplexHeatmap::Heatmap(
   column_names_rot = 45,
   right_annotation = anno,
   #top_annotation = hmap_bp,
-  #width = ncol(mat)*unit(0.1, "mm"),
+  width = ncol(mat)*unit(15, "mm"),
   height = nrow(mat)*unit(1.25, "mm"),
   row_dend_width = unit(6, "mm"),
   column_dend_height = unit(3, "mm"),
@@ -274,6 +292,65 @@ F6E
 
 
 #  scratch work below this ---------------------------
+a<-bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
+                                    cells = bb_cellmeta(cds_main) |>
+                                      filter(partition %in% c('5','8','9','11','12'))), "leiden_assignment2", overwrite_labels = F, group_label_size = 5)
+b<-bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
+                                    cells = bb_cellmeta(cds_main) |>
+                                      filter(partition %in% c('5','8','9','11','12'))), "partition", overwrite_labels = T, group_label_size = 5)
+# cellcount$partition <- factor(cellcount$partition,
+#                               levels = c("5","8","9","11","12"))
+cellcount2 <- cellcount|> filter(partition %in% c("5","8","9","11","12"))
+hmap_bp2 <-
+  ggplot(cellcount2,
+         aes(x = partition, y = normalized_cell_frac, fill = leukemia_phenotype)) +
+  geom_bar(position = "fill", stat = "identity", width = 0.9) +
+  theme_minimal()+
+  theme(legend.title = element_blank()) +
+  theme(legend.position = "bottom")+
+  theme(legend.key.size = unit(0.5, "cm"))+
+  theme(legend.justification = "top")+
+  theme(axis.title.y = element_blank()) +
+  theme(axis.text.y = element_text(size = 5)) +
+  theme(axis.text.x = element_text(size = 10)) +
+  theme(axis.title.x = element_text(size = 9))+
+  coord_fixed(ratio = 1.5)+ #0.45 #1.2
+  theme(plot.margin = unit(c(-0.1,3.23,0,.23), "cm")) + #0.4 for select clusters
+  #theme(plot.margin = unit(c(1,3.31,0,0.13), "cm")) + #0.4 for select clusters
+  labs(x = "Partition Clusters")+
+  scale_x_discrete(expand = c(0.07,0))+ #(0.13,0) for select clusters
+  theme(legend.margin=margin(t = -0.22, unit='cm'))+
+  theme(plot.margin = unit(c(1,0.1,1,0.25), "cm"))
+hmap_bp2
+
+a|(b/hmap_bp2)
+
+F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_topmarkers_part.csv")
+some_tm_part <-
+  monocle3::top_markers(
+    blaseRtools::filter_cds(cds = cds_main,
+                            cells = bb_cellmeta(cds_main) |>
+                              filter(partition %in% c('5','8','9','11','12'))),
+    group_cells_by = "partition",
+    genes_to_test_per_group = 10,
+    cores = 12
+  )
+
+library(kableExtra)
+library(webshot)
+pu_clusts <-
+  some_tm_part |> group_by(cell_group) |>
+  slice_max(order_by = marker_score, n=5)|> kable()|>kable_styling()
+  # pull(gene_short_name)
+pu_clusts
+# save_kable(pu_clusts, file = "pu_clusts.html")
+# webshot::install_phantomjs()
+# webshot("pu_clusts.html", "pu_clusts.pdf")
+
+c<-bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
+                                       cells = bb_cellmeta(cds_main) |>
+                                         filter(partition %in% c('5','8','9','11','12'))), "leiden_assignment2", overwrite_labels = F, group_label_size = 5)+facet_wrap(~geno_pheno)
+
 #pseudotime analysis
 # TODO Make gene bubbles and umap for partitons in cds_p568.
 
@@ -413,3 +490,91 @@ cds_main_aligned <- left_join(bb_cellmeta(cds_main_aligned) |> select(cell_id),
 
 bb_var_umap(cds_main_aligned, "is_louvain_9", value_to_highlight = TRUE)
 
+#Alt Figure 6A
+F6A1 <- bb_var_umap(filter_cds(
+  cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(geno_pheno %in% "dKO: AML")),
+  var = "partition",
+  overwrite_labels = T) +
+  theme_minimal() +
+  labs(title = "dKO: AML") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_rect(color = "black"),
+        legend.position = "none",
+        axis.title = element_blank())+
+  coord_cartesian(xlim=c(-12.5, 13), ylim=c(-12.75, 12))
+F6A1
+F6A2 <- bb_var_umap(
+  filter_cds(
+    cds_main,
+    cells = bb_cellmeta(cds_main) |>
+      filter(geno_pheno %in% "dKO: pre-B ALL")
+  ),
+  var = "partition",
+  overwrite_labels = T
+) +
+  theme_minimal() +
+  labs(title = "dKO: pre-B ALL") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_rect(color = "black"),
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text.y = element_blank())+
+  coord_cartesian(xlim=c(-12.5, 13), ylim=c(-12.75, 12))
+F6A2
+F6A3 <- bb_var_umap(filter_cds(
+  cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(geno_pheno %in% "P53 KO: T ALL")),
+  var = "partition",
+  overwrite_labels = T) +
+  theme_minimal() +
+  labs(title = "P53 KO: T ALL") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_rect(color = "black"),
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text.y = element_blank())+
+  coord_cartesian(xlim=c(-12.5, 13), ylim=c(-12.75, 12))
+F6A3
+F6A4 <- bb_var_umap(
+  filter_cds(
+    cds_main,
+    cells = bb_cellmeta(cds_main) |>
+      filter(geno_pheno %in% "Wildtype")
+  ),
+  var = "partition",
+  overwrite_labels = T
+) +
+  theme_minimal() +
+  labs(title = "Wildtype") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_rect(color = "black"),
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text.y = element_blank())+
+  coord_cartesian(xlim=c(-12.5, 13), ylim=c(-12.75, 12))
+F6A4
+
+F6A <-
+  as_ggplot(grid.arrange(
+    patchworkGrob(F6A1|F6A2|F6A3|F6A4),
+    left = textGrob(F6A1$labels$y, rot=90, vjust = 1.5, hjust=0.35),
+    bottom = textGrob(F6A1$labels$x, hjust = 0.3, vjust = -0.5))
+  )
+F6A
+#ggsave("F6A.pdf", width = 10.85, height = 3.31, path = figs_out)
+
+cellcount_aml <- bb_cellmeta(blaseRtools::filter_cds(
+  cds = cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("AML"))
+)) |> #all clusters
+  group_by(leiden, leiden_assignment2) |>
+  summarise(n = n())
+# cellcount_aml <- filter(cellcount_aml, n > 10)
