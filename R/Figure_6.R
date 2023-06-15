@@ -291,13 +291,13 @@ F6E<-as_ggplot(F6E)
 F6E
 
 
-#  scratch work below this ---------------------------
+#  scratch work below this --------------------------------------------------------------------------
 a<-bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
                                     cells = bb_cellmeta(cds_main) |>
                                       filter(partition %in% c('5','8','9','11','12'))), "leiden_assignment2", overwrite_labels = F, group_label_size = 5)
 b<-bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
                                     cells = bb_cellmeta(cds_main) |>
-                                      filter(partition %in% c('5','8','9','11','12'))), "partition", overwrite_labels = T, group_label_size = 5)
+                                      filter(partition %in% c('5','8','9','11','12'))), "partition", overwrite_labels = F, group_label_size = 5)
 # cellcount$partition <- factor(cellcount$partition,
 #                               levels = c("5","8","9","11","12"))
 cellcount2 <- cellcount|> filter(partition %in% c("5","8","9","11","12"))
@@ -325,7 +325,7 @@ hmap_bp2
 
 a|(b/hmap_bp2)
 
-F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_topmarkers_part.csv")
+#F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_topmarkers_part.csv")
 some_tm_part <-
   monocle3::top_markers(
     blaseRtools::filter_cds(cds = cds_main,
@@ -340,9 +340,12 @@ library(kableExtra)
 library(webshot)
 pu_clusts <-
   some_tm_part |> group_by(cell_group) |>
-  slice_max(order_by = marker_score, n=5)|> kable()|>kable_styling()
+  slice_max(order_by = marker_score, n=5) #|> kable()|>kable_styling()
   # pull(gene_short_name)
 pu_clusts
+
+#write_csv(pu_clusts, file = file.path("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data", "topmarkers_part_5.8.9.11.12.csv"))
+
 # save_kable(pu_clusts, file = "pu_clusts.html")
 # webshot::install_phantomjs()
 # webshot("pu_clusts.html", "pu_clusts.pdf")
@@ -350,6 +353,9 @@ pu_clusts
 c<-bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
                                        cells = bb_cellmeta(cds_main) |>
                                          filter(partition %in% c('5','8','9','11','12'))), "leiden_assignment2", overwrite_labels = F, group_label_size = 5)+facet_wrap(~geno_pheno)
+d<-bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
+                                          cells = bb_cellmeta(cds_main) |>
+                                            filter(partition %in% c('5','8','9','11','12'))), "leiden_assignment2", overwrite_labels = T, group_label_size = 5)
 
 #pseudotime analysis
 # TODO Make gene bubbles and umap for partitons in cds_p568.
