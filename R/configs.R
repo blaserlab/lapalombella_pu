@@ -34,6 +34,7 @@ conflict_prefer("group_by", "dplyr")
 conflict_prefer("select", "dplyr")
 conflict_prefer("rename", "dplyr")
 conflict_prefer("count", "dplyr")
+conflict_prefer("exprs", "monocle3")
 
 
 

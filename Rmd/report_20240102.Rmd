@@ -1,0 +1,190 @@
+---
+title: "Pvr Upstream Regulator Prediction"
+author: "Brad Blaser"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      message = FALSE,
+                      warning = FALSE,
+                      fig.align = "center", 
+                      dev = "png", 
+                      dpi = 300)
+options(dplyr.summarise.inform = FALSE)
+source(here::here("R/dependencies.R"))
+source(here::here("R/configs.R"))
+source(here::here("R/report_20240102_figs.R"))
+```
+
+## Introduction
+
+
+Background:  Pvr/CD155 is the ligand for TIGIT.  Pvr is a top DEG expressed in Tet2/P53 double knockout AML according to Pu.  Blocking TIGIT increases NK cell-mediated killing of AML blasts and therefore CD155 expression by AML blasts may contribute to an immunosuppressed microenvironment.
+
+Question: What are the possible upstream regulators of Pvr expression?  
+
+## Analysis of Pvr expression in our current data
+
+First, is *Pvr* expression detectable in our data?
+
+These are umap projections of samples p5, p6 and p8, which as a reminder are the marrow samples from double knockout AML, double knockout preB-ALL and WT mice.
+
+```{r}
+analysis_configs |> 
+  select(-pipestance_location) |> 
+  pander::pander()
+```
+
+
+```{r, fig.width=7.5, fig.height=3.0}
+umap_aml_highlight + umap_pvr
+```
+
+So there is detectable *Pvr* expression in UMAP regions where we have AML cells.  But which regions?
+
+
+```{r, fig.width=4.25, fig.height=3.5}
+umap_leiden
+```
+
+We can claim that there is overlap between *Pvr* expression and AML cells in leiden clusters 6 and 9.  There are more formal ways we could show this but I think inspection is sufficient at this point.
+
+## Identification of a Gene Regulatory Network
+
+Next we wish to identify transcription factors that may be responsible for inducing *Pvr* expression.  The approach I took uses an algorithm called SCENIC, which generates a complete gene regulatory network based on single cell expression data and transcription factor binding probability to enhancers and promoters.
+
+This generates many types of data output.  Most interesting would be a list of "regulons", which is a set of target genes regulated by a given transcription factor.  It turns out that *Pvr* does not directly appear as a target gene in any of the regulons.  However, we can infer one or more transcriptional regulators for *Pvr* expression by looking at regulons that are enriched in leiden clusters 6 and 9.  If there are relatively few active regulons in these clusters then we may be in good shape.
+
+The SCENIC algorithm generates a per-cell regulon activity score (AUC) and a per-cluster specificity score (RSS).
+
+This heatmap shows the mean AUC score according to leiden cluster:
+
+```{r, fig.width=7.5, fig.height=10}
+plot_grid(auc_hm)
+```
+
+It looks like *Irf8*, *Irf5*, and *Klf4* are of interest for cluster 6.  These are up in cluster 9 although there are a few more to choose from there including *Tcf7l2* and several others.
+
+We can generate a similar heatmap using the RSS scores.  These are calculated from data aggregated by cluster, so confer specificity relative to that classification.  It does look like the same regulons are coming up and it looks like cluster 9 is a little more restricted than with the AUC values.
+
+```{r, fig.width=7.5, fig.height=10}
+plot_grid(rss_hm)
+```
+
+We can rank all of the regulons by RSS score for each cluster of interest:
+
+```{r, fig.width=7.5, fig.height=3.0}
+rss_6_rankplot + rss_9_rankplot
+```
+
+These are essentially the same data but shown in a way that makes the specificity more clear.
+
+So in conclusion, the transcription factors of interest are *Irf5*, *Irf8*, *Mafb*, *Klf4* and *Tcf7l2*.
+
+## Validation of Regulon Specificity
+
+Still though, these are very indirect predictions, because *Pvr* itself didn't show up in the regulons.
+
+We would predict that *Pvr* is co-regulated with many of the genes in interesting regulons.  I used an independent algorithm (graph-based clustering) to generate modules of co-regulated genes.  *Pvr* is in module 2.  There are 11 modules total.  We can take each of the regulons and ask how many of the genes in each regulon are also in Module 2 versus a different module.
+
+```{r}
+pander::pander(regulon_module_tables$Irf8, caption = "Irf8")
+pander::pander(regulon_module_tables$Irf8_extended, caption = "Irf8 Extended")
+pander::pander(regulon_module_tables$Irf5_extended, caption = "Irf5 Extended")
+pander::pander(regulon_module_tables$Klf4_extended, caption = "Klf4 Extended")
+pander::pander(regulon_module_tables$Mafb_extended, caption = "Mafb Extended")
+pander::pander(regulon_module_tables$Tcf7l2, caption = "Tcf7l2")
+pander::pander(regulon_module_tables$Tcf7l2_extended, caption = "Tcf7l2 Extended")
+pander::pander(regulon_module_tables$Ctcf_extended, caption = "Ctcf Extended")
+pander::pander(regulon_module_tables$Foxp1_extended, caption = "Foxp1 Extended")
+pander::pander(regulon_module_tables$Nr3c1_extended, caption = "Nr3c1 Extended")
+```
+
+I chose the regulons of interest plus a few others for comparison (Ctcf, Foxp1, Nr3c1).  The good news is that in the regulons of interest, most of the genes are also in Module 2, like *Pvr*.  But for the comparator regulons, there are still a lot of genes in module 2.  This is probably because module 2 itself is not very specific.
+
+So next we can move to look specifically at expression of the regulon target genes and see if any patterns emerge that are similar to *Pvr*.  In the following series of plots, the color scale represents the aggregate, per-cell expression of each of the target genes within each regulon of interest and the comparators.  Note that the color scale is different for each regulon because the number of genes and their relative expression is different for each.
+
+```{r, fig.height=3.5}
+umap_regulons$Irf8 + theme(aspect.ratio = 0.9)
+umap_regulons$Irf8_extended + theme(aspect.ratio = 0.9)
+umap_regulons$Irf5_extended + theme(aspect.ratio = 0.9)
+umap_regulons$Klf4_extended + theme(aspect.ratio = 0.9)
+umap_regulons$Mafb_extended + theme(aspect.ratio = 0.9)
+umap_regulons$Tcf7l2 + theme(aspect.ratio = 0.9)
+umap_regulons$Tcf7l2_extended + theme(aspect.ratio = 0.9)
+umap_regulons$Ctcf_extended + theme(aspect.ratio = 0.9)
+umap_regulons$Foxp1_extended + theme(aspect.ratio = 0.9)
+umap_regulons$Nr3c1_extended + theme(aspect.ratio = 0.9)
+```
+
+
+Recalling the pattern of *Pvr* expression from above, *Irf8*, *Irf5*, *Klf4*, *Mafb* and *Tcf7l2* all still look promising, and there is really nothing to be seen in the comparitors.
+
+## Extending the analysis
+
+To this point I have used a data set containing only samples p5, p6 and p8.  In the last draft of the paper I saw, there were many different data sets being used, some including all samples, some including transplanted and/or spleen samples etc.  This analysis took 10 days to run, so we will not be running it on every version of the data that was generated, especially because those data sets are larger and will take even longer to run.
+
+However, we have developed some concepts which should extend to the larger data sets, at least in theory.  For example we can look at these samples:  
+
+```{r}
+bb_cellmeta(cds_WT_AML_bALL) |> 
+  group_by(sample, leukemia_phenotype, tissue, genotype, primary_or_engraftment) |> 
+  summarise() |> 
+  pander::pander()
+```
+
+I previously did extensive reference mapping on these data to come up with the following cluster assignments:
+
+```{r, fig.height=3.5}
+umap_leiden_consensus_wt_aml_ball + theme(aspect.ratio = 0.9)
+```
+
+This where the AML cells lie:
+
+```{r, fig.height=3.5}
+umap_aml_highlight_wt_aml_ball + theme(aspect.ratio = 0.9)
+```
+
+Most AML cells fall in the Monocyte, MPP, monoblast, and myeloblast clusters.
+
+Here is *Pvr* expression:
+
+```{r, fig.height=3.5}
+umap_pvr_wt_aml_ball + theme(aspect.ratio = 0.9)
+```
+
+Now we can revisit the regulon target gene expression:
+```{r, fig.height=3.5}
+umap_regulons_wt_aml_ball$Irf8 + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Irf8_extended + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Irf5_extended + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Klf4_extended + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Mafb_extended + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Tcf7l2 + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Tcf7l2_extended + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Ctcf_extended + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Foxp1_extended + theme(aspect.ratio = 0.9)
+umap_regulons_wt_aml_ball$Nr3c1_extended + theme(aspect.ratio = 0.9)
+```
+
+
+
+It looks like most of the conclusions from before still hold with the larger data set.  *Irf8*, *Irf5*, *Klf4* and *Mafb* target genes look like they are expressed in the monocyte, MPP, monoblast and myeloblast clusters.  *Tcf7l2* looks more restricted to the mature monocytes.  Interestingly, *Foxp1* looks like it overlaps with *Pvr* expression in proB cells.
+
+## Conclusion
+
+Based on the SCENIC analysis, *Irf8*, *Irf5*, *Klf4* and *Mafb* are the most likely upstream regulators of *Pvr* expression in these AML cells.  
+
+A table of the regulon target genes can be found here:  /network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/tables/regulon_tbl.csv
+
+Happy to discuss more if you have any questions.
+
+
+
+
