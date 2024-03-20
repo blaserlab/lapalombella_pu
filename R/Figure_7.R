@@ -3,6 +3,7 @@
 pheno_sums <- bb_cellmeta(cds_main) |>
   count(leukemia_phenotype, name = "sum")
 
+#Fig 7C
 F7_microenv_bp<- bb_cellmeta(cds_main) |>
   count(leiden_assignment2, leukemia_phenotype) |>
   left_join(pheno_sums) |>
@@ -36,56 +37,7 @@ F7_microenv_map <- bb_var_umap(
   facet_by = "leukemia_phenotype", overwrite_labels = T
 ) #+theme(legend.text = element_text(size = 8))
 
-marrow_gb_plot <-
-  bb_genebubbles(
-    filter_cds(
-      cds_main,
-      cells = bb_cellmeta(cds_main) |>
-        filter(tissue %in% c("marrow")) |>
-        #filter(leukemia_phenotype %in% c("AML", "pre-B ALL")) |>
-        filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
-        filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
-    ),
-    genes = c(
-      "Cd37",
-      "Cd79a",
-      "Cd3e",
-      "Cd4",
-      "Gzma",
-      "Icos",
-      "Izumo1r",
-      "Trbc1"
-    ),
-    #"Itgam", "Ly6g", "Gzma"),
-    cell_grouping = c("leiden_assignment2", "leukemia_phenotype"),
-    return_value = "data"
-  ) |>
-  ggplot(mapping = aes(
-    x = leiden_assignment2,
-    y = gene_short_name,
-    color = expression,
-    size = proportion
-  )) +
-  geom_point() +
-  scale_size_area() +
-  scale_color_viridis_c() +
-  facet_wrap( ~leukemia_phenotype, scales = "free_x",) +
-  theme_minimal_grid(font_size = 6) +
-  theme(
-    strip.background = ggh4x::element_part_rect(
-      side = "b",
-      colour = "black",
-      fill = "transparent"
-    )
-  ) +
-  theme(axis.text.y = element_text(face = "italic")) +
-  theme(axis.text.x = element_text(angle = 40, hjust = 1)) +
-  labs(x = NULL,
-       y = NULL,
-       size = "Proportion",
-       color = "Expression")
-marrow_gb_plot
-
+#Figure 7D
 gb_plot2 <-
   bb_genebubbles(
     filter_cds(
@@ -136,7 +88,7 @@ gb_plot2 <-
 
 gb_plot2
 
-#Supp Fig 9A
+#Supp Fig 7A
 leiden_clust <- bb_var_umap(cds_main, var = "leiden", overwrite_labels = T)
 
 #Figure 7 scratch:
