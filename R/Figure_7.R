@@ -1,9 +1,31 @@
 #Figure 7
-# cell composition stacked bar chart----------------------
+
+#Fig 7B - microenv umap
+microenv_populations <- bb_cellmeta(cds_main) |>
+  group_by(leiden_assignment2) |>
+  summarise() |>
+  filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
+  filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)) |>
+  pull(leiden_assignment2)
+
+# cds_main$leukemia_phenotype <- factor(cds_main$leukemia_phenotype,
+#                                   levels = c("No leukemia","AML","pre-B ALL"))
+F7_microenv_map <- bb_var_umap(
+  filter_cds(
+    cds_main,
+    cells = bb_cellmeta(cds_main) |>
+      filter(geno_pheno %in% c("dKO: AML", "dKO: pre-B ALL", "Wildtype", "P53 KO: T ALL"))
+  ),
+  var = "leiden_assignment2", cell_size = 0.1,
+  value_to_highlight = microenv_populations,
+  facet_by = "geno_pheno", overwrite_labels = F
+) #+theme(legend.text = element_text(size = 8))
+F7_microenv_map
+
+#Fig 7C - cell composition stacked bar chart
 pheno_sums <- bb_cellmeta(cds_main) |>
   count(leukemia_phenotype, name = "sum")
 
-#Fig 7C
 F7_microenv_bp<- bb_cellmeta(cds_main) |>
   count(leiden_assignment2, leukemia_phenotype) |>
   left_join(pheno_sums) |>
@@ -17,33 +39,13 @@ F7_microenv_bp<- bb_cellmeta(cds_main) |>
   theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
   labs(x = "ScType Assignment")
 
-microenv_populations <- bb_cellmeta(cds_main) |>
-  group_by(leiden_assignment2) |>
-  summarise() |>
-  filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
-  filter(str_detect(leiden_assignment2, "ALL", negate = TRUE)) |>
-  pull(leiden_assignment2)
-
-cds_main$leukemia_phenotype <- factor(cds_main$leukemia_phenotype,
-                                  levels = c("No leukemia","AML","pre-B ALL"))
-F7_microenv_map <- bb_var_umap(
-  filter_cds(
-    cds_main,
-    cells = bb_cellmeta(cds_main) |>
-      filter(leukemia_phenotype %in% c("No leukemia", "AML", "pre-B ALL"))
-  ),
-  var = "leiden_assignment2", cell_size = 0.1,
-  #value_to_highlight = microenv_populations,
-  facet_by = "leukemia_phenotype", overwrite_labels = T
-) #+theme(legend.text = element_text(size = 8))
-
 #Figure 7D
 gb_plot2 <-
   bb_genebubbles(
     filter_cds(
       cds_main,
       cells = bb_cellmeta(cds_main) |>
-        filter(leukemia_phenotype %in% c("AML", "pre-B ALL", "No leukemia")) |>
+        filter(geno_pheno %in% c("dKO: AML", "dKO: pre-B ALL", "Wildtype", "P53 KO: T ALL")) |>
         filter(str_detect(leiden_assignment2, "T")) |>
         # filter(str_detect(leiden_assignment2, "T|B|NK|Natural")) |>
         filter(str_detect(leiden_assignment2, "ALL", negate = TRUE))
@@ -57,10 +59,10 @@ gb_plot2 <-
       "Tigit",
       "Sell",
       "Slamf6"),
-    cell_grouping = c("leiden_assignment2", "leukemia_phenotype"),
+    cell_grouping = c("leiden_assignment2", "geno_pheno"),
     return_value = "data"
   ) |>
-  mutate(across(leukemia_phenotype, factor, levels=c("No leukemia","AML","pre-B ALL")))|>
+  mutate(across(geno_pheno, factor, levels=c("Wildtype", "dKO: AML", "dKO: pre-B ALL", "P53 KO: T ALL")))|>
   ggplot(mapping = aes(
     x = leiden_assignment2,
     y = gene_short_name,
@@ -70,7 +72,7 @@ gb_plot2 <-
   geom_point() +
   scale_size_area() +
   scale_color_viridis_c() +
-  facet_wrap( ~leukemia_phenotype, scales = "free_x",) +
+  facet_wrap( ~geno_pheno, scales = "free_x",) +
   theme_minimal_grid(font_size = 8) +
   theme(
     strip.background = ggh4x::element_part_rect(
@@ -79,13 +81,13 @@ gb_plot2 <-
       fill = "transparent"
     )
   ) +
-  theme(axis.text.y = element_text(face = "italic")) +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  theme(axis.text.y = element_text(face = "italic", size = 9)) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 9)) +
   labs(x = NULL,
        y = NULL,
        size = "Proportion",
-       color = "Expression")
-
+       color = "Expression") +
+  theme(plot.title = element_text(size = 140))
 gb_plot2
 
 #Supp Fig 7A
