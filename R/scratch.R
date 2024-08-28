@@ -1,20 +1,32 @@
 
-# good
-leiden_auc_mat <-
-  t(regulonAUCmat) |>
-  as_tibble(rownames = "cell_id") |>
-  pivot_longer(-cell_id) |>
-  left_join(bb_cellmeta(cds_p568) |>
-              select(cell_id, leiden)) |>
-  group_by(leiden, name) |>
-  summarise(meanAUC = mean(value)) |>
-  pivot_wider(names_from = name, values_from = meanAUC) |>
-  bb_tbl_to_matrix()
-ComplexHeatmap::Heatmap(t(scale(leiden_auc_mat)))
 
-# good
-SCENIC::plotRSS_oneSet(rss, setName = "6") # cluster ID
+bb_cellmeta(cds_WT_AML_bALL) |> glimpse()
+bb_cellmeta(cds_WT_AML_bALL) |> count(specimen, tissue, genotype, leukemia_phenotype)
 
-# good
-rss_mat <- rss_data |> select(-Z) |> pivot_wider(names_from = Topic, values_from = RSS) |> bb_tbl_to_matrix()
-ComplexHeatmap::Heatmap(t(scale(rss_mat)))
+bb_var_umap(cds_WT_AML_bALL, "density", facet_by = c("genotype", "leukemia_phenotype"), cols = (vars(genotype)), rows = vars(leukemia_phenotype))
+
+
+bb_var_umap(cds_WT_AML_bALL, "density", facet_by = c("genotype"))
+
+p0 <- test_bb_var_umap(cds_WT_AML_bALL, "density")
+p0
+p1 <- test_bb_var_umap(cds_WT_AML_bALL, "density", facet_by = c("genotype"))
+p1
+p2 <- test_bb_var_umap(cds_WT_AML_bALL, "density", facet_by = c("leukemia_phenotype"))
+p2
+p3 <- test_bb_var_umap(cds_WT_AML_bALL, "density", facet_by = c("genotype", "leukemia_phenotype"), cell_size = 2)
+p3
+p3 + scale_color_viridis_c(limits = c(0, 0.2), na.value = "red") + scale_fill_viridis_c(limits = c(0, 0.2), na.value = "red")
+left_join(p1$data |> as_tibble() |> select(cell_id, p1_density = density),
+          p2$data |> as_tibble() |> select(cell_id, p2_density = density)) |>
+  left_join(p3$data |> as_tibble() |> select(cell_id, p3_density = density)) |>
+  left_join(p0$data |> as_tibble() |> select(cell_id, p0_density = density))
+
+
+test_bb_var_umap(cds_WT_AML_bALL, "density")
+p3$compound_variable
+
+
+bb_gene_umap(cds_WT_AML_bALL, "Pvr") +
+bb_gene_umap(cds_WT_AML_bALL, "Nectin2")
+

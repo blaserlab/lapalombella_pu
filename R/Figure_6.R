@@ -208,9 +208,29 @@ F6D <- bb_var_umap(blaseRtools::filter_cds(cds = cds_main,
                                     cells = bb_cellmeta(cds_main) |>
                                       filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12'))), "leiden_assignment2", overwrite_labels = T, group_label_size = 5)
 #ggsave("Figure6D-aml_leiden_clusters.pdf", path = figs_out)
+F6D
+
+bb_var_umap(
+  blaseRtools::filter_cds(
+    cds = cds_main,
+    cells = bb_cellmeta(cds_main) |>
+      filter(leukemia_phenotype %in% c("AML")) |> filter(leiden %in% c('4', '5', '8', '24', '12'))
+  ),
+  "leiden_assignment2",
+  overwrite_labels = T,
+  group_label_size = 5,
+  facet_by = "sample"
+)
+
+
+analysis_configs
+
+#ggsave("Figure6D-aml_leiden_clusters.pdf", path = figs_out)
 
 #Figure 6E
 markers <- AML_topmarkers |> pull(gene_short_name)
+
+bb_cellmeta(aml) |> count(leiden_assignment2, leiden)
 
 #Expression Matrix
 mat <-
