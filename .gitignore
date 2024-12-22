@@ -12,3 +12,4 @@ inst/data-raw/regenerated_git_commands.R
 *.pdf
 *.png
 *.tiff
+*.tmp/*

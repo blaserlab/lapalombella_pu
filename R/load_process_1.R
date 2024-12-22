@@ -15,6 +15,8 @@ conflict_prefer("count", "dplyr")
 conflict_prefer("exprs", "monocle3")
 conflict_prefer("rename", "dplyr")
 
+save_dir <- fs::path("/home/OSUMC.EDU/blas02/network/X/Labs/Blaser/staff/single_cell/lapalombella_citeseq_dec2024")
+
 # read in the config file -------------------------------------------------
 analysis_configs <- read_csv("/home/OSUMC.EDU/blas02/network/X/Labs/Blaser/staff/single_cell/lapalombella_citeseq_dec2024/analysis_configs.csv") |>
   mutate(pipestance_path = bb_fix_file_path(pipestance_path)) |>
@@ -67,7 +69,8 @@ walk(.x = analysis_configs$sample,
      .f = \(x,
             conf = analysis_configs,
             ens_lookup = ensembl_lookup,
-            bl_adts = biolegend_adts) {
+            bl_adts = biolegend_adts,
+            sd = save_dir) {
        conf_filtered <- conf |>
          filter(sample == x)
        mat_gex <-
@@ -212,18 +215,17 @@ walk(.x = analysis_configs$sample,
        colData(cds)$doubletfinder_high_conf <- NULL
 
        # save the cds
-       save_dir <- fs::path("data", x)
+       save_dir <- fs::path(sd, "cds", x)
        fs::dir_create(save_dir)
        save(
          cds,
-         file = fs::path(save_dir, "cds.rda"),
-         compress = "bzip2"
+         file = fs::path(save_dir, "cds.rda")
        )
        gc()
 
 
      })
 
-save(analysis_configs, file = "data/analyis_configs.rda", compress = "bzip2")
-save(biolegend_adts, file = "data/biolegend_adts.rda", compress = "bzip2")
+save(analysis_configs, file = fs::path(save_dir, "analyis_configs.rda"), compress = "bzip2")
+save(biolegend_adts, file = fs::path(save_dir, "biolegend_adts.rda"), compress = "bzip2")
 gc()
