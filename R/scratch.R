@@ -30,3 +30,12 @@ p3$compound_variable
 bb_gene_umap(cds_WT_AML_bALL, "Pvr") +
 bb_gene_umap(cds_WT_AML_bALL, "Nectin2")
 
+bb_cellmeta(cds_main_human)
+
+bb_var_umap(cds_main_human, "partition")
+
+bb_gene_umap(cds_main_human, "CD3E") + bb_cite_umap(cds_main_human, "CD3")
+
+
+
+
