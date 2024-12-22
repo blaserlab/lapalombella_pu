@@ -36,3 +36,32 @@ bb_var_umap(cds_main_human, "leiden", value_to_highlight = c("14", "22", "35", "
 bb_cite_umap(cds_main_human, "CD33")
 bb_cite_umap(cds_main_human, "CD14")
 bb_cite_umap(cds_main_human, "HLA-DR")
+
+
+bb_var_umap(cds_main_human, "genotype", facet_by = "celltype.l1_ref", alt_dim_x = "prealignment_dim1", alt_dim_y = "prealignment_dim2")+
+  lims(x = c(-20, 20), y = c(-20, 20))
+
+bb_var_umap(cds_main_human, "genotype", facet_by = "celltype.l1_ref", alt_dim_x = "prealignment_dim1", alt_dim_y = "prealignment_dim2")+
+  lims(x = c(-20, 20), y = c(-20, 20))
+
+bb_var_umap(cds_main_human, "genotype", overwrite_labels = TRUE, alt_label_col = "celltype.l1_ref", alt_dim_x = "prealignment_dim1", alt_dim_y = "prealignment_dim2", foreground_alpha = 0.1)+
+  lims(x = c(-18, 18), y = c(-18, 18)) +
+  theme(legend.position = "right")
+
+p1 <- bb_var_umap(cds_main_human, "genotype", value_to_highlight = "WT", overwrite_labels = TRUE, alt_label_col = "celltype.l1_ref", alt_dim_x = "prealignment_dim1", alt_dim_y = "prealignment_dim2", foreground_alpha = 0.1)+
+  lims(x = c(-18, 18), y = c(-18, 18)) +
+  theme(legend.position = "right")
+
+p2 <- bb_var_umap(cds_main_human, "genotype", value_to_highlight = "tp53", overwrite_labels = TRUE, alt_label_col = "celltype.l1_ref", alt_dim_x = "prealignment_dim1", alt_dim_y = "prealignment_dim2", foreground_alpha = 0.1)+
+  lims(x = c(-18, 18), y = c(-18, 18)) +
+  theme(legend.position = "right")
+
+p3 <- bb_var_umap(cds_main_human, "genotype", value_to_highlight = "tet2", overwrite_labels = TRUE, alt_label_col = "celltype.l1_ref", alt_dim_x = "prealignment_dim1", alt_dim_y = "prealignment_dim2", foreground_alpha = 0.1)+
+  lims(x = c(-18, 18), y = c(-18, 18)) +
+  theme(legend.position = "right")
+
+p4 <- bb_var_umap(cds_main_human, "genotype", value_to_highlight = "comutant", overwrite_labels = TRUE, alt_label_col = "celltype.l1_ref", alt_dim_x = "prealignment_dim1", alt_dim_y = "prealignment_dim2", foreground_alpha = 0.1)+
+  lims(x = c(-18, 18), y = c(-18, 18)) +
+  theme(legend.position = "right")
+
+p1+p2+p3+p4
