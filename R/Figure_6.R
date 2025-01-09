@@ -79,7 +79,7 @@ aml_gexp_umap <- ggarrange(aml_plotlist[[1]],
 #     genes_to_test_per_group = 20,
 #     cores = 12
 #   )
-#F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_topmarkers_part.csv")
+#F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Senior Associate group/Rosa/Ethan/1. EHL/Tet2_P53/Data/F6_topmarkers_part.csv")
 
 markers <- F6_topmarkers_part |> pull(gene_short_name)
 

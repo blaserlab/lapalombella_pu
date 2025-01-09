@@ -153,9 +153,7 @@ prots <- c("CD33", "CD11b", "CD14", "HLA-DR")
 
 #cell unaligned data eval
 mdsc_prot_dat <-
-  bb_genebubbles(#filter_cds(cds_main_human, cells = bb_cellmeta(cds_main_human) |>
-                  #            filter(!(celltype.l1_ref %in% c("B", "other T", "CD4 T", "CD8 T", "NK")))),
-    cds_main_human_unaligned,
+  bb_genebubbles(cds_main_human_unaligned,
                  genes = prots,
                  cell_grouping = c("leiden"),
                  experiment_type = "Antibody Capture",
@@ -376,6 +374,79 @@ mdsc_bp <-
 mdsc_bp
 head(cellcount2)
 
+#Identify malignant clusters for comparison to mouse partition clusters 3/6
+bb_cite_umap(cds_main_human_unaligned, "CD33")
+bb_cite_umap(cds_main_human_unaligned, "CD123")
+
+
+bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("CD34"))
+bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("CD33"))
+bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("FLT3"))
+bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("IL3RA"))
+
+F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Senior Associate group/Rosa/Ethan/1. EHL/Tet2_P53/Data/F6_topmarkers_part.csv")
+mouse_aml_markers <- F6_topmarkers_part |> filter(cell_group %in% c(3,6)) |> pull(gene_short_name)
+
+
+library(biomaRt)
+# Connect to Ensembl
+mouse_mart <- useMart("ensembl", dataset = "mmusculus_gene_ensembl", host = "https://useast.ensembl.org")
+human_mart <- useMart("ensembl", dataset = "hsapiens_gene_ensembl", host = "https://useast.ensembl.org")
+
+# Get orthologs
+orthologs <- getLDS(attributes = c("mgi_symbol"),
+                    filters = "mgi_symbol",
+                    values = mouse_aml_markers,
+                    mart = mouse_mart,
+                    attributesL = c("hgnc_symbol"),
+                    martL = human_mart)
+
+# Split into smaller batches
+batches <- split(mouse_aml_markers, ceiling(seq_along(mouse_aml_markers) / 10))  # Batches of 10 genes
+
+# Function to query each batch
+query_batch <- function(batch) {
+  getLDS(attributes = c("mgi_symbol"),
+         filters = "mgi_symbol",
+         values = batch,
+         mart = mouse_mart,
+         attributesL = c("hgnc_symbol"),
+         martL = human_mart)
+}
+
+# Query all batches and combine results
+orthologs <- do.call(rbind, lapply(batches, query_batch))
+
+# View results
+head(orthologs)
+
+################################################################################
+test_gl <- c("HSPD1", "NCL", "FCMR", "DUT", "PHGDH")
+bb_gene_umap(cds_main_human_unaligned,
+             gene_or_genes = bb_rowmeta(cds_main_human_unaligned) |>
+               select(feature_id, test_gl))
+
+###################################################################
+
+#generatung new logical col data for aggregate gene expression
+nadeu_11b <- readxl::read_excel("~/network/X/Labs/Blaser/share/collaborators/lapalombella_whipp_network/queries/41591_2022_1927_MOESM3_ESM.xlsx", sheet = "Supplementary Table 11b", skip = 5, col_names = c("feature_id", "gene_short_name", "mean", "l2fc", "se", "p", "padj", "direction"))
+
+#murine DKO partition cluster 3/6 signature
+cds_m <- nadeu_11b |>
+  filter(direction == "Up") |>
+  filter(padj < 0.05) |>
+  mutate(feature_id = str_remove(feature_id, "\\..*")) |>
+  mutate(nadeu_RT_gene = TRUE) |>
+  bb_tbl_to_rowdata(obj = cds_main, min_tbl = _)
+
+bb_gene_umap(
+  filter_cds(
+    cds_main,
+    cells = bb_cellmeta(cds_main) |> filter(partition_assignment_1 == "B")
+  ),
+  gene_or_genes = bb_rowmeta(cds_main) |> select(feature_id, nadeu_RT_gene)
+) +
+  facet_grid(row = vars(patient), col = (vars(disease_tissue)))
 
 ################################################################################
 #01.02.24

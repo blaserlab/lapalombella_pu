@@ -36,8 +36,7 @@ conflict_prefer("rename", "dplyr")
 conflict_prefer("count", "dplyr")
 conflict_prefer("exprs", "monocle3")
 conflicts_prefer(base::as.data.frame)
-
-
+conflicts_prefer(base::intersect)
 
 # output directories
 
