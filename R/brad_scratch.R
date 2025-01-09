@@ -65,3 +65,32 @@ p4 <- bb_var_umap(cds_main_human, "genotype", value_to_highlight = "comutant", o
   theme(legend.position = "right")
 
 p1+p2+p3+p4
+
+
+
+bb_var_umap(cds_combined, "data_set")
+bb_var_umap(cds_)
+bb_gene_umap(cds_combined, "CD3E")
+bb_gene_umap(cds_combined, "CD14")
+bb_gene_umap(cds_combined, "CD19")
+bb_var_umap(cds_combined, "genotype", facet_by = c("value", "data_set"))
+bb_var_umap(cds_combined, "density", facet_by = c("genotype", "data_set"))
+bb_cellmeta(cds_combined) |> glimpse()
+bb_var_umap(cds_combined, "partition", facet_by = "data_set", value_to_highlight = c("3", "6"))
+bb_var_umap(cds_combined, "partition", facet_by = "data_set", overwrite_labels = TRUE)
+
+bb_var_umap(cds_main_human_unaligned, "genotype")
+bb_var_umap(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |> filter(celltype.l1_ref == "CD8 T")), "celltype.l2_ref", overwrite_labels = FALSE)
+
+bb_cellmeta(cds_main_human_unaligned) |> glimpse()
+bb_cellmeta(cds_main_human_unaligned) |> count(celltype.l1_ref)
+
+cds_combined <- bb_rowmeta(cds_combined) |>
+  mutate(exhaustion = ifelse(gene_short_name %in% some_vector_of_genes), TRUE, FALSE) |>
+  select(feature_id, exhaustion) |>
+  bb_tbl_to_rowdata(obj = cds_combined, min_tbl = _)
+
+tempdir()
+
+# how to fork a project from github
+# blaseRtemplates::initialize_github("blaserlab/lapalombella.pu.datapkg", dest = "/workspace/ethan_workspace")
