@@ -76,10 +76,31 @@ bb_gene_umap(cds_combined, "CD19")
 bb_var_umap(cds_combined, "genotype", facet_by = c("value", "data_set"))
 bb_var_umap(cds_combined, "density", facet_by = c("genotype", "data_set"))
 bb_cellmeta(cds_combined) |> glimpse()
-bb_var_umap(cds_combined, "partition", facet_by = "data_set", value_to_highlight = c("3", "6"))
-bb_var_umap(cds_combined, "partition", facet_by = "data_set", overwrite_labels = TRUE)
 
-bb_var_umap(cds_main_human_unaligned, "genotype")
+
+# the informative plots here
+bb_var_umap(cds_combined, "partition", facet_by = "data_set", value_to_highlight = c("3", "6"))
+bb_var_umap(cds_combined, "leiden.1", facet_by = "data_set", overwrite_labels = TRUE)
+bb_var_umap(cds_combined, "partition", facet_by = "data_set", overwrite_labels = TRUE)
+bb_var_umap(cds_combined, "genotype", facet_by = "data_set")
+
+# how to count human cells per sample
+bb_cellmeta(cds_combined) |>
+  count(pid, genotype)
+
+# how to actually sample the numan cells
+bb_cellmeta(cds_combined) |>
+  filter(data_set == "human") |>
+  filter(!sample %in% c("the ones to exclude")) |>
+  slice_sample(n = 1873, by = pid)
+
+# mouse similar but use specimen variable
+bb_cellmeta(cds_combined) |> glimpse()
+bb_cellmeta(cds_combined) |>
+  count(specimen)
+
+# want to 1. Define regions of enrichment by human genotype.  Do this by lumping leiden.1 clusters together, using recode if you want.  2. Normalize human cell number per sample by downsampling to validate that you lumped the clusters together fairly.  Then show number of human cells of a particular genotype are really enriched as you say they are.  3.  Normalize the mouse cell numbers per specimen.  Show that the number of cells coming from clusters 3 and 6 is higher in the human comutant regions.
+
 bb_var_umap(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |> filter(celltype.l1_ref == "CD8 T")), "celltype.l2_ref", overwrite_labels = FALSE)
 
 bb_cellmeta(cds_main_human_unaligned) |> glimpse()
@@ -90,7 +111,6 @@ cds_combined <- bb_rowmeta(cds_combined) |>
   select(feature_id, exhaustion) |>
   bb_tbl_to_rowdata(obj = cds_combined, min_tbl = _)
 
-tempdir()
 
 # how to fork a project from github
 # blaseRtemplates::initialize_github("blaserlab/lapalombella.pu.datapkg", dest = "/workspace/ethan_workspace")
