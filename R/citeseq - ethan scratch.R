@@ -351,7 +351,8 @@ cellcount2 <- bb_cellmeta(filter_cds(cds_main_human_unaligned, cells = bb_cellme
   mutate(normalized_cell_frac = n/ratio/4)
 
 #factor levels
-cellcount2$genotype <- factor(cellcount$genotype,
+cellcount2$genotype
+cellcount2$genotype <- factor(cellcount2$genotype,
                              levels = c("WT", "tet2","tp53", "comutant"))
 #plot
 mdsc_bp <-
@@ -373,6 +374,7 @@ mdsc_bp <-
 
 mdsc_bp
 head(cellcount2)
+################################################################################
 
 #Identify malignant clusters for comparison to mouse partition clusters 3/6
 bb_cite_umap(cds_main_human_unaligned, "CD33")
@@ -429,57 +431,331 @@ bb_gene_umap(cds_main_human_unaligned,
 ###################################################################
 
 #generatung new logical col data for aggregate gene expression
-nadeu_11b <- readxl::read_excel("~/network/X/Labs/Blaser/share/collaborators/lapalombella_whipp_network/queries/41591_2022_1927_MOESM3_ESM.xlsx", sheet = "Supplementary Table 11b", skip = 5, col_names = c("feature_id", "gene_short_name", "mean", "l2fc", "se", "p", "padj", "direction"))
-
-#murine DKO partition cluster 3/6 signature
-cds_m <- nadeu_11b |>
-  filter(direction == "Up") |>
-  filter(padj < 0.05) |>
-  mutate(feature_id = str_remove(feature_id, "\\..*")) |>
-  mutate(nadeu_RT_gene = TRUE) |>
-  bb_tbl_to_rowdata(obj = cds_main, min_tbl = _)
-
-bb_gene_umap(
-  filter_cds(
-    cds_main,
-    cells = bb_cellmeta(cds_main) |> filter(partition_assignment_1 == "B")
-  ),
-  gene_or_genes = bb_rowmeta(cds_main) |> select(feature_id, nadeu_RT_gene)
-) +
-  facet_grid(row = vars(patient), col = (vars(disease_tissue)))
+# nadeu_11b <- readxl::read_excel("~/network/X/Labs/Blaser/share/collaborators/lapalombella_whipp_network/queries/41591_2022_1927_MOESM3_ESM.xlsx", sheet = "Supplementary Table 11b", skip = 5, col_names = c("feature_id", "gene_short_name", "mean", "l2fc", "se", "p", "padj", "direction"))
+#
+# #murine DKO partition cluster 3/6 signature
+# cds_m <- nadeu_11b |>
+#   filter(direction == "Up") |>
+#   filter(padj < 0.05) |>
+#   mutate(feature_id = str_remove(feature_id, "\\..*")) |>
+#   mutate(nadeu_RT_gene = TRUE) |>
+#   bb_tbl_to_rowdata(obj = cds_main, min_tbl = _)
+#
+# bb_gene_umap(
+#   filter_cds(
+#     cds_main,
+#     cells = bb_cellmeta(cds_main) |> filter(partition_assignment_1 == "B")
+#   ),
+#   gene_or_genes = bb_rowmeta(cds_main) |> select(feature_id, nadeu_RT_gene)
+# ) +
+#   facet_grid(row = vars(patient), col = (vars(disease_tissue)))
 
 ################################################################################
-#01.02.24
-# bb_cellmeta(cds_main_human_unaligned) |> glimpse()
-#
-# # make logical values for CD33+CD11b+ cells
-# mat <- monocle3::exprs(cds_main_human_unaligned)
-#
-# str(mat)
-#
-# matrix_dir <- as.matrix(mat@matrix)
-#
-# gene_expression <- mat["ENSG00000105383", , drop = FALSE]
-#
-# gene_expression_values <- matrix_dir["ENSG00000105383", , drop = FALSE]
-#
-# cols_above_zero <- colnames(gene_expression_values)[gene_expression_values > 0]
-#
-#
-# str(gene_expression)
-#
-# cols_above_zero <- colnames(gene_expression)[gene_expression > 0]
-#
-# # Check if it's a sparse matrix or a different structure
-# if (inherits(gene_expression, "CsparseMatrix") || inherits(gene_expression, "RsparseMatrix")) {
-#   # If it's sparse, convert to a dense vector using as.vector() specifically for sparse matrices
-#   gene_expression <- as.vector(gene_expression)
-# }
-#
-# # Find the columns where gene expression is greater than 0
-# selected_columns <- colnames(mat)[gene_expression > 0]
-# # Find the columns where gene expression is greater than 0
-# selected_columns <- colnames(mat)[gene_expression > 0]
-#
-# cd33_tbl <- colnames(mat[ ,mat["ENSG00000105383", ] > 0]) |> as_tibble() |> mutate(CD33_pos = TRUE) |> rename(cell_id = value)
-# mouse_cds_list[[4]] <- bb_tbl_to_coldata(mouse_cds_list[[4]], min_tbl = cd19_tbl)
+#T cell exhaustion
+bb_var_umap(cds_main_human_unaligned, "genotype", foreground_alpha = 0.1)
+bb_var_umap(
+  filter_cds(
+    cds_main_human_unaligned,
+    cells = bb_cellmeta(cds_main_human_unaligned) |>
+      filter((
+        celltype.l1_ref %in% c("CD8 T", "CD4 T", "other T")
+      ))
+  ),
+  "genotype",
+  overwrite_labels = F,
+  foreground_alpha = 0.1
+) + labs(title = "T cells")
+
+bb_var_umap(
+  filter_cds(
+    cds_main_human_unaligned,
+    cells = bb_cellmeta(cds_main_human_unaligned) |>
+      filter((
+        celltype.l1_ref %in% c("CD8 T")
+      ))
+  ),
+  "genotype",
+  foreground_alpha = 0.1
+) + labs(title = "CD8 T cells") +theme_minimal()
+
+bb_cite_umap(cds_main_human_unaligned, "CD8") + theme_minimal() +labs(title = "CD8 Antibody Capture")
+
+#CD8 T cell proportions - normalized
+# Stacked bar chart: CD8 T population genotype composition
+#normalized to cell quantity contributed from each leukemia genotype
+cellgeno_sums <- bb_cellmeta(cds_main_human_unaligned) |>
+  count(genotype, name = "geno_sum") #geno_sum - total cell count for each genotype
+
+total_geno_sum <- sum(cellgeno_sums$geno_sum)  # total cells across all genotypes
+
+cellcount <- bb_cellmeta(cds_main_human_unaligned) |>
+  group_by(celltype.l1_ref, genotype, pid) |>
+  summarise(n = n()) |> filter(celltype.l1_ref %in% c("CD8 T")) |>
+  left_join(cellgeno_sums) |>
+  mutate(ratio = geno_sum/total_geno_sum) |> #ratio- proportion of cells contributed from ea geno
+  mutate(normalized_cell_frac = (n/ratio)/4) #scaled count of cells for each celltype.l1_ref & genotype
+
+#factor levels
+cellcount$genotype <- factor(cellcount$genotype,
+                             levels = c("comutant","tet2","tp53", "WT"))
+
+#CD8 T cell proportions stacked bar plot
+t_prop_bp <-
+  ggplot(cellcount,
+         aes(x = celltype.l1_ref, y = normalized_cell_frac, fill = genotype)) +
+  geom_bar(position = "fill",
+           stat = "identity",
+           width = 0.9) + labs(title = "CD8 T cell proportions", subtitle = "cell type & genotype scaled cell counts") +
+  theme_minimal() +
+  theme(#axis.text.x = element_blank(),
+    axis.ticks.x = element_blank())
+
+t_prop_bp
+
+#CD8 T cell proportions - normalized
+# Stacked bar chart: CD8 T population sample composition
+#normalized to cell quantity contributed from each sample
+
+# Calculate the total cell count for each genotype
+geno_sums <- bb_cellmeta(cds_main_human_unaligned) |>
+  group_by(genotype) |>
+  summarise(total_geno_sum = n(), .groups = "drop")  # Total cell count for each genotype
+
+# Calculate the total cell count for each patient (pid)
+pid_sums <- bb_cellmeta(cds_main_human_unaligned) |>
+  group_by(pid) |>
+  summarise(pid_sum = n(), .groups = "drop")  # Total cell count for each patient
+
+# Calculate normalized cell fractions
+count <- bb_cellmeta(cds_main_human_unaligned) |>
+  group_by(celltype.l1_ref, genotype, pid) |>
+  summarise(n = n(), .groups = "drop") |>
+  filter(celltype.l1_ref %in% c("CD8 T")) |>
+  left_join(geno_sums, by = "genotype") |>
+  left_join(pid_sums, by = "pid") |>
+  mutate(ratio = pid_sum / total_geno_sum) |> # Ratio: proportion of cells contributed by the patient to the genotype
+  mutate(normalized_cell_frac = n / ratio)  # Scaled count of CD8 T cells by genotype and pid
+
+# Scatter plot of normalized_cell_frac for each pid, grouped by genotype
+ggplot(count, aes(x = genotype, y = normalized_cell_frac, color = pid)) +
+  geom_point(position = position_dodge(width = 0.4)) +
+  # geom_bar(position = "fill",
+  #          stat = "identity",
+  #          width = 0.9) +
+  labs(
+    title = "CD8 T cell Count Normalized by genotype and pid",
+    x = "Genotype",
+    y = "Normalized Cell #",
+    color = "Patient ID"
+  ) +
+  theme_minimal() +  # Apply minimal theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+
+#Exhaustion marker eval
+#CD8 T cell exhaustion marker gene bubble - protein
+prot_exhaust <- c(
+  "CD279 (PD-1)",
+  "CD152 (CTLA-4)",
+  "TIGIT (VSTM3)",
+  "CD244 (2B4)",
+  "CD272 (BTLA)",
+  "CD223 (LAG-3)"
+)
+
+mdsc_prot_dat <-
+  bb_genebubbles(cds_main_human_unaligned,
+                 genes = prots,
+                 cell_grouping = c("leiden"),
+                 experiment_type = "Antibody Capture",
+                 return_value = "data"
+  )
+
+
+cd8_prot_bub <- bb_genebubbles(
+  filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+               filter((celltype.l1_ref %in% "CD8 T"))),
+  genes = prot_exhaust,
+  cell_grouping = "genotype",
+  experiment_type = "Antibody Capture",
+  return_value = "data"
+) |>
+ggplot(mapping = aes(x = genotype, y = gene_short_name, size = proportion, fill = expression)) +
+  geom_point(pch = 21) +
+  scale_size_area() +
+  scale_fill_viridis_c(option = "A") +
+  theme_minimal_grid() + labs(title = "CD8 T cell Exhaustion Marker Expression - protein")
+cd8_prot_bub
+#CD8 T exhaustion marker genes - upregulated inhibitory receptors & TF TOX
+bb_gene_umap(
+  filter_cds(
+    cds_main_human_unaligned,
+    cells = bb_cellmeta(cds_main_human_unaligned) |>
+      filter((celltype.l1_ref %in% c("CD8 T")))
+  ),
+  gene_or_genes = c(
+    "PDCD1",
+    "CTLA4",
+    "LAG3",
+    "TIGIT",
+    "HAVCR2",
+    "TOX")) +
+  facet_wrap(~ genotype) +
+  labs(title = "CD8 T cell Exhaustion Marker Aggregate Transcript Expression",
+       subtitle = "Marker Genes: PD-1 (PDCD1), CTLA4, TIGIT, TIM3 (HAVCR2),TOX") +
+  theme_minimal()
+
+#CD8 T cell exhaustion marker gene bubble - transcripts
+exhaust_genes <- c("PDCD1", "CTLA4", "LAG3", "TIGIT", "HAVCR2","TOX")
+
+bb_genebubbles(
+  filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+               filter((celltype.l1_ref %in% "CD8 T"))),
+  genes = exhaust_genes,
+  cell_grouping = "genotype",
+  experiment_type = "Gene Expression",
+  return_value = "data"
+) |>
+  dplyr::mutate(gene_short_name = dplyr::case_when(
+    gene_short_name == "HAVCR2" ~ "TIM3 (HAVCR2)",
+    gene_short_name == "PDCD1" ~ "PD-1 (PDCD1)",
+    TRUE ~ gene_short_name
+  )) |>
+  ggplot(mapping = aes(x = genotype,
+                       y = gene_short_name,
+                       size = proportion,
+                       fill = expression)) +
+  geom_point(pch = 21) +
+  scale_size_area() +
+  scale_fill_viridis_c(option = "A") +
+  theme_minimal_grid() +
+  labs(title = "CD8 T cell Exhaustion Marker Expression - transcipts")
+
+# bb_var_umap(cds_main_human_unaligned, "genotype", foreground_alpha = 0.1)
+# bb_var_umap(cds_main_human_unaligned, "celltype.l1_ref")
+# bb_var_umap(cds_main_human_unaligned, "celltype.l2_ref")
+# bb_var_umap(cds_main_human_unaligned, "celltype.l3_ref")
+
+#protein level exhaustion markers
+bb_rowmeta(cds_main_human_unaligned, experiment_type = "Antibody Capture") |>
+  View()
+
+#T cell exhaustion - inhibitory receptors
+bb_cite_umap(
+  filter_cds(
+    cds_main_human_unaligned,
+    cells = bb_cellmeta(cds_main_human_unaligned) |>
+      filter((celltype.l1_ref == "CD8 T" & genotype == "comutant"))
+  ),
+  antibody = c(
+    "CD279 (PD-1)",
+    "CD152 (CTLA-4)",
+    "TIGIT (VSTM3)",
+    "CD244 (2B4)",
+    "CD272 (BTLA)",
+    "CD223 (LAG-3)"),
+  cell_size = 0.5, plot_title = "comutant") + theme_minimal() +
+  lims(x = c(-2.5, 18), y = c(-10, 15))
+
+bb_cite_umap(
+  filter_cds(
+    cds_main_human_unaligned,
+    cells = bb_cellmeta(cds_main_human_unaligned) |>
+      filter((celltype.l1_ref == "CD8 T" & genotype == "tet2"))
+  ),
+  antibody = c(
+    "CD279 (PD-1)",
+    "CD152 (CTLA-4)",
+    "TIGIT (VSTM3)",
+    "CD244 (2B4)",
+    "CD272 (BTLA)",
+    "CD223 (LAG-3)"),
+  cell_size = 0.5) +
+  lims(x = c(-2.5, 18), y = c(-10, 15))
+
+bb_cite_umap(
+  filter_cds(
+    cds_main_human_unaligned,
+    cells = bb_cellmeta(cds_main_human_unaligned) |>
+      filter((celltype.l1_ref == "CD8 T" & genotype == "tp53"))
+  ),
+  antibody = c(
+    "CD279 (PD-1)",
+    "CD152 (CTLA-4)",
+    "TIGIT (VSTM3)",
+    "CD244 (2B4)",
+    "CD272 (BTLA)",
+    "CD223 (LAG-3)"),
+  cell_size = 0.5) +
+  lims(x = c(-2.5, 18), y = c(-10, 15))
+
+bb_cite_umap(
+  filter_cds(
+    cds_main_human_unaligned,
+    cells = bb_cellmeta(cds_main_human_unaligned) |>
+      filter((celltype.l1_ref == "CD8 T" & genotype == "WT"))
+  ),
+  antibody = c(
+    "CD279 (PD-1)",
+    "CD152 (CTLA-4)",
+    "TIGIT (VSTM3)",
+    "CD244 (2B4)",
+    "CD272 (BTLA)",
+    "CD223 (LAG-3)"),
+  cell_size = 0.5) +
+  lims(x = c(-2.5, 18), y = c(-10, 15))
+
+blaseRtools::bb_cite_umap
+#Treg markers
+bb_gene_umap(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                          filter((celltype.l1_ref == "CD8 T"))), gene_or_genes = c("FOXP3", "IL2RA"))
+#genes down regulated in exhausted CD8 T
+bb_gene_umap(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                          filter((celltype.l1_ref == "CD8 T" & genotype == "comutant"))), gene_or_genes = c("GZMB", "PRF1", "IL2", "TNF", "IFNG", "HNF1A")) +
+  lims(x = c(-2.5, 18), y = c(-10, 15)) + labs(title = "comutant")+theme_minimal()
+
+bb_gene_umap(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                          filter((celltype.l1_ref == "CD8 T" & genotype == "tet2"))), gene_or_genes = c("GZMB", "PRF1", "IL2", "TNF", "IFNG", "HNF1A")) +
+  lims(x = c(-2.5, 18), y = c(-10, 15)) + labs(title = "tet2")+theme_minimal()
+
+bb_gene_umap(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                          filter((celltype.l1_ref == "CD8 T" & genotype == "tp53"))), gene_or_genes = c("GZMB", "PRF1", "IL2", "TNF", "IFNG", "HNF1A")) +
+  lims(x = c(-2.5, 18), y = c(-10, 15)) + labs(title = "tp53")+theme_minimal()
+
+bb_gene_umap(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                          filter((celltype.l1_ref == "CD8 T" & genotype == "WT"))), gene_or_genes = c("GZMB", "PRF1", "IL2", "TNF", "IFNG", "HNF1A")) +
+  lims(x = c(-2.5, 18), y = c(-10, 15)) + labs(title = "WT")+theme_minimal()
+
+####################
+#Exhaustion Scoring#
+####################
+exhaustion_genes <- c("PDCD1", "CTLA4", "LAG3", "TIGIT", "TOX")
+
+#extract expression mat
+expr_mat <- exprs(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                               filter((celltype.l1_ref == "CD8 T"))))
+
+#calc mean expression across the genes for each cell
+exhaustion_scores <- colMeans(expr_mat, na.rm = TRUE)
+
+# Add the exhaustion score to colData
+cd8_cds <- filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                        filter((celltype.l1_ref == "CD8 T")))
+colData(cd8_cds)$Exhaustion_Score <- exhaustion_scores
+
+colData(cd8_cds)
+
+bb_var_umap(cd8_cds, "Exhaustion_Score", facet_by = "genotype")+
+  labs(title = "Exhaustion Score across CD8 T Cells")
+####################
+bb_gene_violinplot(
+    cd8_cds,
+    variable = "leiden",
+    experiment_type = "Gene Expression",
+    genes_to_plot = "CD33",
+    pseudocount = 0,
+    jitter_fill = "transparent",
+    violin_alpha = 0.55,
+    jitter_alpha = 0.1,
+    include_jitter = TRUE
+  ) + theme(axis.title.y = element_blank()) + theme(strip.text = element_blank()) + plot_layout(heights = c(1,-0.1 , 1)) +
+    labs(title = "CD33", x = "Leiden clusters", y = "Gene Expression")
