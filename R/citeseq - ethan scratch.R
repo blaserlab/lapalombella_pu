@@ -375,61 +375,6 @@ mdsc_bp <-
 mdsc_bp
 head(cellcount2)
 ################################################################################
-
-#Identify malignant clusters for comparison to mouse partition clusters 3/6
-bb_cite_umap(cds_main_human_unaligned, "CD33")
-bb_cite_umap(cds_main_human_unaligned, "CD123")
-
-
-bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("CD34"))
-bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("CD33"))
-bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("FLT3"))
-bb_gene_umap(cds_main_human_unaligned, gene_or_genes = c("IL3RA"))
-
-F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Senior Associate group/Rosa/Ethan/1. EHL/Tet2_P53/Data/F6_topmarkers_part.csv")
-mouse_aml_markers <- F6_topmarkers_part |> filter(cell_group %in% c(3,6)) |> pull(gene_short_name)
-
-
-library(biomaRt)
-# Connect to Ensembl
-mouse_mart <- useMart("ensembl", dataset = "mmusculus_gene_ensembl", host = "https://useast.ensembl.org")
-human_mart <- useMart("ensembl", dataset = "hsapiens_gene_ensembl", host = "https://useast.ensembl.org")
-
-# Get orthologs
-orthologs <- getLDS(attributes = c("mgi_symbol"),
-                    filters = "mgi_symbol",
-                    values = mouse_aml_markers,
-                    mart = mouse_mart,
-                    attributesL = c("hgnc_symbol"),
-                    martL = human_mart)
-
-# Split into smaller batches
-batches <- split(mouse_aml_markers, ceiling(seq_along(mouse_aml_markers) / 10))  # Batches of 10 genes
-
-# Function to query each batch
-query_batch <- function(batch) {
-  getLDS(attributes = c("mgi_symbol"),
-         filters = "mgi_symbol",
-         values = batch,
-         mart = mouse_mart,
-         attributesL = c("hgnc_symbol"),
-         martL = human_mart)
-}
-
-# Query all batches and combine results
-orthologs <- do.call(rbind, lapply(batches, query_batch))
-
-# View results
-head(orthologs)
-
-################################################################################
-test_gl <- c("HSPD1", "NCL", "FCMR", "DUT", "PHGDH")
-bb_gene_umap(cds_main_human_unaligned,
-             gene_or_genes = bb_rowmeta(cds_main_human_unaligned) |>
-               select(feature_id, test_gl))
-
-###################################################################
-
 #generatung new logical col data for aggregate gene expression
 # nadeu_11b <- readxl::read_excel("~/network/X/Labs/Blaser/share/collaborators/lapalombella_whipp_network/queries/41591_2022_1927_MOESM3_ESM.xlsx", sheet = "Supplementary Table 11b", skip = 5, col_names = c("feature_id", "gene_short_name", "mean", "l2fc", "se", "p", "padj", "direction"))
 #
@@ -759,3 +704,109 @@ bb_gene_violinplot(
     include_jitter = TRUE
   ) + theme(axis.title.y = element_blank()) + theme(strip.text = element_blank()) + plot_layout(heights = c(1,-0.1 , 1)) +
     labs(title = "CD33", x = "Leiden clusters", y = "Gene Expression")
+
+###############################################################################
+#Do the authors see the same patterns in human patients carrying TET2+TP53 mutations?
+#Similar to clusters 3 and 6 observed in mice
+
+bb_var_umap(cds_combined, "partition", facet_by = "data_set", value_to_highlight = c("3", "6"))
+bb_var_umap(cds_combined, "leiden.1", facet_by = "data_set", overwrite_labels = TRUE)
+bb_var_umap(cds_combined, "partition", facet_by = "data_set", overwrite_labels = TRUE)
+bb_var_umap(cds_combined, "genotype", facet_by = "data_set")
+
+
+#Pull leiden.1 cluster values from mouse cells from partitions 3 & 6
+leiden.1_ms3.6_equiv <-
+  bb_cellmeta(filter_cds(
+    cds_combined,
+    cells = bb_cellmeta(cds_combined) |> filter(data_set %in% c("mouse") &
+                                                  partition == c("3", "6"))
+  )) |> count(leiden.1) |>
+  mutate(percentage = n / sum(n) * 100)
+
+leiden.1_ms3.6_equiv <- leiden.1_ms3.6_equiv |> filter(percentage > 0.5) |> pull(leiden.1)
+
+#Plot highlighting these clusters
+bb_var_umap(cds_combined, "leiden.1", facet_by = "data_set", value_to_highlight = leiden.1_ms3.6_equiv) + theme_minimal()
+bb_var_umap(cds_combined, "genotype", facet_by = "data_set")+theme_minimal()
+bb_gene_umap(cds_combined, gene_or_genes = c("CD34", "CD33")) + facet_wrap(~ data_set) +theme_minimal() + labs(title = "CD33/CD34 aggregate gene expression")
+
+
+# count human cells per sample
+bb_cellmeta(cds_combined) |>
+  count(pid, genotype) |> arrange(n)
+
+# Down sample the human cells
+set.seed(123)
+
+filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
+  filter(data_set == "human") |>
+  filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
+  slice_sample(n = 1873, by = pid))
+
+#Before
+bb_var_umap(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
+                         filter(data_set == "human") |>
+                         filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250"))),
+            "leiden.1",
+            facet_by = "data_set",
+            value_to_highlight = leiden.1_ms3.6_equiv) + theme_minimal()
+#After down sampling
+bb_var_umap(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
+                         filter(data_set == "human") |>
+                         filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
+                         slice_sample(n = 1873, by = pid)),
+            "leiden.1",
+            facet_by = "data_set",
+            value_to_highlight = leiden.1_ms3.6_equiv) + theme_minimal()
+
+#Show number of human cells of a particular genotype are really enriched as you say they are.
+bb_cellmeta(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
+                         filter(data_set == "human") |>
+                         filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
+                         slice_sample(n = 1873, by = pid))) |>
+  filter(leiden.1 %in% leiden.1_ms3.6_equiv)
+
+# mouse similar but use specimen variable
+bb_cellmeta(cds_combined) |> glimpse()
+bb_cellmeta(cds_combined) |> filter(data_set == "mouse") |>
+  count(specimen, genotype) |> arrange(n)
+
+
+# want to 1. Define regions of enrichment by human genotype.
+#Do this by lumping leiden.1 clusters together, using recode if you want.
+#2. Normalize human cell number per sample by downsampling to validate that you lumped the clusters
+#together fairly.
+#Then show number of human cells of a particular genotype are really enriched as you say they are.
+#3.  Normalize the mouse cell numbers per specimen.
+#Show that the number of cells coming from clusters 3 and 6 is higher in the human comutant regions.
+
+#TODO check to make sure this was performed correctly
+
+#Down sample the human cells
+set.seed(123)
+hm_aligned_count <- bb_cellmeta(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
+                                       filter(data_set == "human") |>
+                                       filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
+                                       slice_sample(n = 1873, by = pid))) |>
+  filter(leiden.1 %in% leiden.1_ms3.6_equiv) |>
+  group_by(genotype, pid) |>
+  summarise(n = n()) |>
+  ggplot(mapping = aes(x = genotype, y = n, fill = genotype)) +
+  geom_violin(trim = TRUE, alpha = 0.6) +  # Violin plot layer
+  geom_jitter(aes(color = pid), width = 0.2, alpha = 0.8) +  # Add jitter for individual points
+  labs(
+    title = "dKO AML Mouse Clusters 3 & 6 Aligned Human Cells",
+    subtitle = "Down sampled for comparison",
+    x = "Genotype",
+    y = "Mouse Aligned Normalized Human Cell #",
+    fill = "Genotype",
+    color = "Patient ID"
+  ) +
+  theme_minimal() +  # Apply minimal theme
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+    legend.position = "right"  # Position the legend
+  )
+
+hm_aligned_count
