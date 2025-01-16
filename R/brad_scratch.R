@@ -125,8 +125,8 @@ human_aml_only_cds_tm <- monocle3::top_markers(human_aml_only_cds, group_cells_b
 
 View(human_aml_only_cds_tm)
 
-human_aml_only_cds_tm |> 
-  count(gene_short_name, cell_group) |> 
+human_aml_only_cds_tm |>
+  count(gene_short_name, cell_group) |>
   arrange(desc(n))
 
 
@@ -158,29 +158,36 @@ human_mouse_orthos <- orthos |>
   left_join(mouse_ensembl, by = c("mouse" = "gene_short_name"))
 human_mouse_orthos
 
-left_join(human_aml_only_cds_tm, human_mouse_orthos, by = c("gene_short_name" = "human")) |> 
-  as_tibble() |> 
-  select(feature_id = mouse_ensembl, human_genotype = cell_group) |> 
-  filter(!is.na(feature_id)) |> 
-  group_by(feature_id) |> 
-  mutate(n = n()) |> 
-  filter(n == 1) |> 
+left_join(human_aml_only_cds_tm, human_mouse_orthos, by = c("gene_short_name" = "human")) |>
+  as_tibble() |>
+  select(feature_id = mouse_ensembl, human_genotype = cell_group) |>
+  filter(!is.na(feature_id)) |>
+  group_by(feature_id) |>
+  mutate(n = n()) |>
+  filter(n == 1) |>
   ungroup()
   count(feature_id) |> arrange(desc(n))
 
 
-cds_main <- left_join(human_aml_only_cds_tm, human_mouse_orthos, by = c("gene_short_name" = "human")) |> 
-  as_tibble() |> 
-  select(feature_id = mouse_ensembl, human_genotype = cell_group) |> 
+cds_main <- left_join(human_aml_only_cds_tm, human_mouse_orthos, by = c("gene_short_name" = "human")) |>
+  as_tibble() |>
+  select(feature_id = mouse_ensembl, human_genotype = cell_group) |>
   filter(!is.na(feature_id)) |>
-  group_by(feature_id) |> 
-  mutate(n = n()) |> 
-  filter(n == 1) |> 
-  ungroup() |> 
-  select(-n) |> 
+  group_by(feature_id) |>
+  mutate(n = n()) |>
+  filter(n == 1) |>
+  ungroup() |>
+  select(-n) |>
   bb_tbl_to_rowdata(cds_main, min_tbl = _)
 
 bb_cellmeta(cds_main)
 bb_rowmeta(cds_main)
 bb_var_umap(cds_main, "partition", value_to_highlight = c("3", "6"))
 bb_gene_umap(cds_main, gene_or_genes = bb_rowmeta(cds_main) |> select(feature_id, human_genotype) |> filter(!is.na(human_genotype)))
+
+bb_cellmeta(cds_combined) |> glimpse()
+bb_var_umap(cds_combined, "partition", facet_by = "data_set", value_to_highlight = c("3", "6"))
+
+
+
+

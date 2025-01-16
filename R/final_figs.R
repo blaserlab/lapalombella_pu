@@ -524,105 +524,162 @@ save_plot(
 #Do the authors see the same patterns in human patients carrying TET2+TP53 mutations?
 #Similar to clusters 3 and 6 observed in mice
 
-bb_var_umap(cds_combined, "partition", facet_by = "data_set", value_to_highlight = c("3", "6"))
-bb_var_umap(cds_combined, "leiden.1", facet_by = "data_set", overwrite_labels = TRUE)
-bb_var_umap(cds_combined, "partition", facet_by = "data_set", overwrite_labels = TRUE)
-bb_var_umap(cds_combined, "genotype", facet_by = "data_set")
-bb_var_umap(cds_combined, "genotype") + bb_var_umap(cds_combined, "leiden.1")
+# helpful
+# bb_var_umap(cds_combined, "leiden.1",
+#             facet_by = "data_set", overwrite_labels = TRUE) / bb_var_umap(obj = cds_combined, var = "genotype", facet_by = "data_set")
+#
+# bb_var_umap(filter_cds(cds_combined, cells = bb_cellmeta(cds_combined) |> filter(celltype.l1_ref %in% c("DC", "Mono", "other"))), "leiden.1", overwrite_labels = TRUE) +
+#
+# bb_var_umap(filter_cds(cds_combined, cells = bb_cellmeta(cds_combined) |> filter(celltype.l1_ref %in% c("DC", "Mono", "other"))), "genotype")
+#
+# bb_cellmeta(cds_combined) |> count(celltype.l1_ref)
+# bb_var_umap(filter_cds(cds_combined, cells = bb_cellmeta(cds_combined) |> filter(celltype.l1_ref == "B")), "leiden.1", overwrite_labels = TRUE)
+#
+# bb_var_umap(cds_combined, "celltype.l1_ref") + bb_var_umap(cds_combined, "leiden.1", overwrite_labels = TRUE)
+# bb_var_umap(cds_combined, "partition.1")
 
 
-#Pull leiden.1 cluster values from mouse cells from partitions 3 & 6
-leiden.1_ms3.6_equiv <-
-  bb_cellmeta(filter_cds(
-    cds_combined,
-    cells = bb_cellmeta(cds_combined) |> filter(data_set %in% c("mouse") &
-                                                  partition == c("3", "6"))
-  )) |> count(leiden.1) |>
-  mutate(percentage = n / sum(n) * 100)
+# need to run this---------------------
+leiden.1_tibble <- bind_rows(
+  tibble(
+    leiden.1 = c(
+      "49",
+      "22",
+      "81",
+      "67",
+      "57",
+      "52",
+      "91",
+      "19",
+      "72",
+      "46",
+      "27",
+      "17",
+      "37",
+      "83",
+      "61",
+      "3",
+      "51",
+      "41",
+      "40",
+      "62",
+      "42",
+      "53",
+      "35",
+      "9",
+      "36",
+      "71",
+      "60",
+      "32",
+      "92"
+    ),
+    aml_leiden_enrichment = "comutant_aml"
+  ),
+  tibble(
+    leiden.1 = c("56", "6", "77", "14", "16", "4", "105", "2", "88"),
+    aml_leiden_enrichment = "WT_aml"
+  ),
+  tibble(
+    leiden.1 = c("39","47", "21", "89", "20", "86", "95", "69", "25"),
+    aml_leiden_enrichment = "tet2_aml"
+  ),
+  tibble(
+         leiden.1 = c("48", "26", "18", "76", "93", "87", "24", "90", "33", "5", "99", "38"),
+         aml_leiden_enrichment = "tp53_aml"
+  ),
+  tibble(
+    leiden.1 = c("106", "97", "75", "82", "13", "63", "23", "44", "7", "100"),
+    aml_leiden_enrichment = "B cells"
+  ),
 
-leiden.1_ms3.6_equiv <- leiden.1_ms3.6_equiv |> filter(percentage > 0.5) |> pull(leiden.1)
-
-#Plot highlighting these clusters
-bb_var_umap(cds_combined, "leiden.1", facet_by = "data_set", value_to_highlight = leiden.1_ms3.6_equiv) + theme_minimal()
-bb_var_umap(cds_combined, "genotype", facet_by = "data_set")+theme_minimal()
-bb_gene_umap(cds_combined, gene_or_genes = c("CD34", "CD33")) + facet_wrap(~ data_set) +theme_minimal() + labs(title = "CD33/CD34 aggregate gene expression")
-
-
-# count human cells per sample
-bb_cellmeta(cds_combined) |>
-  count(pid, genotype) |> arrange(n)
-
-# Down sample the human cells
-set.seed(123)
-
-filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
-  filter(data_set == "human") |>
-  filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
-  slice_sample(n = 1873, by = pid))
-
-#Before
-bb_var_umap(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
-                         filter(data_set == "human") |>
-                         filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250"))),
-            "leiden.1",
-            facet_by = "data_set",
-            value_to_highlight = leiden.1_ms3.6_equiv) + theme_minimal()
-#After down sampling
-bb_var_umap(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
-                         filter(data_set == "human") |>
-                         filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
-                         slice_sample(n = 1873, by = pid)),
-            "leiden.1",
-            facet_by = "data_set",
-            value_to_highlight = leiden.1_ms3.6_equiv) + theme_minimal()
-
-#Show number of human cells of a particular genotype are really enriched as you say they are.
-bb_cellmeta(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
-                         filter(data_set == "human") |>
-                         filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
-                         slice_sample(n = 1873, by = pid))) |>
-  filter(leiden.1 %in% leiden.1_ms3.6_equiv)
-
-# mouse similar but use specimen variable
-bb_cellmeta(cds_combined) |> glimpse()
-bb_cellmeta(cds_combined) |> filter(data_set == "mouse") |>
-  count(specimen, genotype) |> arrange(n)
-
-
-# want to 1. Define regions of enrichment by human genotype.
-#Do this by lumping leiden.1 clusters together, using recode if you want.
-#2. Normalize human cell number per sample by downsampling to validate that you lumped the clusters
-#together fairly.
-#Then show number of human cells of a particular genotype are really enriched as you say they are.
-#3.  Normalize the mouse cell numbers per specimen.
-#Show that the number of cells coming from clusters 3 and 6 is higher in the human comutant regions.
-
-#TODO check to make sure this was performed correctly
-
-#Down sample the human cells
-set.seed(123)
-hm_aligned_count <- bb_cellmeta(filter_cds(cds_combined, bb_cellmeta(cds_combined) |>
-                                       filter(data_set == "human") |>
-                                       filter(!pid %in% c("U18-6524", "U22-0332", "U18-3620", "U17-2250")) |>
-                                       slice_sample(n = 1873, by = pid))) |>
-  filter(leiden.1 %in% leiden.1_ms3.6_equiv) |>
-  group_by(genotype, pid) |>
-  summarise(n = n()) |>
-  ggplot(mapping = aes(x = genotype, y = n, fill = genotype)) +
-  geom_violin(trim = TRUE, alpha = 0.6) +  # Violin plot layer
-  geom_jitter(aes(color = pid), width = 0.2, alpha = 0.8) +  # Add jitter for individual points
-  labs(
-    title = "dKO AML Mouse Clusters 3 & 6 Aligned Human Cells",
-    subtitle = "Down sampled for comparison",
-    x = "Genotype",
-    y = "Mouse Aligned Normalized Human Cell #",
-    fill = "Genotype",
-    color = "Patient ID"
-  ) +
-  theme_minimal() +  # Apply minimal theme
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
-    legend.position = "right"  # Position the legend
+  tibble(
+    leiden.1 = c(
+      "65",
+      "45",
+      "73",
+      "103",
+      "59",
+      "68",
+      "11",
+      "98",
+      "58",
+      "15",
+      "79",
+      "102",
+      "55",
+      "78",
+      "96",
+      "28",
+      "50",
+      "80",
+      "10",
+      "85",
+      "94",
+      "101",
+      "43",
+      "66"
+    ),
+    aml_leiden_enrichment = "TNK"
   )
+)
 
-hm_aligned_count
+colData(cds_combined)$aml_leiden_enrichment <- NULL
+cds_combined <- left_join(
+  bb_cellmeta(cds_combined),
+  leiden.1_tibble,
+  by = join_by(leiden.1)
+) |>
+  mutate(aml_leiden_enrichment = replace_na(aml_leiden_enrichment, "other")) |> select(cell_id, aml_leiden_enrichment) |>
+  bb_tbl_to_coldata(obj = cds_combined, min_tbl = _)
+
+
+# good -----------------
+bb_var_umap(cds_combined, "aml_leiden_enrichment")
+
+
+
+
+# good - maybe filter out the "other" cells---------------------
+bb_var_umap(obj = filter_cds(
+  cds_combined,
+  cells = bb_cellmeta(cds_combined) |> filter(data_set == "human")
+),
+var = "genotype") + bb_var_umap(
+  filter_cds(
+    cds_combined,
+    cells = bb_cellmeta(cds_combined) |> filter(data_set == "mouse")
+  ),
+  "partition",
+  value_to_highlight = c("3", "6")
+)
+
+
+# good
+bb_cellmeta(cds_combined) |>
+  # filter(aml_leiden_enrichment %in% c("comutant_aml", "other_aml")) |>
+  filter(data_set == "human") |>
+  count(aml_leiden_enrichment, genotype) |>
+  ggplot(aes(x = aml_leiden_enrichment, y = n, fill = genotype)) +
+  geom_bar(stat = "identity", position = "fill")
+
+
+# good
+bb_cellmeta(cds_combined) |>
+  filter(aml_leiden_enrichment %in% c("comutant_aml", "tet2_aml", "WT_aml", "tp53_aml")) |>
+  filter(data_set == "mouse") |>
+  filter(partition %in% c("3", "6")) |>
+  count(aml_leiden_enrichment, genotype) |>
+  ggplot(aes(x = genotype, y = n, fill = aml_leiden_enrichment)) +
+  geom_bar(stat = "identity", position = "fill")
+
+
+data <- bb_cellmeta(cds_combined) |>
+  filter(aml_leiden_enrichment %in% c("comutant_aml", "tet2_aml", "WT_aml", "tp53_aml")) |>
+  filter(data_set == "mouse") |>
+  filter(partition %in% c("3", "6")) |>
+  mutate(new_group = ifelse(aml_leiden_enrichment == "comutant_aml", "comutant_aml", "other_aml")) |>
+  count(new_group) |>
+  pivot_wider(names_from = new_group, values_from = n)
+
+binom.test(x = data$comutant_aml, data$comutant_aml + data$other_aml, p = 0.25)
+
