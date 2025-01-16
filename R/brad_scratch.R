@@ -113,4 +113,74 @@ cds_combined <- bb_rowmeta(cds_combined) |>
 
 
 # how to fork a project from github
-# blaseRtemplates::initialize_github("blaserlab/lapalombella.pu.datapkg", dest = "/workspace/ethan_workspace")
+
+
+bb_cellmeta(cds_main_human_unaligned) |> glimpse()
+bb_var_umap(cds_main_human_unaligned, "celltype.l1_ref", overwrite_labels = TRUE)
+
+human_aml_only_cds <- filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |> filter(celltype.l1_ref %in% c("Mono", "DC", "other")))
+bb_var_umap(human_aml_only_cds, "genotype")
+bb_var_umap(human_aml_only_cds, "density")
+human_aml_only_cds_tm <- monocle3::top_markers(human_aml_only_cds, group_cells_by = "genotype", genes_to_test_per_group = 100, cores = 20)
+
+View(human_aml_only_cds_tm)
+
+human_aml_only_cds_tm |> 
+  count(gene_short_name, cell_group) |> 
+  arrange(desc(n))
+
+
+orthos <- read_tsv("https://www.informatics.jax.org/downloads/reports/HOM_AllOrganism.rpt") |>
+  mutate(`DB Class Key` = as.integer(`DB Class Key`))
+
+duplicates <- orthos |>
+  filter(`Common Organism Name` %in% c("mouse, laboratory", "human")) |>
+  # filter(!`DB Class Key` %in% c(48325866, 48332781)) |>
+  select(`DB Class Key`, `Common Organism Name`, `Symbol`) |>
+  dplyr::summarise(n = dplyr::n(), .by = c(`DB Class Key`, `Common Organism Name`)) |>
+  filter(n >1L) |>
+  pull(`DB Class Key`)
+
+
+human_ensembl <- bb_rowmeta(cds_main_human_unaligned) |> select(human_ensembl = id, gene_short_name)
+mouse_ensembl <- bb_rowmeta(cds_main) |> select(mouse_ensembl = id, gene_short_name)
+
+
+human_mouse_orthos <- orthos |>
+  filter(`Common Organism Name` %in% c("mouse, laboratory", "human")) |>
+  filter(!`DB Class Key` %in% c(48325866, 48332781)) |>
+  filter(!`DB Class Key` %in% duplicates) |>
+  select(`DB Class Key`,`Common Organism Name`, `Symbol`) |>
+  pivot_wider(names_from = `Common Organism Name`, values_from = Symbol) |>
+  select(-`DB Class Key`) |>
+  rename(mouse = `mouse, laboratory`) |>
+  left_join(human_ensembl, by = c("human" = "gene_short_name")) |>
+  left_join(mouse_ensembl, by = c("mouse" = "gene_short_name"))
+human_mouse_orthos
+
+left_join(human_aml_only_cds_tm, human_mouse_orthos, by = c("gene_short_name" = "human")) |> 
+  as_tibble() |> 
+  select(feature_id = mouse_ensembl, human_genotype = cell_group) |> 
+  filter(!is.na(feature_id)) |> 
+  group_by(feature_id) |> 
+  mutate(n = n()) |> 
+  filter(n == 1) |> 
+  ungroup()
+  count(feature_id) |> arrange(desc(n))
+
+
+cds_main <- left_join(human_aml_only_cds_tm, human_mouse_orthos, by = c("gene_short_name" = "human")) |> 
+  as_tibble() |> 
+  select(feature_id = mouse_ensembl, human_genotype = cell_group) |> 
+  filter(!is.na(feature_id)) |>
+  group_by(feature_id) |> 
+  mutate(n = n()) |> 
+  filter(n == 1) |> 
+  ungroup() |> 
+  select(-n) |> 
+  bb_tbl_to_rowdata(cds_main, min_tbl = _)
+
+bb_cellmeta(cds_main)
+bb_rowmeta(cds_main)
+bb_var_umap(cds_main, "partition", value_to_highlight = c("3", "6"))
+bb_gene_umap(cds_main, gene_or_genes = bb_rowmeta(cds_main) |> select(feature_id, human_genotype) |> filter(!is.na(human_genotype)))
