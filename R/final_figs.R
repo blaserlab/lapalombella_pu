@@ -90,7 +90,7 @@ tables_out <- "/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_networ
 
 ###################################################################################################
 #12.31.24 MDSC identification
-bb_cellmeta(cds_main_human_unaligned) |> glimpse()
+#bb_cellmeta(cds_main_human_unaligned) |> glimpse()
 
 # MDSC proteins of interest
 prots <- c("CD33", "CD11b", "CD14", "HLA-DR")
@@ -102,7 +102,7 @@ mdsc_prot_dat <-
                  cell_grouping = c("leiden"),
                  experiment_type = "Antibody Capture",
                  return_value = "data"
-  )
+                 )
 
 set.seed(123)
 
@@ -221,20 +221,6 @@ mdsc_leiden_clusts <-
 
 save_plot(filename = fs::path(figs_out, "mdsc_umap.pdf"), mdsc_leiden_clusts, base_width = 7, base_height = 2.5)
 
-# fisher exact test for mdsc--------------------
-values <- bb_cellmeta(cds_main_human_unaligned) |>
-  mutate(genotype_binary = ifelse(genotype == "comutant", "comutant", "other")) |>
-  count(mdsc_clust, genotype_binary) |>
-  pull(n)
-
-mat <- matrix(values, nrow = 2)
-colnames(mat) <- c("mdsc_no", "mdsc_yes")
-rownames(mat) <- c("comutant", "other")
-mat
-
-
-fisher.test(mat[c(2:1), c(2:1)])
-
 #mdsc cluster protein bubbles -----------------------------
 mdsc_protein_dat <- bb_genebubbles(
   cds_main_human_unaligned,
@@ -245,8 +231,6 @@ mdsc_protein_dat <- bb_genebubbles(
   expression_threshold = 0.6,
   return_value = "data"
 )
-
-
 
 mdsc_proteinbubble_plot <- ggplot(mdsc_protein_dat,
        aes(x = mdsc_clust,
@@ -268,8 +252,6 @@ save_plot(
   base_height = 2.0
 )
 
-
-
 #mdsc cluster transcript bubbles--------------
 mdsc_markers <- c("ITGAM",
                   "CD14",
@@ -285,7 +267,7 @@ mdsc_transcript_dat <- bb_genebubbles(
   cell_grouping = "mdsc_clust",
   experiment_type = "Gene Expression",
   scale_expr = FALSE,
-  # expression_threshold = 0.6,
+  #expression_threshold = 0.6,
   return_value = "data"
 ) |>
   dplyr::mutate(gene_short_name = dplyr::case_when(
@@ -294,8 +276,6 @@ mdsc_transcript_dat <- bb_genebubbles(
     gene_short_name == "CEACAM8" ~ "CD66b (CEACAM8)",
     TRUE ~ gene_short_name
   ))
-
-
 
 mdsc_genebubble_plot <- ggplot(mdsc_transcript_dat,
        aes(x = mdsc_clust,
@@ -318,7 +298,56 @@ save_plot(
   base_height = 2.0
 )
 
+cellgeno_sums <- bb_cellmeta(cds_main_human_unaligned) |>
+  count(genotype, name = "geno_sum")
+cellcount2 <- bb_cellmeta(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                                       filter((leiden %in% mdsc_clusts)))) |>
+  group_by(genotype, pid) |>
+  summarise(n = n()) |>
+  left_join(cellgeno_sums) |>
+  mutate(total = sum(cellgeno_sums$geno_sum)) |>
+  mutate(ratio = geno_sum/total) |>
+  mutate(normalized_cell_frac = n/ratio)
 
+#factor levels
+cellcount2$genotype
+cellcount2$genotype <- factor(cellcount2$genotype,
+                              levels = c("WT", "tet2","tp53", "comutant"))
+#stacked mdsc bar plot
+mdsc_bp_stack <- ggplot(cellcount2,
+                        aes(x = 1, y = normalized_cell_frac, fill = genotype)) +
+  geom_bar(position = "fill", stat = "identity", width = 0.9) +  # Change position to "stack"
+  labs( x = NULL,
+    y = "MDSC Cell Fraction (Normalized)",
+      ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_blank(),  # Removes x-axis labels
+    axis.ticks.x = element_blank()  # Removes x-axis ticks
+  )
+
+mdsc_bp_stack
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "mdsc_geno_proportions_barplot.pdf"),
+  plot = mdsc_bp_stack,
+  base_width = 3.5,
+  base_height = 3.0
+)
+
+# fisher exact test for mdsc--------------------
+values <- bb_cellmeta(cds_main_human_unaligned) |>
+  mutate(genotype_binary = ifelse(genotype == "comutant", "comutant", "other")) |>
+  count(mdsc_clust, genotype_binary) |>
+  pull(n)
+
+mat <- matrix(values, nrow = 2)
+colnames(mat) <- c("mdsc_no", "mdsc_yes")
+rownames(mat) <- c("comutant", "other")
+mat
+
+fisher.test(mat[c(2:1), c(2:1)])
 
 ################################################################################
 #T cell exhaustion
@@ -386,9 +415,9 @@ ggplot(count, aes(x = genotype, y = normalized_cell_frac, color = pid)) +
   #          stat = "identity",
   #          width = 0.9) +
   labs(
-    title = "CD8 T cell Count Normalized by genotype and pid",
+    #title = "CD8 T cell Count Normalized by genotype and pid",
     x = "Genotype",
-    y = "Normalized Cell #",
+    y = "CD8 T Cell # (Normalized)",
     color = "Patient ID"
   ) +
   theme_minimal() +  # Apply minimal theme
@@ -510,15 +539,18 @@ save_plot(
 # ) |>
 #   group_by(pid, genotype, celltype.l2_ref) |>
 #   summarise(mean_exhaustion_score = mean(exhaustion_yes)) |>
-#   ggplot(aes(x = genotype, y = mean_exhaustion_score)) +
-#   geom_jitter() +
-#   # geom_violin() +
+#   ggplot(aes(x = genotype, y = mean_exhaustion_score, fill = genotype)) +
+#   geom_jitter(aes(color = genotype), width = 0.2, height = 0, size = 1, alpha = 0.8) +
+#   geom_violin(alpha = 0.5) +
+#   geom_errorbar(data = summary_stats,
+#                 aes(x = genotype, ymin = mean - se, ymax = mean + se),
+#                 width = 0.2, color = "black") +
 #   facet_wrap( ~ celltype.l2_ref) +
 #   ggpubr::stat_compare_means(comparisons = list(c("comutant", "tet2"),
 #                                                 c("comutant", "tp53"),
 #                                                 c("comutant", "WT")), method = "wilcox")
-
-
+#
+# colData(cds_main_human_unaligned) |> glimpse()
 
 ###############################################################################
 #Do the authors see the same patterns in human patients carrying TET2+TP53 mutations?
@@ -634,44 +666,79 @@ cds_combined <- left_join(
 
 
 # good -----------------
-bb_var_umap(cds_combined, "aml_leiden_enrichment")
+colData(cds_combined)$aml_leiden_enrichment <- factor(
+  colData(cds_combined)$aml_leiden_enrichment,
+  levels = c("B cells", "TNK", "WT_aml", "tet2_aml", "tp53_aml", "comutant_aml")
+)
 
-
-
-
-# good - maybe filter out the "other" cells---------------------
-bb_var_umap(obj = filter_cds(
+human_ms_geno_aml_umap<- bb_var_umap(filter_cds(
   cds_combined,
-  cells = bb_cellmeta(cds_combined) |> filter(data_set == "human")
+  cells = bb_cellmeta(cds_combined) |> filter(aml_leiden_enrichment != "other")), "aml_leiden_enrichment", foreground_alpha = 0.5)
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "human_ms_geno_aml_umap.pdf"),
+  plot = human_ms_geno_aml_umap,
+  base_width = 6,
+  base_height = 4
+)
+
+# good - filtered out the "other" cells---------------------
+human_ms_umap <- bb_var_umap(obj = filter_cds(
+  cds_combined,
+  cells = bb_cellmeta(cds_combined) |> filter(data_set == "human") |> filter(aml_leiden_enrichment != "other")
 ),
-var = "genotype") + bb_var_umap(
+var = "genotype") +labs(title = "Human") + bb_var_umap(
   filter_cds(
     cds_combined,
-    cells = bb_cellmeta(cds_combined) |> filter(data_set == "mouse")
+    cells = bb_cellmeta(cds_combined) |> filter(data_set == "mouse") |> filter(aml_leiden_enrichment != "other")
   ),
   "partition",
   value_to_highlight = c("3", "6")
+) +labs(title = "Mouse")
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "human_ms_umap.pdf"),
+  plot = human_ms_umap,
+  base_width = 10,
+  base_height = 4.0
 )
 
-
 # good
-bb_cellmeta(cds_combined) |>
+human_ms_mapping_QC_barplot <- bb_cellmeta(filter_cds(
+  cds_combined,
+  cells = bb_cellmeta(cds_combined) |> filter(aml_leiden_enrichment != "other"))) |>
   # filter(aml_leiden_enrichment %in% c("comutant_aml", "other_aml")) |>
   filter(data_set == "human") |>
   count(aml_leiden_enrichment, genotype) |>
   ggplot(aes(x = aml_leiden_enrichment, y = n, fill = genotype)) +
-  geom_bar(stat = "identity", position = "fill")
+  geom_bar(stat = "identity", position = "fill") + labs(y = "Proportion")
 
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "human_ms_mapping_QC_barplot.pdf"),
+  plot = human_ms_mapping_QC_barplot,
+  base_width = 6,
+  base_height = 4.0
+)
 
 # good
-bb_cellmeta(cds_combined) |>
+human_ms3.6_region_enrich_bp <- bb_cellmeta(cds_combined) |>
   filter(aml_leiden_enrichment %in% c("comutant_aml", "tet2_aml", "WT_aml", "tp53_aml")) |>
   filter(data_set == "mouse") |>
   filter(partition %in% c("3", "6")) |>
   count(aml_leiden_enrichment, genotype) |>
   ggplot(aes(x = genotype, y = n, fill = aml_leiden_enrichment)) +
-  geom_bar(stat = "identity", position = "fill")
+  geom_bar(stat = "identity", position = "fill") + labs(y = "Proportion")
 
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "human_ms3.6_region_enrich_bp.pdf"),
+  plot = human_ms3.6_region_enrich_bp,
+  base_width = 4,
+  base_height = 4.0
+)
 
 data <- bb_cellmeta(cds_combined) |>
   filter(aml_leiden_enrichment %in% c("comutant_aml", "tet2_aml", "WT_aml", "tp53_aml")) |>
@@ -682,4 +749,3 @@ data <- bb_cellmeta(cds_combined) |>
   pivot_wider(names_from = new_group, values_from = n)
 
 binom.test(x = data$comutant_aml, data$comutant_aml + data$other_aml, p = 0.25)
-

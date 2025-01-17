@@ -21,9 +21,9 @@ suppressPackageStartupMessages(library("gridExtra"))
 suppressPackageStartupMessages(library("patchwork"))
 suppressPackageStartupMessages(library("todor"))
 
-
 # run this to update the data package
 blaseRtemplates::project_data("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/datapkg")
 
 #blaseRtemplates::install_one_package("todor")
 # todor::todor(c("TODO", "NOTE"))
+
