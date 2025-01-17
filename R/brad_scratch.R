@@ -189,5 +189,14 @@ bb_cellmeta(cds_combined) |> glimpse()
 bb_var_umap(cds_combined, "partition", facet_by = "data_set", value_to_highlight = c("3", "6"))
 
 
+bb_cellmeta(cds_main_human_unaligned) |> 
+  count(sample, pid, genotype) |> 
+  View()
 
+bb_cellmeta(cds_main_human_unaligned) |> 
+  count(sample) |> View()
 
+seq_qc |> View()
+
+bb_cellmeta(cds_main_human_unaligned) |> nrow()
+bb_rowmeta(cds_combined) |> nrow()
