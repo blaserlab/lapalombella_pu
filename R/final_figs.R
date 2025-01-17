@@ -324,7 +324,8 @@ mdsc_bp_stack <- ggplot(cellcount2,
   theme(
     axis.text.x = element_blank(),  # Removes x-axis labels
     axis.ticks.x = element_blank()  # Removes x-axis ticks
-  )
+  ) +
+  scale_fill_manual(values = experimental_group_palette_1)
 
 mdsc_bp_stack
 
