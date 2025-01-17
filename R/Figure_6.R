@@ -71,14 +71,20 @@ aml_gexp_umap <- ggarrange(aml_plotlist[[1]],
 
 #ggsave("F6C2.pdf", path = figs_out, width = 8.25, height = 4.5)
 #####################################################################################################################
+unique(colData(cds_main)$genotype)
+bb_var_umap(filter_cds(
+  cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("AML", "T ALL", "No leukemia"))), "genotype")
+
 #Figure 6C: Heatmap
-# F6_topmarkers_part <-
-#   monocle3::top_markers(
-#     cds_main,
-#     group_cells_by = "partition",
-#     genes_to_test_per_group = 20,
-#     cores = 12
-#   )
+F6_topmarkers_part <-
+  monocle3::top_markers(
+    cds_main,
+    group_cells_by = "partition",
+    genes_to_test_per_group = 20,
+    cores = 12
+  )
 #F6_topmarkers_part <- read.csv("~/network/T/Labs/EHL/Senior Associate group/Rosa/Ethan/1. EHL/Tet2_P53/Data/F6_topmarkers_part.csv")
 
 markers <- F6_topmarkers_part |> pull(gene_short_name)
@@ -89,7 +95,7 @@ mat <-
     obj = filter_cds(
       cds_main,
       cells = bb_cellmeta(cds_main) |>
-        filter(partition %in% c(1:16)),
+        filter(leukemia_phenotype %in% c("AML", "T ALL", "No leukemia")),
       genes = bb_rowmeta(cds_main) |>
         filter(gene_short_name %in% markers)
     ),
@@ -104,9 +110,6 @@ rownames(mat) <-
   left_join(bb_rowmeta(cds_main) |>
               select(feature_id, gene_short_name)) |>
   pull(gene_short_name)
-
-heatmap_3_colors <-
-  c("#313695", "white", "#A50026")
 
 colfun = circlize::colorRamp2(breaks = c(min(mat),
                                          0,
@@ -133,7 +136,7 @@ ComplexHeatmap::Heatmap(
   col = colfun,
   name = "Expression",
   show_row_names = F,
-  show_column_names = F, #check column clustering order for bp
+  show_column_names = T, #check column clustering order for bp
   right_annotation = anno,
   #top_annotation = hmap_bp,
   #width = ncol(mat)*unit(0.1, "mm"),
@@ -151,30 +154,33 @@ ComplexHeatmap::Heatmap(
 
 # Stacked bar chart: heatmap cell composition
 #normalized to cell quantity contributed from each leukemia phenotype
-cellpheno_sums <- bb_cellmeta(cds_main) |>
-  count(leukemia_phenotype, name = "pheno_sum")
+cellgeno_sums <- bb_cellmeta(filter_cds(
+  cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("AML", "T ALL", "No leukemia")))) |>
+  count(genotype, name = "geno_sum")
 
-cellcount <- bb_cellmeta(cds_main) |>
-  group_by(partition, leukemia_phenotype, leiden_assignment2) |>
-  summarise(n = n()) |> filter(partition %in% c(1:16)) |>
+cellcount <- bb_cellmeta(filter_cds(
+  cds_main,
+  cells = bb_cellmeta(cds_main) |>
+    filter(leukemia_phenotype %in% c("AML", "T ALL", "No leukemia")))) |>
+  group_by(partition, genotype, leiden_assignment2) |>
+  summarise(n = n()) |>
   left_join(cellpheno_sums) |>
-  mutate(leukemia_phenotype = recode(leukemia_phenotype, "No leukemia" = "WT")) |>
-  mutate(total = sum(cellpheno_sums$pheno_sum)) |>
-  mutate(ratio = pheno_sum/total) |>
-  mutate(normalized_cell_frac = n/ratio/4)
+  #mutate(leukemia_phenotype = recode(leukemia_phenotype, "No leukemia" = "WT")) |>
+  mutate(total = sum(cellgeno_sums$geno_sum)) |>
+  mutate(ratio = geno_sum/total) |>
+  mutate(normalized_cell_frac = n/ratio)
 
 #write.csv(cellcount, file = "~/network/T/Labs/EHL/Rosa/Ethan/10x/Tet2_P53/cellcount.csv")
 
 #factor levels
 cellcount$partition <- factor(cellcount$partition,
-                                     levels = c("12","2","4","15","6","3","9","14", "11","1","16","10","5","8","13","7")) #for all
-
-cellcount$leukemia_phenotype <- factor(cellcount$leukemia_phenotype,
-                                       levels = c("AML", "pre-B ALL","T ALL", "WT"))
+                                     levels = c("12","5", "2", "4", "8", "13", "6", "3", "9","11","14", "1", "16", "10", "7")) #for all
 #plot
 hmap_bp <-
   ggplot(cellcount,
-         aes(x = partition, y = normalized_cell_frac, fill = leukemia_phenotype)) +
+         aes(x = partition, y = normalized_cell_frac, fill = genotype)) +
   geom_bar(position = "fill", stat = "identity", width = 0.9) +
   theme_minimal()+
   theme(legend.title = element_blank()) +
