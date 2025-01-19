@@ -48,8 +48,15 @@ experimental_group_palette_1 <- c(
   "tet2" = brewer.pal(n = 8, name = "Dark2")[4],
   "tp53" = brewer.pal(n = 8, name = "Dark2")[5],
   "WT" = brewer.pal(n = 8, name = "Dark2")[6]
+)
 
-
+experimental_group_palette_2 <- c(
+  "Murine dKO TET2/TP53 AML" = brewer.pal(n = 8, name = "Dark2")[1],
+  "other" = brewer.pal(n = 8, name = "Dark2")[2],
+  "comutant_aml" = brewer.pal(n = 8, name = "Dark2")[3],
+  "tet2_aml" = brewer.pal(n = 8, name = "Dark2")[4],
+  "tp53_aml" = brewer.pal(n = 8, name = "Dark2")[5],
+  "WT_aml" = brewer.pal(n = 8, name = "Dark2")[6]
 )
 
 
@@ -206,7 +213,7 @@ mdsc_leiden_clusts <-
     cell_size = 0.1,
     foreground_alpha = 0.05,
     palette = experimental_group_palette_1,
-    rasterize = TRUE
+    rasterize = F
   ) + labs(title = "MDSC Clusters") +
   bb_var_umap(
     cds_main_human_unaligned,
@@ -215,11 +222,11 @@ mdsc_leiden_clusts <-
     foreground_alpha = 0.05,
     overwrite_labels = F,
     palette = experimental_group_palette_1,
-    rasterize = TRUE
+    rasterize = F
   ) + labs(title = "Genotype")
 
 
-save_plot(filename = fs::path(figs_out, "mdsc_umap.pdf"), mdsc_leiden_clusts, base_width = 7, base_height = 2.5)
+save_plot(filename = fs::path(figs_out, "mdsc_clust_umap.pdf"), mdsc_leiden_clusts, base_width = 7, base_height = 2.5)
 
 #mdsc cluster protein bubbles -----------------------------
 mdsc_protein_dat <- bb_genebubbles(
@@ -569,7 +576,7 @@ save_plot(
 # bb_var_umap(filter_cds(cds_combined, cells = bb_cellmeta(cds_combined) |> filter(celltype.l1_ref == "B")), "leiden.1", overwrite_labels = TRUE)
 #
 # bb_var_umap(cds_combined, "celltype.l1_ref") + bb_var_umap(cds_combined, "leiden.1", overwrite_labels = TRUE)
-# bb_var_umap(cds_combined, "partition.1")
+# bb_var_umap(cds_combined, "dataset")
 
 
 # need to run this---------------------
@@ -656,7 +663,11 @@ leiden.1_tibble <- bind_rows(
   )
 )
 
+# colData(cds_main) |> glimpse()
+# unique(colData(cds_main)$barcode)
 colData(cds_combined)$aml_leiden_enrichment <- NULL
+unique(colData(cds_combined)$aml_leiden_enrichment)
+
 cds_combined <- left_join(
   bb_cellmeta(cds_combined),
   leiden.1_tibble,
@@ -665,6 +676,77 @@ cds_combined <- left_join(
   mutate(aml_leiden_enrichment = replace_na(aml_leiden_enrichment, "other")) |> select(cell_id, aml_leiden_enrichment) |>
   bb_tbl_to_coldata(obj = cds_combined, min_tbl = _)
 
+# ms_aml_mapped_cds <- filter_cds(
+#   cds_combined,
+#   cells = bb_cellmeta(cds_combined) |>
+#     filter(data_set == "mouse") |>
+#     filter(partition %in% c(3,6)) |>
+#     filter(aml_leiden_enrichment != "other")
+# )
+
+ms_mapped_aml_dat <- bb_cellmeta(filter_cds(
+  cds_combined,
+  cells = bb_cellmeta(cds_combined) |>
+    filter(data_set == "mouse") |>
+    filter(partition %in% c(3,6)) |>
+    filter(aml_leiden_enrichment != "other")
+)) |>
+  select(cell_id, aml_leiden_enrichment) |> mutate(aml_leiden_enrichment = "Murine dKO TET2/TP53 AML")
+
+all_cells_enrich <- bb_cellmeta(cds_combined) |> select(cell_id, aml_leiden_enrichment)
+
+mapped_enrich <- all_cells_enrich |>
+  left_join(ms_mapped_aml_dat, by = "cell_id") |>
+  mutate(aml_leiden_enrichment2 = coalesce(aml_leiden_enrichment.y, aml_leiden_enrichment.x)) |>
+  select(cell_id, aml_leiden_enrichment2)
+
+# unique(mapped_enrich$aml_leiden_enrichment2)
+# bb_var_umap(cds_combined, "aml_leiden_enrichment")
+
+colData(cds_combined)$aml_leiden_enrichment2 <- NULL
+
+cds_combined <- left_join(
+  bb_cellmeta(cds_combined),
+  mapped_enrich,
+  by = join_by(cell_id)
+) |>
+   select(cell_id, aml_leiden_enrichment2) |>
+  bb_tbl_to_coldata(obj = cds_combined, min_tbl = _)
+
+#unique(colData(cds_combined)$aml_leiden_enrichment2)
+
+colData(cds_combined)$aml_leiden_enrichment2 <- factor(
+  colData(cds_combined)$aml_leiden_enrichment2,
+  levels = c("B cells", "TNK", "WT_aml", "tet2_aml", "tp53_aml", "comutant_aml", "Murine dKO TET2/TP53 AML", "other")
+)
+
+human_ms_aml_mapped_umap<- bb_var_umap(filter_cds(
+  cds_combined,
+  cells = bb_cellmeta(cds_combined) |>
+    filter(!aml_leiden_enrichment2 %in% c("other"))),
+  "aml_leiden_enrichment2", palette = experimental_group_palette_2)
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "human_ms_aml_mapped_umap.pdf"),
+  plot = human_ms_aml_mapped_umap,
+  base_width = 6,
+  base_height = 4
+)
+
+human_ms_aml_mapped_umap_NoTB <- bb_var_umap(filter_cds(
+  cds_combined,
+  cells = bb_cellmeta(cds_combined) |>
+    filter(!aml_leiden_enrichment2 %in% c("other", "B cells", "TNK"))),
+  "aml_leiden_enrichment2")
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "human_ms_aml_mapped_umap_NoTB.pdf"),
+  plot = human_ms_aml_mapped_umap_NoTB,
+  base_width = 6,
+  base_height = 4
+)
 
 # good -----------------
 colData(cds_combined)$aml_leiden_enrichment <- factor(
@@ -672,36 +754,62 @@ colData(cds_combined)$aml_leiden_enrichment <- factor(
   levels = c("B cells", "TNK", "WT_aml", "tet2_aml", "tp53_aml", "comutant_aml")
 )
 
-human_ms_geno_aml_umap<- bb_var_umap(filter_cds(
-  cds_combined,
-  cells = bb_cellmeta(cds_combined) |> filter(aml_leiden_enrichment != "other")), "aml_leiden_enrichment", foreground_alpha = 0.5)
+# human_ms_geno_aml_umap <- bb_var_umap(
+#   filter_cds(
+#     cds_combined,
+#     cells = bb_cellmeta(cds_combined) |> filter(aml_leiden_enrichment != "other")
+#   ),
+#   "aml_leiden_enrichment",
+#   foreground_alpha = 0.5
+# )
 
-save_plot(
-  #filename = "temp.pdf",
-  filename = fs::path(figs_out, "human_ms_geno_aml_umap.pdf"),
-  plot = human_ms_geno_aml_umap,
-  base_width = 6,
-  base_height = 4
-)
+# save_plot(
+#   #filename = "temp.pdf",
+#   filename = fs::path(figs_out, "human_ms_geno_aml_umap.pdf"),
+#   plot = human_ms_geno_aml_umap,
+#   base_width = 6,
+#   base_height = 4
+# )
 
 # good - filtered out the "other" cells---------------------
-human_ms_umap <- bb_var_umap(obj = filter_cds(
+ms_all_aml_dat <- bb_cellmeta(filter_cds(
   cds_combined,
-  cells = bb_cellmeta(cds_combined) |> filter(data_set == "human") |> filter(aml_leiden_enrichment != "other")
+  cells = bb_cellmeta(cds_combined) |>
+    filter(data_set == "mouse") |>
+    filter(partition %in% c(3,6)) #|>
+    #filter(aml_leiden_enrichment != "other")
+)) |>
+  select(cell_id) |> mutate(dko_aml = "Murine dKO TET2/TP53 AML")
+
+colData(cds_combined)$dko_aml <- NULL
+
+cds_combined <- left_join(
+  bb_cellmeta(cds_combined),
+  ms_all_aml_dat,
+  by = join_by(cell_id)
+) |>
+  select(cell_id, dko_aml) |>
+  bb_tbl_to_coldata(obj = cds_combined, min_tbl = _)
+
+human_ms_umap2 <- bb_var_umap(obj = filter_cds(
+  cds_combined,
+  cells = bb_cellmeta(cds_combined) |> filter(data_set == "human") #|> filter(aml_leiden_enrichment != "other")
 ),
-var = "genotype") +labs(title = "Human") + bb_var_umap(
+var = "genotype",
+foreground_alpha = 0.5,
+palette = experimental_group_palette_1) +labs(title = "Human") + bb_var_umap(
   filter_cds(
     cds_combined,
-    cells = bb_cellmeta(cds_combined) |> filter(data_set == "mouse") |> filter(aml_leiden_enrichment != "other")
+    cells = bb_cellmeta(cds_combined) |> filter(data_set == "mouse") #|> filter(aml_leiden_enrichment != "other")
   ),
-  "partition",
-  value_to_highlight = c("3", "6")
+  "dko_aml",
+  value_to_highlight = "Murine dKO TET2/TP53 AML"
 ) +labs(title = "Mouse")
 
 save_plot(
   #filename = "temp.pdf",
-  filename = fs::path(figs_out, "human_ms_umap.pdf"),
-  plot = human_ms_umap,
+  filename = fs::path(figs_out, "human_ms_umap2.pdf"),
+  plot = human_ms_umap2,
   base_width = 10,
   base_height = 4.0
 )
