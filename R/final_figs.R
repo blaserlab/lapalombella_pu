@@ -1,100 +1,3 @@
-suppressPackageStartupMessages(library("blaseRtools"))
-suppressPackageStartupMessages(library("blaseRtemplates"))
-suppressPackageStartupMessages(library("tidyverse"))
-suppressPackageStartupMessages(library("monocle3"))
-suppressPackageStartupMessages(library("circlize"))
-suppressPackageStartupMessages(library("ComplexHeatmap"))
-suppressPackageStartupMessages(library("lazyData"))
-suppressPackageStartupMessages(library("cowplot"))
-suppressPackageStartupMessages(library("RColorBrewer"))
-suppressPackageStartupMessages(library("ggrepel"))
-suppressPackageStartupMessages(library("ggpubr"))
-suppressPackageStartupMessages(library("rstatix"))
-#suppressPackageStartupMessages(library("readxl"))
-suppressPackageStartupMessages(library("knitr"))
-suppressPackageStartupMessages(library("pander"))
-suppressPackageStartupMessages(library("conflicted"))
-suppressPackageStartupMessages(library("readr"))
-suppressPackageStartupMessages(library("gridExtra"))
-suppressPackageStartupMessages(library("patchwork"))
-suppressPackageStartupMessages(library("todor"))
-
-
-# run this to update the data package
-blaseRtemplates::project_data("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/datapkg")
-
-# graphical parameters####
-the_font_size <-10
-theme_set(theme_cowplot(font_size = the_font_size))
-
-# show_col(pal_npg("nrc")(10))
-experimental_group_palette <- c(
-  "AML" = "#DC0000",
-  "WT" = "#3C5488",
-  "MDSC" = brewer.pal(n = 8, name = "Dark2")[1],
-  "other" = brewer.pal(n = 8, name = "Dark2")[2],
-  "comutant" = brewer.pal(n = 8, name = "Dark2")[3],
-  "tet2" = brewer.pal(n = 8, name = "Dark2")[4],
-  "tp53" = brewer.pal(n = 8, name = "Dark2")[5],
-  "WT" = "orange3"
-
-
-)
-
-experimental_group_palette_1 <- c(
-  "MDSC" = brewer.pal(n = 8, name = "Dark2")[1],
-  "other" = brewer.pal(n = 8, name = "Dark2")[2],
-  "comutant" = brewer.pal(n = 8, name = "Dark2")[3],
-  "tet2" = brewer.pal(n = 8, name = "Dark2")[4],
-  "tp53" = brewer.pal(n = 8, name = "Dark2")[5],
-  "WT" = brewer.pal(n = 8, name = "Dark2")[6]
-)
-
-experimental_group_palette_2 <- c(
-  "Murine dKO TET2/TP53 AML" = brewer.pal(n = 8, name = "Dark2")[1],
-  "other" = brewer.pal(n = 8, name = "Dark2")[2],
-  "comutant_aml" = brewer.pal(n = 8, name = "Dark2")[3],
-  "tet2_aml" = brewer.pal(n = 8, name = "Dark2")[4],
-  "tp53_aml" = brewer.pal(n = 8, name = "Dark2")[5],
-  "WT_aml" = brewer.pal(n = 8, name = "Dark2")[6]
-)
-
-
-jitter_alpha_fill <- 0.2
-jitter_shape <- 21
-jitter_size <- 2
-jitter_stroke <- 0.5
-jitter_width <- 0.2
-jitter_alpha_color <- 1
-jitter_height <- 0.2
-
-summarybox_color <- "black"
-summarybox_size <- 0.5
-summarybox_width <- 0.3
-summarybox_alpha <- 0.3
-summarybox_geom <- "crossbar"
-
-# 3 color heatmap
-heatmap_3_colors <- c("#041dff","white","#ff0505")
-
-# conflicts ---------------------------------------------------------------
-# resolve conflicting function names here
-conflict_prefer("filter", "dplyr")
-conflict_prefer("mutate", "dplyr")
-conflict_prefer("group_by", "dplyr")
-conflict_prefer("select", "dplyr")
-conflict_prefer("rename", "dplyr")
-conflict_prefer("count", "dplyr")
-conflict_prefer("exprs", "monocle3")
-conflicts_prefer(base::as.data.frame)
-conflicts_prefer(base::intersect)
-
-# output directories
-
-figs_out <- fs::path("~/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/figs/revisions_final")
-tables_out <- "/network/X/Labs/Blaser/share/collaborators/lapalombella_pu_network/tables"
-
-
 ###################################################################################################
 #12.31.24 MDSC identification
 #bb_cellmeta(cds_main_human_unaligned) |> glimpse()
@@ -222,7 +125,7 @@ mdsc_leiden_clusts <-
     foreground_alpha = 0.05,
     overwrite_labels = F,
     palette = experimental_group_palette_1,
-    rasterize = F
+    rasterize = T
   ) + labs(title = "Genotype")
 
 
@@ -666,7 +569,6 @@ leiden.1_tibble <- bind_rows(
 # colData(cds_main) |> glimpse()
 # unique(colData(cds_main)$barcode)
 colData(cds_combined)$aml_leiden_enrichment <- NULL
-unique(colData(cds_combined)$aml_leiden_enrichment)
 
 cds_combined <- left_join(
   bb_cellmeta(cds_combined),
@@ -720,25 +622,27 @@ colData(cds_combined)$aml_leiden_enrichment2 <- factor(
   levels = c("B cells", "TNK", "WT_aml", "tet2_aml", "tp53_aml", "comutant_aml", "Murine dKO TET2/TP53 AML", "other")
 )
 
-human_ms_aml_mapped_umap<- bb_var_umap(filter_cds(
-  cds_combined,
-  cells = bb_cellmeta(cds_combined) |>
-    filter(!aml_leiden_enrichment2 %in% c("other"))),
-  "aml_leiden_enrichment2", palette = experimental_group_palette_2)
-
-save_plot(
-  #filename = "temp.pdf",
-  filename = fs::path(figs_out, "human_ms_aml_mapped_umap.pdf"),
-  plot = human_ms_aml_mapped_umap,
-  base_width = 6,
-  base_height = 4
-)
+# human_ms_aml_mapped_umap<- bb_var_umap(filter_cds(
+#   cds_combined,
+#   cells = bb_cellmeta(cds_combined) |>
+#     filter(!aml_leiden_enrichment2 %in% c("other"))),
+#   "aml_leiden_enrichment2", palette = experimental_group_palette_2)
+#
+# save_plot(
+#   #filename = "temp.pdf",
+#   filename = fs::path(figs_out, "human_ms_aml_mapped_umap.pdf"),
+#   plot = human_ms_aml_mapped_umap,
+#   base_width = 6,
+#   base_height = 4
+# )
 
 human_ms_aml_mapped_umap_NoTB <- bb_var_umap(filter_cds(
   cds_combined,
   cells = bb_cellmeta(cds_combined) |>
     filter(!aml_leiden_enrichment2 %in% c("other", "B cells", "TNK"))),
-  "aml_leiden_enrichment2")
+  "aml_leiden_enrichment2",
+    palette = experimental_group_palette_2,
+  rasterize = T)
 
 save_plot(
   #filename = "temp.pdf",
@@ -797,13 +701,17 @@ human_ms_umap2 <- bb_var_umap(obj = filter_cds(
 ),
 var = "genotype",
 foreground_alpha = 0.5,
-palette = experimental_group_palette_1) +labs(title = "Human") + bb_var_umap(
+palette = experimental_group_palette_1,
+rasterize = T) +labs(title = "Human") +
+  bb_var_umap(
   filter_cds(
     cds_combined,
     cells = bb_cellmeta(cds_combined) |> filter(data_set == "mouse") #|> filter(aml_leiden_enrichment != "other")
   ),
   "dko_aml",
-  value_to_highlight = "Murine dKO TET2/TP53 AML"
+  value_to_highlight = "Murine dKO TET2/TP53 AML",
+  #pallete = experimental_group_palette_2,
+  rasterize = T
 ) +labs(title = "Mouse")
 
 save_plot(
@@ -815,22 +723,22 @@ save_plot(
 )
 
 # good
-human_ms_mapping_QC_barplot <- bb_cellmeta(filter_cds(
-  cds_combined,
-  cells = bb_cellmeta(cds_combined) |> filter(aml_leiden_enrichment != "other"))) |>
-  # filter(aml_leiden_enrichment %in% c("comutant_aml", "other_aml")) |>
-  filter(data_set == "human") |>
-  count(aml_leiden_enrichment, genotype) |>
-  ggplot(aes(x = aml_leiden_enrichment, y = n, fill = genotype)) +
-  geom_bar(stat = "identity", position = "fill") + labs(y = "Proportion")
-
-save_plot(
-  #filename = "temp.pdf",
-  filename = fs::path(figs_out, "human_ms_mapping_QC_barplot.pdf"),
-  plot = human_ms_mapping_QC_barplot,
-  base_width = 6,
-  base_height = 4.0
-)
+# human_ms_mapping_QC_barplot <- bb_cellmeta(filter_cds(
+#   cds_combined,
+#   cells = bb_cellmeta(cds_combined) |> filter(aml_leiden_enrichment != "other"))) |>
+#   # filter(aml_leiden_enrichment %in% c("comutant_aml", "other_aml")) |>
+#   filter(data_set == "human") |>
+#   count(aml_leiden_enrichment, genotype) |>
+#   ggplot(aes(x = aml_leiden_enrichment, y = n, fill = genotype)) +
+#   geom_bar(stat = "identity", position = "fill") + labs(y = "Proportion")
+#
+# save_plot(
+#   #filename = "temp.pdf",
+#   filename = fs::path(figs_out, "human_ms_mapping_QC_barplot.pdf"),
+#   plot = human_ms_mapping_QC_barplot,
+#   base_width = 6,
+#   base_height = 4.0
+# )
 
 # good
 human_ms3.6_region_enrich_bp <- bb_cellmeta(cds_combined) |>
@@ -839,7 +747,8 @@ human_ms3.6_region_enrich_bp <- bb_cellmeta(cds_combined) |>
   filter(partition %in% c("3", "6")) |>
   count(aml_leiden_enrichment, genotype) |>
   ggplot(aes(x = genotype, y = n, fill = aml_leiden_enrichment)) +
-  geom_bar(stat = "identity", position = "fill") + labs(y = "Proportion")
+  geom_bar(stat = "identity", position = "fill") + labs(y = "Proportion") +
+  scale_fill_manual(values = experimental_group_palette_2)
 
 save_plot(
   #filename = "temp.pdf",

@@ -18,6 +18,14 @@ experimental_group_palette_1 <- c(
   "WT" = brewer.pal(8, "Dark2")[6]
 )
 
+experimental_group_palette_2 <- c(
+  "Murine dKO TET2/TP53 AML" = "#F8766D",
+  "other" = brewer.pal(n = 8, name = "Dark2")[2],
+  "comutant_aml" = brewer.pal(n = 8, name = "Dark2")[3],
+  "tet2_aml" = brewer.pal(n = 8, name = "Dark2")[4],
+  "tp53_aml" = brewer.pal(n = 8, name = "Dark2")[5],
+  "WT_aml" = brewer.pal(n = 8, name = "Dark2")[6]
+)
 jitter_alpha_fill <- 0.2
 jitter_shape <- 21
 jitter_size <- 2
