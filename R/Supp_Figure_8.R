@@ -18,10 +18,17 @@ Supp_Fig_8A <- bb_var_umap(
   ),
   var = "leiden_assignment2", cell_size = 0.5,
   value_to_highlight = microenv_populations,
-  facet_by = "genotype", overwrite_labels = F
+  facet_by = "genotype", overwrite_labels = F, rasterize = T
 ) #+theme(legend.text = element_text(size = 8))
 Supp_Fig_8A
 
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_8A.pdf"),
+  plot = Supp_Fig_8A,
+  base_width = 12,
+  base_height = 3
+)
 #cell composition stacked bar chart
 # pheno_sums <- bb_cellmeta(cds_main) |>
 #   count(leukemia_phenotype, name = "sum")
@@ -89,6 +96,14 @@ Supp_Fig_8B <-
        color = "Expression") +
   theme(plot.title = element_text(size = 140))
 Supp_Fig_8B
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_8B.pdf"),
+  plot = Supp_Fig_8B,
+  base_width = 8,
+  base_height = 4
+)
 
 #Supp Fig 8C
 #CD8 T cell exhaustion marker gene bubble - protein
