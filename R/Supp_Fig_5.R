@@ -7,14 +7,30 @@ Supp_Fig_5A1 <- bb_var_umap(filter_cds(
 
 Supp_Fig_5A1
 
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_5A1.pdf"),
+  plot = Supp_Fig_5A1,
+  base_width = 5,
+  base_height = 4
+)
+
 Supp_Fig_5B <- bb_var_umap(filter_cds(
   cds = cds_p568,
   cells = bb_cellmeta(cds_p568) |>
     filter(louvain %in% c(53, 48, 4, 21, 33, 38, 10, 49, 24, 9, 34, 19, 26, 20, 51, 15, 31)
     ) |> filter(leukemia_phenotype %in% c("AML", "No leukemia"))
-), "density") + facet_wrap(~leukemia_phenotype)
+),"density", facet_by = "leukemia_phenotype")
 
 Supp_Fig_5B
+
+save_plot(
+  filename = "temp.pdf",
+  #filename = fs::path(figs_out, "Supp_Fig_5B.pdf"),
+  plot = Supp_Fig_5B,
+  base_width = 10,
+  base_height = 4
+)
 
 #Supp 5 GMP Cluster Identification
 #Lineage MArkers
@@ -245,10 +261,20 @@ Supp_Fig_5A2 <- bb_var_umap(
   value_to_highlight = TRUE,
   legend_pos = "none",
   plot_title = "Louvain cluster 19",
-  palette = "#EF8A62"
+  palette = "#EF8A62",
+  rasterize = T
 ) +
   facet_grid(col = vars(geno_pheno)) + labs(x = "UMAP 1", y = "UMAP 2") +
   theme_minimal() + theme(panel.grid.major = element_blank(),
                           panel.grid.minor = element_blank(),
                           panel.background = element_rect(color = "black"),
                           legend.position = "none")
+Supp_Fig_5A2
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_5A2.pdf"),
+  plot = Supp_Fig_5A2,
+  base_width = 4,
+  base_height = 4
+)
