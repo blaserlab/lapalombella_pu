@@ -278,3 +278,31 @@ save_plot(
   base_width = 4,
   base_height = 4
 )
+
+#Supplemental Figure 5C
+colData(cds_p568)$louvain <- factor(
+  colData(cds_p568)$louvain,
+  levels = c("10", "38", "48", "53", "21","33", "24", "4", "49", "19", "34", "20","26", "9","51","15","31")
+)
+Supp_Fig_5C <- bb_genebubbles(
+  filter_cds(cds_p568, cells = bb_cellmeta(cds_p568) |>
+               filter(louvain %in% c("10", "38", "48", "53", "21","33", "24", "4", "49", "19", "34", "20","26", "9","51","15","31"))),
+               #filter(leukemia_phenotype %in% c("AML"))),
+  genes = c("Klf4", "Flt3", "Fcgr4", "Itga4"),
+  cell_grouping = "louvain",
+  experiment_type = "Gene Expression",
+  scale_expr = F) + geom_point(pch = 21) +
+  scale_size_area() +
+  scale_fill_viridis_c(option = "A") +
+  theme_minimal_grid()
+
+Supp_Fig_5C
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_5C.pdf"),
+  plot = Supp_Fig_5C,
+  base_width = 6.5,
+  base_height = 4.0
+)
+
