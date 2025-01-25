@@ -10,7 +10,9 @@ F6A1<- bb_var_umap(filter_cds(
     filter(leukemia_phenotype %in% c("AML", "T ALL", "No leukemia"))
 ),
 "partition",
-overwrite_labels = T) + facet_wrap( ~ genotype)  +
+overwrite_labels = T,
+rasterize = T
+) + facet_wrap( ~ genotype)  +
   labs(x = "UMAP 1", y = "UMAP 2") +
   theme_minimal() +
   theme(
@@ -36,6 +38,15 @@ F6A2<-bb_var_umap(filter_cds(
 F6A<-F6A1/plot_spacer()/F6A2 + plot_layout(heights = c(2,-0.2, 2))
 
 F6A
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "F6A.pdf"),
+  F6A,
+  base_width = 10,
+  base_height = 6
+)
+
 
 #####################################################################################################################
 #Figure 6B
