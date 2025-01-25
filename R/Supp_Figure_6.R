@@ -1,155 +1,264 @@
-#AML vs WT all cell pseudobulk comparision
+#Supplemental Figure 6
+#Supp Figs D-H
 
-# bb_var_umap(
-#   filter_cds(
-#     cds = cds_main,
-#     cells = bb_cellmeta(cds_main) |>
-#       filter(leukemia_phenotype %in% c("AML", "No leukemia"))),
-#   "leiden_assignment2",
-#   #alt_dim_x = "aggr_UMAP_1",
-#   #alt_dim_y = "aggr_UMAP_2",
-#   overwrite_labels = F,
-#   facet_by = "geno_pheno"
-# )/
-#   bb_var_umap(
-#     filter_cds(
-#       cds = cds_main,
-#       cells = bb_cellmeta(cds_main) |>
-#         filter(leukemia_phenotype %in% c("AML", "No leukemia"))),
-#     var = "density",
-#     facet_by = "geno_pheno",
-#     #alt_dim_x = "aggr_UMAP_1",
-#     #alt_dim_y = "aggr_UMAP_2"
-#   )
+# MDSC proteins of interest
+prots <- c("CD33", "CD11b", "CD14", "HLA-DR")
 
-#Supp Fig 6A
-bb_cellmeta(filter_cds(
-  cds = cds_main,
-  cells = bb_cellmeta(cds_main) |>
-    filter(leukemia_phenotype %in% c("AML", "No leukemia")))) |>
-  group_by(sample, tissue, leukemia_phenotype) |>
-  summarise(n = n())
-unique(colData(wt_aml)$leukemia_phenotype)
-
-exp_design <-
-  bb_cellmeta(filter_cds(
-    cds = cds_main,
-    cells = bb_cellmeta(cds_main) |>
-      filter(leukemia_phenotype %in% c("AML", "No leukemia")))) |> #wt_aml
-  group_by(sample, leukemia_phenotype) |>
-  summarise()
-#exp_design
-
-# pseudobulk_res <-
-#   bb_pseudobulk_mf(cds = wt_aml,
-#                    pseudosample_table = exp_design,
-#                    design_formula = "~ leukemia_phenotype",
-#                    result_recipe = c("leukemia_phenotype", "AML", "No leukemia"))
-pseudobulk_res <-
-  bb_pseudobulk_mf(cds = filter_cds(
-    cds = cds_main,
-    cells = bb_cellmeta(cds_main) |>
-      filter(leukemia_phenotype %in% c("AML", "No leukemia"))),
-    pseudosample_table = exp_design,
-    design_formula = "~ leukemia_phenotype",
-    result_recipe = c("leukemia_phenotype", "AML", "No leukemia"))
-
-#less conservative approach (pseudobulk is a very conservative approach)
-#bb_monocle_regression(cds = wt_aml, gene_or_genes = "Mpo", form = "~genotype")
-
-pseudobulk_res$Header
-
-pseudobulk_res$Result |> filter(gene_short_name == "Mpo")
-pseudobulk_res$Result |> filter(gene_short_name == "Cd34")
-# Fig6_wt_aml_clust1_all_pseudobulk<- pseudobulk_res$Result
-F6_aml_wt_pseudobulk<- pseudobulk_res$Result
-
-#write.csv(F6_aml_wt_pseudobulk, "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_aml_wt_pseudobulk.csv")
-F6_aml_wt_pseudobulk<- read.csv("~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/F6_aml_wt_pseudobulk.csv")
-
-#Volcano Plot:
-# Differential expression results.  Positive L2FC indicates up in B vs T upregulated
-genes_to_highlight <- unique(c("Prox1", "Ifi44l", "Tdrd5", "Etv4", "Etv5")) #"Cd34", "Mpo", "Klf4", "Il7r" #"Fcnb", "Nedd4", "Cebpe", "Ms4a3", "Ets1", "Mapk13", "Ifit1", "Ifit3", "Ifi47", "Il6ra", "Irf5"
-#genes_to_highlight <- filter(F6_aml_wt_pseudobulk, padj < 0.001 & abs(log2FoldChange) >= 5)|>pull(gene_short_name)
-#genes_to_highlight <- genes_to_highlight[genes_to_highlight %in% (filter(pseudobulk_res$Result, padj < 0.1 & abs(log2FoldChange) >= 0.58)|>pull(gene_short_name))]
-#genes_to_highlight <- genes_to_highlight[genes_to_highlight %in% (filter(F6_aml_wt_pseudobulk, padj < 0.1 & abs(log2FoldChange) >= 0.58)|>pull(gene_short_name))]
-
-
-volcano_data <- F6_aml_wt_pseudobulk %>%
-  mutate(threshold = padj < 0.05 & abs(log2FoldChange) >= 0.58) %>%
-  mutate(text_label = ifelse(gene_short_name %in% genes_to_highlight, gene_short_name, ""))
-#write.csv(volcano_data, "~/network/T/Labs/EHL/Rosa/Ethan/10X/Tet2_P53/Data/volcano_data.csv")
-
-#Pu wants to highlight the annotated genes and expand the volcano data through removal of Slc4a8
-volcano_data<-volcano_data[!(volcano_data$gene_short_name=="Slc4a8"),]
-
-#install.packages("ggbreak")
-#library(ggbreak)
-library(ggtext)
-volcano_pseudobulk <-
-  ggplot(
-    volcano_data,
-    aes(
-      x = log2FoldChange,
-      y = -log10(padj),
-      colour = threshold,
-      fill = threshold,
-      label = text_label
-    )
-  ) +
-  geom_point(shape = 21,
-             size = 0.5,
-             alpha = 0.4) +
-  geom_text_repel(color = "black",
-                  fontface = "italic",
-                  box.padding = 0.5, #0.5
-                  point.padding = 0.25, #0.25
-                  min.segment.length = 0,
-                  max.overlaps = 20000,
-                  size = 3,
-                  segment.size = 0.25,
-                  force = 2,
-                  seed = 1234,
-                  segment.curvature = -0.1,
-                  segment.square = TRUE,
-                  segment.inflect = TRUE) +
-  xlab("log<sub>2</sub> fold change") +
-  ylab("-log<sub>10</sub> adjusted p-value") +
-  theme(axis.title.x =  element_markdown()) +
-  theme(axis.title.y = element_markdown()) +
-  theme(legend.position = "none") +
-  scale_color_manual(values = c("grey80", "#DC0000")) +
-  scale_fill_manual(values = c("transparent", "#DC0000")) +
-  labs(title = "Pseudobulk dKO AML vs WT")+ #caption = "\U21D0 Up in WT\nUp in AML \U21D2",
-  theme(plot.caption.position = "panel") +
-  #theme(plot.caption = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  coord_cartesian(xlim = c(-1.0 * max(abs(range(volcano_data |> dplyr::filter(!is.na(padj)) |> pull(log2FoldChange)))), 1.0 * max(abs(range(volcano_data |> filter(!is.na(padj)) |> pull(log2FoldChange)))))) #+
-#ggbreak::scale_y_cut(breaks=c(35), which=c(1), scales=c(0.1, 10))
-volcano_pseudobulk
-
-#Supp Figure 6B
-#install.packages("msigdbr")
-library(msigdbr)
-library(topGO)
-goenrichment <-
-  bb_goenrichment(
-    query = dplyr::filter(pseudobulk_res$Result, padj < 0.05 &
-                            log2FoldChange >= 0.58) |> pull(gene_short_name),
-    reference = bb_rowmeta(cds_main),
-    go_db = "org.Mm.eg.db"
+mdsc_prot_dat <-
+  bb_genebubbles(cds_main_human_unaligned,
+                 genes = prots,
+                 cell_grouping = c("leiden"),
+                 experiment_type = "Antibody Capture",
+                 return_value = "data"
   )
 
+set.seed(123)
 
-gosummary <- bb_gosummary(x = goenrichment,
-                               reduce_threshold = 0.85,
-                               go_db = "org.Mm.eg.db")
-pseudobulk_AML_vs_WT_GO_PCA <-
-  bb_goscatter(simMatrix = gosummary$simMatrix,
-               reducedTerms = gosummary$reducedTerms)
-pseudobulk_AML_vs_WT_GO_PCA
+# Loop through each protein
+for (prot in prots) {
+  # Filter for the current protein and run k-means
+  prot_data <- mdsc_prot_dat |>
+    filter(gene_short_name == prot) |>
+    select(expression, proportion)
 
-#Supp Figure 6C-F
-#Need to recover from Pu's previous code
+  # Run k-means
+  kmeans_result <- kmeans(prot_data, centers = 3)
 
-#Supp Figure 6G
+  # Add cluster assignments back to the dataset
+  clustered_data <- mdsc_prot_dat |>
+    filter(gene_short_name == prot) |>
+    mutate(cluster = as.factor(kmeans_result$cluster))
+
+  # Plot the protein expression/proportion clustering results
+  plot <- ggplot(clustered_data, aes(x = expression, y = proportion, label = leiden)) +
+    geom_point(aes(color = cluster), size = 3) +
+    geom_text(vjust = -0.5, hjust = 0.5, size = 3) +
+    labs(
+      title = paste("Expression vs. Proportion for", prot, "with K-means Clusters"),
+      x = "Expression",
+      y = "Proportion",
+      color = "Cluster"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "right")
+
+  # geom_text_repel()# Print the plot
+  print(plot)
+
+  # Calculate x-axis range for each cluster
+  cluster_ranges <- clustered_data |>
+    group_by(cluster) |>
+    summarise(
+      min_expression = min(expression, na.rm = TRUE),
+      max_expression = max(expression, na.rm = TRUE),
+      leiden_values = paste(unique(leiden), collapse = ", ") # Combine unique Leiden values
+    )
+
+  # Order clusters by max_expression and assign new cluster names
+  cluster_ranges <- cluster_ranges |>
+    arrange(max_expression) |>
+    mutate(
+      cluster = case_when(
+        row_number() == 1 ~ "negative",
+        row_number() == 2 ~ "low",
+        row_number() == 3 ~ "high"
+      )
+    )
+
+  # create df name based on the prot
+  assign(
+    paste0(prot, "_cluster_ranges"),
+    cluster_ranges
+  )
+  # Print the ranges
+  print(paste("X-axis ranges for", prot))
+  print(cluster_ranges)
+}
+
+head(CD33_cluster_ranges)
+
+#CD33 low and high expression clusters
+cd33_clusts <- mdsc_prot_dat |>
+  filter(gene_short_name == "CD33", expression > CD33_cluster_ranges |>
+           filter(cluster == "low") |>
+           pull(min_expression)
+  ) |> pull(leiden) |> as.character()
+#CD11b low and high expression clusters
+cd11b_clusts <- mdsc_prot_dat |>
+  filter(gene_short_name == "CD11b", expression > CD11b_cluster_ranges |>
+           filter(cluster == "low") |>
+           pull(min_expression)
+  ) |> pull(leiden) |> as.character()
+#HLA-DR negative and low expression clusters
+hladr_clusts <- mdsc_prot_dat |>
+  filter(gene_short_name == "HLA-DR", expression < `HLA-DR_cluster_ranges` |>
+           filter(cluster == "high") |>
+           pull(min_expression)
+  ) |> pull(leiden) |> as.character()
+
+# Intersection between vectors - potential mdsc leiden cluster list
+mdsc_clusts <- Reduce(intersect, list(cd33_clusts, cd11b_clusts, hladr_clusts))
+
+# is the mdsc population present in comutant patients--------------------
+
+cds_main_human_unaligned <- bb_cellmeta(cds_main_human_unaligned) |>
+  select(cell_id, leiden) |>
+  mutate(mdsc_clust = ifelse(leiden %in% mdsc_clusts, "MDSC", "other")) |>
+  select(-leiden) |>
+  bb_tbl_to_coldata(obj = cds_main_human_unaligned, min_tbl = _)
+
+Supp_Fig_6DE <-
+  bb_var_umap(
+    cds_main_human_unaligned,
+    "mdsc_clust",
+    cell_size = 0.1,
+    foreground_alpha = 0.05,
+    palette = experimental_group_palette_1,
+    rasterize = F
+  ) + labs(title = "MDSC Clusters") +
+  bb_var_umap(
+    cds_main_human_unaligned,
+    "genotype",
+    cell_size = 0.1,
+    foreground_alpha = 0.05,
+    overwrite_labels = F,
+    palette = experimental_group_palette_1,
+    rasterize = T
+  ) + labs(title = "Genotype")
+
+
+save_plot(
+  filename = fs::path(figs_out, "Supp_Fig_6DE.pdf"),
+  Supp_Fig_6DE,
+  base_width = 7,
+  base_height = 2.5
+)
+
+#mdsc cluster protein bubbles -----------------------------
+mdsc_protein_dat <- bb_genebubbles(
+  cds_main_human_unaligned,
+  genes = c("HLA-DR", "CD33", "CD11b", "CD14"),
+  cell_grouping = "mdsc_clust",
+  experiment_type = "Antibody Capture",
+  scale_expr = FALSE,
+  expression_threshold = 0.6,
+  return_value = "data"
+)
+
+Supp_Fig_6F <- ggplot(mdsc_protein_dat,
+                      aes(x = mdsc_clust,
+                          y = gene_short_name,
+                          size = proportion,
+                          fill = expression)) +
+  geom_point(pch = 21) +
+  scale_size_area() +
+  scale_fill_viridis_c(option = "A") +
+  theme_minimal_grid() +
+  labs(x = NULL, y = NULL, fill = "Binding", size = "Proportion") +
+  theme(legend.box = "horizontal")
+
+save_plot(
+  # filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_6F.pdf"),
+  plot = Supp_Fig_6F,
+  base_width = 4.0,
+  base_height = 2.0
+)
+
+#mdsc cluster transcript bubbles--------------
+mdsc_markers <- c("ITGAM",
+                  "CD14",
+                  "CD33",
+                  "HLA-DRA",
+                  "FUT4"
+                  # "CD34",
+                  # "ARG1
+)
+mdsc_transcript_dat <- bb_genebubbles(
+  cds_main_human_unaligned,
+  genes = mdsc_markers,
+  cell_grouping = "mdsc_clust",
+  experiment_type = "Gene Expression",
+  scale_expr = FALSE,
+  #expression_threshold = 0.6,
+  return_value = "data"
+) |>
+  dplyr::mutate(gene_short_name = dplyr::case_when(
+    gene_short_name == "ITGAM" ~ "CD11b (ITGAM)",
+    gene_short_name == "FUT4" ~ "CD15 (FUT4)",
+    gene_short_name == "CEACAM8" ~ "CD66b (CEACAM8)",
+    TRUE ~ gene_short_name
+  ))
+
+Supp_Fig_6G <- ggplot(mdsc_transcript_dat,
+                      aes(x = mdsc_clust,
+                          y = gene_short_name,
+                          size = proportion,
+                          fill = expression)) +
+  geom_point(pch = 21) +
+  scale_size_area() +
+  scale_fill_viridis_c(option = "D") +
+  theme_minimal_grid() +
+  labs(x = NULL, y = NULL, fill = "Expression", size = "Proportion") +
+  theme(legend.box = "horizontal")
+Supp_Fig_6G
+
+save_plot(
+  # filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_6G.pdf"),
+  plot = Supp_Fig_6G,
+  base_width = 4.75,
+  base_height = 2.0
+)
+
+cellgeno_sums <- bb_cellmeta(cds_main_human_unaligned) |>
+  count(genotype, name = "geno_sum")
+cellcount2 <- bb_cellmeta(filter_cds(cds_main_human_unaligned, cells = bb_cellmeta(cds_main_human_unaligned) |>
+                                       filter((leiden %in% mdsc_clusts)))) |>
+  group_by(genotype, pid) |>
+  summarise(n = n()) |>
+  left_join(cellgeno_sums) |>
+  mutate(total = sum(cellgeno_sums$geno_sum)) |>
+  mutate(ratio = geno_sum/total) |>
+  mutate(normalized_cell_frac = n/ratio)
+
+#factor levels
+cellcount2$genotype
+cellcount2$genotype <- factor(cellcount2$genotype,
+                              levels = c("WT", "tet2","tp53", "comutant"))
+#stacked mdsc bar plot
+Supp_Fig_6H <- ggplot(cellcount2,
+                      aes(x = 1, y = normalized_cell_frac, fill = genotype)) +
+  geom_bar(position = "fill", stat = "identity", width = 0.9) +
+  labs( x = NULL,
+        y = "MDSC Cell Fraction (Normalized)",
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  ) +
+  scale_fill_manual(values = experimental_group_palette_1)
+
+Supp_Fig_6H
+
+save_plot(
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_6H.pdf"),
+  plot = Supp_Fig_6H,
+  base_width = 3.5,
+  base_height = 3.0
+)
+
+# fisher exact test for mdsc--------------------
+values <- bb_cellmeta(cds_main_human_unaligned) |>
+  mutate(genotype_binary = ifelse(genotype == "comutant", "comutant", "other")) |>
+  count(mdsc_clust, genotype_binary) |>
+  pull(n)
+
+mat <- matrix(values, nrow = 2)
+colnames(mat) <- c("mdsc_yes", "mdsc_no")
+rownames(mat) <- c("comutant", "other")
+mat
+
+fisher.test(mat[c(2:1), c(2:1)])
