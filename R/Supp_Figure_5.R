@@ -3,7 +3,9 @@ Supp_Fig_5A1 <- bb_var_umap(filter_cds(
   cells = bb_cellmeta(cds_p568) |>
     filter(louvain %in% c(53, 48, 4, 21, 33, 38, 10, 49, 24, 9, 34, 19, 26, 20, 51, 15, 31)
     ) |> filter(leukemia_phenotype %in% c("AML", "No leukemia"))
-), "louvain", overwrite_labels = T)
+), "louvain",
+overwrite_labels = T,
+rasterize = T)
 
 Supp_Fig_5A1
 
@@ -20,15 +22,15 @@ Supp_Fig_5B <- bb_var_umap(filter_cds(
   cells = bb_cellmeta(cds_p568) |>
     filter(louvain %in% c(53, 48, 4, 21, 33, 38, 10, 49, 24, 9, 34, 19, 26, 20, 51, 15, 31)
     ) |> filter(leukemia_phenotype %in% c("AML", "No leukemia"))
-),"density", facet_by = "leukemia_phenotype")
+),"density", facet_by = "genotype")
 
 Supp_Fig_5B
 
 save_plot(
-  filename = "temp.pdf",
-  #filename = fs::path(figs_out, "Supp_Fig_5B.pdf"),
+  #filename = "temp.pdf",
+  filename = fs::path(figs_out, "Supp_Fig_5B.pdf"),
   plot = Supp_Fig_5B,
-  base_width = 10,
+  base_width = 8,
   base_height = 4
 )
 
@@ -294,7 +296,9 @@ Supp_Fig_5C <- bb_genebubbles(
   scale_expr = F) + geom_point(pch = 21) +
   scale_size_area() +
   scale_fill_viridis_c(option = "A") +
-  theme_minimal_grid()
+  theme_minimal_grid()  +
+  scale_x_discrete(limits = c("10", "38", "48", "53", "21", "33", "24", "4", "49", "19", "34", "20", "26", "9", "51", "15", "31")) + # x-axis order
+  scale_y_discrete(limits = c("Fcgr4","Flt3", "Itga4", "Klf4")) # y-axis order
 
 Supp_Fig_5C
 
